@@ -1,0 +1,538 @@
+<meta charset="UTF-8">
+<title>RealtorHelper — Conversational Search (concepts)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F6F8;--surface:#FFFFFF;--surface-2:#F1F3F6;--surface-3:#E6E9EE;--text:#111827;--text-2:#4B5563;--muted:#8A93A3;--border:#E3E6EB;--accent:#2F5BEA;--accent-soft:#ECF0FE;--ink:#111827;--on-ink:#FFFFFF;--good:#1A7F4E;--good-soft:#E7F6EE;--shadow:0 1px 2px rgba(16,24,40,.05),0 10px 28px rgba(16,24,40,.08)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0D1015;--surface:#141920;--surface-2:#1B212A;--surface-3:#252C37;--text:#E7EAF0;--text-2:#AEB5C1;--muted:#7C8594;--border:#262D38;--accent:#86A2FF;--accent-soft:#1B2540;--ink:#E7EAF0;--on-ink:#0D1015;--good:#5FCF9A;--good-soft:#123326;--shadow:0 10px 30px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic.sm{width:13px;height:13px}.ic.lg{width:22px;height:22px}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:4px;min-width:0}
+.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}.sub{color:var(--text-2)}
+.small{font-size:12px}.s13{font-size:13px}.b{font-weight:600}.m{font-weight:500}
+
+#top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap}
+.logo{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;flex:none}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:7px 14px;border-radius:7px;font-weight:600;font-size:13px;color:var(--text-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+#top .desc{flex:1;min-width:220px;font-size:12.5px;color:var(--muted);line-height:1.4}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:500;white-space:nowrap;background:var(--ink);color:var(--on-ink)}
+.btn:hover{opacity:.88}
+.btn.sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn.sec:hover{background:var(--surface-2)}
+.btn.ghost{background:none;color:var(--text-2)}
+.btn.ghost:hover{color:var(--text)}
+.btn.sm{padding:5px 11px;font-size:12.5px}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--surface-2);color:var(--text-2);font-weight:500;font-size:12.5px;border:1px solid transparent;white-space:nowrap}
+.chip.rm{padding-right:7px}
+.chip.rm button{display:grid;place-items:center;color:var(--muted)}
+.chip.rm button:hover{color:var(--text)}
+.chip.ghost{background:var(--surface);border-color:var(--border);color:var(--text-2)}
+.chip.ghost:hover{border-color:var(--text-2);color:var(--text)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+
+#stage{min-height:calc(100vh - 54px)}
+
+/* ---- shared chat bits ---- */
+.bubble{max-width:82%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45}
+.bubble.agent{align-self:flex-end;background:var(--ink);color:var(--on-ink);border-bottom-right-radius:4px}
+.bubble.sys{align-self:flex-start;background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;display:flex;flex-direction:column;gap:10px}
+.bubble.sys .headline{font-size:13.5px}
+.composer{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 14px;background:var(--surface)}
+.composer input{flex:1;border:0;outline:none;background:none;min-width:0;font-size:13.5px}
+.iconbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--muted);flex:none}
+.iconbtn:hover{background:var(--surface-2);color:var(--text)}
+.iconbtn.on{color:var(--accent);background:var(--accent-soft)}
+.send{width:32px;height:32px;border-radius:8px;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;flex:none}
+.send:disabled{opacity:.35}
+.quickRow{display:flex;gap:7px;flex-wrap:wrap}
+
+.resultCard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;display:flex;gap:11px;align-items:center;min-width:0}
+.resultCard .ph{width:54px;height:40px;border-radius:7px;flex:none;background:linear-gradient(135deg,var(--a),var(--b))}
+.t0{--a:#D9DEE5;--b:#A9B4C2}.t1{--a:#E5E1DB;--b:#BFB7AC}.t2{--a:#DCE3DE;--b:#AEBDB4}.t3{--a:#E2DFE7;--b:#B8B1C4}.t4{--a:#DCE3E9;--b:#A3B2C0}.t5{--a:#E7E3DD;--b:#C8BFB3}
+.resultCard .info{min-width:0;display:flex;flex-direction:column;gap:1px}
+.resultCard .price{font-weight:700;font-size:13.5px}
+.resultCard .facts{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.resultCard .addr{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.featTags{display:flex;gap:4px;flex:none}
+.featTags .ic{width:14px;height:14px;color:var(--good)}
+
+.nearRow{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--border)}
+.nearRow:first-child{border-top:0}
+.nearRow .why{font-size:11.5px;color:var(--muted);white-space:nowrap}
+
+.zeroBox{display:flex;flex-direction:column;gap:8px;background:var(--surface-2);border-radius:10px;padding:12px 14px}
+
+/* ---- preferences panel (shared by all variants) ---- */
+.pfHeader{display:flex;align-items:center;gap:10px;padding:14px 16px 10px}
+.pfHeader .who{font-weight:700;font-size:13.5px}
+.pfHeader .sub{font-size:11.5px;color:var(--muted)}
+.pfBody{padding:2px 16px 16px;display:flex;flex-direction:column}
+.pfGroup{padding:10px 0;border-bottom:1px solid var(--border)}
+.pfGroup:last-child{border-bottom:0}
+.pfGroupTitle{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding-bottom:6px}
+.pfRow{display:flex;flex-direction:column;gap:6px;padding:7px 0}
+.pfRow.pending{background:var(--accent-soft);margin:0 -10px;padding:7px 10px;border-radius:8px}
+.pfLbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2)}
+.pendingDot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+.pfInline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pfNum{width:80px;border:1px solid var(--border);border-radius:7px;padding:6px 8px;background:var(--surface);font-size:12.5px;color:var(--text)}
+.pfChip{padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:var(--surface-2);color:var(--text-2);border:1px solid transparent}
+.pfChip[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.pfStepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:8px;height:26px}
+.pfStepper button{width:24px;height:24px;display:grid;place-items:center;color:var(--text-2)}
+.pfStepper span{padding:0 6px;font-size:12.5px;font-weight:600;min-width:34px;text-align:center}
+.pfToggle{width:34px;height:19px;border-radius:10px;background:var(--surface-3);position:relative;flex:none}
+.pfToggle::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--surface);transition:left .15s}
+.pfToggle[aria-checked="true"]{background:var(--ink)}
+.pfToggle[aria-checked="true"]::after{left:17px}
+.saveBar{display:flex;align-items:center;gap:8px;padding:4px 16px 12px;flex-wrap:wrap}
+.saveBar .btn{flex:1;white-space:normal}
+.saveBtn{background:var(--accent);color:#fff}
+.saveBtn:disabled{opacity:.4;cursor:default}
+.savedTick{color:var(--good)}
+.histNote{font-size:11px;color:var(--muted);white-space:nowrap}
+.quickSave{background:var(--accent);color:#fff;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+
+/* ================= Variant A — split pane ================= */
+.rootA{display:grid;height:calc(100vh - 54px);grid-template-columns:360px 300px minmax(0,1fr);grid-template-areas:"chat prefs results"}
+.chatPaneA{grid-area:chat;border-right:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.chatPaneA .hd{padding:14px 16px;border-bottom:1px solid var(--border);font-weight:600;display:flex;align-items:center;gap:8px}
+.chatScrollA{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
+.chatPaneA .ft{padding:12px 14px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.prefsPaneA{grid-area:prefs;border-right:1px solid var(--border);background:var(--surface);overflow:auto;display:flex;flex-direction:column;min-height:0}
+.resultsPaneA{grid-area:results;overflow:auto;padding:22px 26px 40px;display:flex;flex-direction:column;gap:16px}
+.countRow{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.countBig{font-size:30px;font-weight:700;letter-spacing:-.02em}
+.gridA{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+
+/* ================= Variant B — inline timeline ================= */
+.rootB{max-width:720px;margin:0 auto;display:flex;flex-direction:column;min-height:calc(100vh - 54px)}
+.hdB{position:sticky;top:54px;background:var(--bg);padding:14px 18px 2px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;z-index:5}
+.hdB .live{font-weight:700;font-size:15px}
+.chipGlanceB{padding:0 18px 8px}
+.drawerB{margin:0 18px 10px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column}
+.chatScrollB{flex:1;padding:4px 18px 18px;display:flex;flex-direction:column;gap:14px}
+.ftB{position:sticky;bottom:0;background:var(--bg);padding:10px 18px 18px;display:flex;flex-direction:column;gap:8px}
+.miniRow{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px}
+.miniRow .resultCard{min-width:220px;flex:none}
+
+/* ================= Variant C — omnibox + board ================= */
+.rootC{display:flex;flex-direction:column;min-height:calc(100vh - 54px)}
+.omniWrap{padding:20px 26px 8px;display:flex;flex-direction:column;gap:10px;background:var(--surface);border-bottom:1px solid var(--border)}
+.omnibar{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:14px;padding:12px 10px 12px 18px;background:var(--surface-2)}
+.omnibar input{flex:1;border:0;outline:none;background:none;font-size:15px}
+.replyLineC{font-size:13px;color:var(--text-2);min-height:18px}
+.replyLineC b{color:var(--text)}
+.boardWrapC{flex:1;overflow:auto;padding:18px 26px 40px}
+.gridC{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.cardC{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.cardC .ph{aspect-ratio:16/10;background:linear-gradient(135deg,var(--a),var(--b))}
+.cardC .body{padding:12px 13px;display:flex;flex-direction:column;gap:3px}
+.cardC .price{font-weight:700;font-size:15px}
+.drawerToggles{display:flex;gap:8px;margin:0 26px 10px}
+.drawerC{margin:0 26px 14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;max-height:280px;overflow:auto}
+.drawerC.hist{padding:10px 14px;gap:6px}
+.drawerC.hist .h{font-size:12.5px;color:var(--text-2)}
+
+@media (max-width:1180px){.rootA{grid-template-columns:340px minmax(0,1fr);grid-template-rows:auto 1fr;grid-template-areas:"chat prefs" "chat results"}}
+@media (max-width:860px){.rootA{grid-template-columns:1fr;grid-template-rows:auto auto auto;grid-template-areas:"chat" "prefs" "results"}.chatPaneA{height:46vh}.prefsPaneA{max-height:40vh}}
+@media (max-width:640px){#top .desc{display:none}}
+</style>
+
+<div id="top"></div>
+<div id="stage"></div>
+
+<script>
+/* ===================== helpers ===================== */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const fmtK=n=>'$'+Math.round(n/1000)+'k';
+const nf=n=>Math.round(n).toLocaleString('en-US');
+const icon=(n,c='')=>`<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+function btn(label,o={}){return `<button type="${o.submit?'submit':'button'}" class="btn ${o.kind||''} ${o.sm?'sm':''}" ${o.act?`data-act="${o.act}"`:''} ${o.data||''} ${o.disabled?'disabled':''}>${o.icon?icon(o.icon):''}${label}</button>`;}
+
+/* ===================== mock inventory ===================== */
+const HOODS={'Oak Park':[615000,22],'Cedar Grove':[590000,29],'Westgate':[585000,19],'Linden Hills':[560000,25],'Riverside':[540000,15],'Hillcrest':[680000,34],'Downtown':[520000,12]};
+const STREETS=['Elm','Ash','Willow','Juniper','Aspen','Chestnut','Hawthorn','Magnolia','Sycamore','Laurel','Poplar','Spruce','Alder','Beacon','Harbor','Summit','Garden','Meadow','Prairie','Ridge'],SUF=['St','Ave','Ln','Ct','Dr','Way','Pl','Rd'];
+function rng(s){return()=>(s=(s*16807)%2147483647)/2147483647;}
+const DATA=(()=>{const r=rng(20261001),out=[],hs=Object.keys(HOODS);let id=1;
+ for(let i=0;i<56;i++){const hood=hs[i%hs.length],[base,com]=HOODS[hood],urban=hood==='Downtown'||hood==='Riverside';
+  const type=urban?(r()<.65?'Condo':'Townhouse'):(r()<.8?'Single-family':'Townhouse');
+  let beds=type==='Condo'?1+Math.floor(r()*3):2+Math.floor(r()*4);
+  let price=Math.round((base*(.8+r()*.42)+(beds-3)*28000)/1000)*1000;
+  let sqft=Math.round((type==='Condo'?650+beds*320:950+beds*360+r()*420)/10)*10;
+  let garage=type==='Condo'?r()<.35:r()<.72,yard=type==='Condo'?false:r()<.68,office=r()<.42;
+  let commute=Math.max(8,com+Math.round((r()-.5)*14));
+  const hoa=type==='Condo'?260+Math.round(r()*22)*10:type==='Townhouse'?(r()<.5?120:0):(r()<.15?45:0);
+  const highway=(hood==='Hillcrest'&&r()<.5)||r()<.05;
+  const num=100+Math.floor(r()*4800),st=STREETS[Math.floor(r()*STREETS.length)],sf=SUF[Math.floor(r()*SUF.length)];
+  const baths=Math.max(1,beds-1+(r()<.5?.5:0)),dom=1+Math.floor(r()*35);
+  out.push({id:id++,addr:`${num} ${st} ${sf}${type==='Condo'?' #'+(2+Math.floor(r()*7))+'0'+(1+Math.floor(r()*4)):''}`,hood,price,beds,baths,sqft,hoa,commute,type,garage,yard,office,highway,dom,tone:i%6});}
+ return out;})();
+
+/* ===================== search engine ===================== */
+const FEAT_LABEL={garage:'Garage',yard:'Yard',office:'Home office'};
+function emptyCriteria(){return{priceMin:null,priceMax:null,areas:[],types:[],bedsMin:null,sqftMin:null,sqftMax:null,commuteMax:null,hoaMax:null,features:[],noHighway:false};}
+function baselineCriteria(){return{priceMin:550000,priceMax:650000,hoaMax:250,areas:['Oak Park','Cedar Grove','Westgate'],types:['Single-family','Townhouse'],bedsMin:4,sqftMin:1700,sqftMax:2600,commuteMax:30,noHighway:true,features:['garage','yard','office']};}
+function priceLabel(c){if(c.priceMin&&c.priceMax)return`${fmtK(c.priceMin)}–${fmtK(c.priceMax)} budget`;if(c.priceMax)return`Up to ${fmtK(c.priceMax)}`;return`From ${fmtK(c.priceMin)}`;}
+function sqftLabel(c){if(c.sqftMin&&c.sqftMax)return`${nf(c.sqftMin)}–${nf(c.sqftMax)} sqft`;if(c.sqftMin)return`${nf(c.sqftMin)}+ sqft`;return`Up to ${nf(c.sqftMax)} sqft`;}
+const FILTERS=[
+ {k:'price',on:c=>c.priceMin!=null||c.priceMax!=null,test:(l,c)=>(c.priceMin==null||l.price>=c.priceMin)&&(c.priceMax==null||l.price<=c.priceMax),label:priceLabel,why:(l,c)=>c.priceMax!=null&&l.price>c.priceMax?`${fmtK(l.price-c.priceMax)} over budget`:`${fmtK(c.priceMin-l.price)} under the minimum`},
+ {k:'areas',on:c=>c.areas.length>0,test:(l,c)=>c.areas.includes(l.hood),label:c=>c.areas.join(' or '),why:l=>`In ${l.hood}, not a chosen area`},
+ {k:'types',on:c=>c.types.length>0,test:(l,c)=>c.types.includes(l.type),label:c=>c.types.join(' or '),why:l=>`${l.type}, not a chosen type`},
+ {k:'beds',on:c=>!!c.bedsMin,test:(l,c)=>l.beds>=c.bedsMin,label:c=>`${c.bedsMin}+ bedrooms`,why:l=>`${l.beds} bedrooms`},
+ {k:'sqft',on:c=>c.sqftMin!=null||c.sqftMax!=null,test:(l,c)=>(c.sqftMin==null||l.sqft>=c.sqftMin)&&(c.sqftMax==null||l.sqft<=c.sqftMax),label:sqftLabel,why:l=>`${nf(l.sqft)} sqft`},
+ {k:'commute',on:c=>!!c.commuteMax,test:(l,c)=>l.commute<=c.commuteMax,label:c=>`Commute ≤ ${c.commuteMax} min`,why:l=>`${l.commute} min commute`},
+ {k:'hoa',on:c=>c.hoaMax!=null,test:(l,c)=>l.hoa<=c.hoaMax,label:c=>`HOA ≤ $${c.hoaMax}`,why:l=>`$${l.hoa}/mo HOA`},
+ {k:'garage',on:c=>c.features.includes('garage'),test:l=>l.garage,label:()=>'Garage required',why:()=>'No garage'},
+ {k:'yard',on:c=>c.features.includes('yard'),test:l=>l.yard,label:()=>'Yard required',why:()=>'No yard'},
+ {k:'office',on:c=>c.features.includes('office'),test:l=>l.office,label:()=>'Home office required',why:()=>'No office / den'},
+ {k:'highway',on:c=>c.noHighway,test:l=>!l.highway,label:()=>'Away from the highway',why:()=>'Near the highway'}];
+function runSearch(c){const active=FILTERS.filter(f=>f.on(c));
+ const results=DATA.filter(l=>active.every(f=>f.test(l,c)));
+ const near=DATA.filter(l=>!results.includes(l)).map(l=>{const fails=active.filter(f=>!f.test(l,c));return fails.length===1?{l,f:fails[0]}:null;}).filter(Boolean);
+ return{results,near,active};}
+
+/* ===================== utterance parser ===================== */
+function extractNums(t){const out=[],rx=/\$?(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(k|m|mil|thousand|million)?\b/g;let x;while((x=rx.exec(t))){let v=parseFloat(x[1].replace(/,/g,''));const u=x[2];if(u==='k'||u==='thousand')v*=1e3;else if(u)v*=1e6;out.push({v,i:x.index,end:x.index+x[0].length,u:!!u});}return out;}
+const NEG=/\b(no|not|don'?t|doesn'?t|without|skip|except|exclude|avoid|drop|away from)\b/;
+function negatedBefore(t,idx){return NEG.test(t.slice(Math.max(0,idx-26),idx));}
+function parseUtterance(raw,prevC){
+ const touched=new Set();
+ if(/\b(start over|reset|clear( all)? filters|new search)\b/i.test(raw))return{criteria:emptyCriteria(),changes:['cleared all filters'],reset:true,touched:FILTERS.map(f=>f.k)};
+ const c=JSON.parse(JSON.stringify(prevC)),changes=[];
+ const t=' '+raw.toLowerCase().replace(/[’']/g,"'")+' ';
+
+ if(/\$|\bprice\b|\bbudget\b|\bafford\b|\bspend\b|\d+\s*(k|thousand|million|m)\b/.test(t)){
+  const nums=extractNums(t).map(n=>(!n.u&&n.v<5000)?{...n,v:n.v*1000}:n).filter(n=>n.v>=100000&&n.v<=5000000);
+  if(nums.length>=2&&/^\s*(to|-|–|and)\s*$/.test(t.slice(nums[0].end,nums[1].i))){
+   c.priceMin=Math.min(nums[0].v,nums[1].v);c.priceMax=Math.max(nums[0].v,nums[1].v);changes.push(`budget ${fmtK(c.priceMin)}–${fmtK(c.priceMax)}`);touched.add('price');
+  }else if(nums.length){
+   for(const n of nums){const pre=t.slice(Math.max(0,n.i-28),n.i);
+    const dir=/(at least|over|above|from|minimum|more than|starting at)\s*$/.test(pre)?'min':/(under|below|up to|max|no more than|at most|less than|cap(?:ped)? at|tops? out at|budget of)\s*$/.test(pre)?'max':'max';
+    if(dir==='min'){c.priceMin=n.v;changes.push(`budget from ${fmtK(n.v)}`);}else{c.priceMax=n.v;changes.push(`budget up to ${fmtK(n.v)}`);}touched.add('price');}
+  }}
+
+ for(const h of Object.keys(HOODS)){const j=t.indexOf(h.toLowerCase());if(j<0)continue;
+  if(negatedBefore(t,j)){if(c.areas.includes(h)){c.areas=c.areas.filter(x=>x!==h);changes.push(`dropped ${h}`);touched.add('areas');}}
+  else if(!c.areas.includes(h)){c.areas.push(h);changes.push(`added ${h}`);touched.add('areas');}}
+
+ const TYPES={'Single-family':/single[- ]family|detached/,'Townhouse':/town ?houses?|row ?houses?/,'Condo':/condos?|condominiums?|apartments?/};
+ for(const[ty,rx]of Object.entries(TYPES)){const m=t.match(rx);if(!m)continue;if(negatedBefore(t,m.index)){c.types=c.types.filter(x=>x!==ty);changes.push(`excluded ${ty.toLowerCase()}s`);touched.add('types');}else if(!c.types.includes(ty)){c.types.push(ty);changes.push(`type ${ty.toLowerCase()}`);touched.add('types');}}
+
+ const bm=t.match(/(\d+)\s*\+?\s*(?:bed(?:room)?s?|br)\b/);if(bm){c.bedsMin=+bm[1];changes.push(`${bm[1]}+ bedrooms`);touched.add('beds');}
+
+ if(/sqft|square\s*f(?:ee|oo)t|sq\.?\s*ft/.test(t)){
+  const ns=extractNums(t).map(n=>n.v).filter(v=>v>=400&&v<=8000);
+  if(ns.length>=2){c.sqftMin=Math.min(...ns);c.sqftMax=Math.max(...ns);changes.push(`${nf(c.sqftMin)}–${nf(c.sqftMax)} sqft`);touched.add('sqft');}
+  else if(ns.length){const pre=t.slice(0,t.indexOf(String(ns[0])));const isMax=/(under|below|up to|max|no more than|less than)\s*$/.test(pre.slice(-24));
+   if(isMax){c.sqftMax=ns[0];changes.push(`up to ${nf(ns[0])} sqft`);}else{c.sqftMin=ns[0];changes.push(`at least ${nf(ns[0])} sqft`);}touched.add('sqft');}}
+
+ const cm=t.match(/(\d+)\s*[- ]?min(?:ute)?s?\b.*?(?:commute|drive)|(?:commute|drive).*?(\d+)\s*[- ]?min(?:ute)?s?\b/);
+ if(cm){c.commuteMax=+(cm[1]||cm[2]);changes.push(`commute ≤ ${c.commuteMax} min`);touched.add('commute');}
+
+ if(/\bhoa\b/.test(t)){if(/\bno hoa\b/.test(t)){c.hoaMax=0;changes.push('no HOA');touched.add('hoa');}else{const m=t.match(/hoa[^\d]{0,12}(\d+)/);if(m){c.hoaMax=+m[1];changes.push(`HOA ≤ $${m[1]}`);touched.add('hoa');}}}
+
+ const FEAT={garage:/garage|parking/,yard:/\byard\b|backyard|garden/,office:/\boffice\b|\bden\b|home office|study/};
+ for(const[f,rx]of Object.entries(FEAT)){const m=t.match(rx);if(!m)continue;
+  if(negatedBefore(t,m.index)){if(c.features.includes(f)){c.features=c.features.filter(x=>x!==f);changes.push(`${FEAT_LABEL[f].toLowerCase()} no longer required`);touched.add(f);}}
+  else if(!c.features.includes(f)){c.features.push(f);changes.push(`needs a ${FEAT_LABEL[f].toLowerCase()}`);touched.add(f);}}
+
+ if(/highway|freeway|interstate|i-?94/.test(t)){
+  if(/(fine|ok|okay|don'?t mind|doesn'?t matter|no problem)/.test(t)){c.noHighway=false;changes.push('highway is fine now');}
+  else{c.noHighway=true;changes.push('avoiding the highway');}touched.add('highway');}
+
+ return{criteria:c,changes,reset:false,touched:[...touched]};
+}
+
+/* ===================== near-match summary ===================== */
+function topBlocker(near){const by={};for(const n of near)by[n.f.k]=(by[n.f.k]||0)+1;
+ const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];if(!top)return null;
+ const f=FILTERS.find(x=>x.k===top[0]);return{key:top[0],count:top[1],label:f.k};}
+function relax(criteria,key){const c=JSON.parse(JSON.stringify(criteria));
+ if(key==='sqft'){if(c.sqftMin)c.sqftMin=Math.max(0,c.sqftMin-300);}
+ else if(key==='price'){if(c.priceMax)c.priceMax=Math.round(c.priceMax+50000);}
+ else if(key==='commute'){if(c.commuteMax)c.commuteMax+=10;}
+ else if(key==='garage'||key==='yard'||key==='office'){c.features=c.features.filter(x=>x!==key);}
+ else if(key==='highway'){c.noHighway=false;}
+ else if(key==='beds'){if(c.bedsMin)c.bedsMin=Math.max(1,c.bedsMin-1);}
+ else if(key==='areas'){c.areas=[];}
+ else if(key==='types'){c.types=[];}
+ else if(key==='hoa'){c.hoaMax=null;}
+ return c;}
+const BLOCK_LABEL={price:'the budget',areas:'the chosen areas',types:'the home type',beds:'the bedroom minimum',sqft:'the size minimum',commute:'the commute limit',hoa:'the HOA cap',garage:'the garage requirement',yard:'the yard requirement',office:'the office requirement',highway:'avoiding the highway'};
+
+function summarize(parsed,res){
+ const{changes,reset}=parsed;
+ if(reset)return`Cleared everything. Showing all ${DATA.length} homes.`;
+ const head=changes.length?`Got it — ${changes.join(', ')}.`:`I didn't catch a new filter in that.`;
+ if(res.results.length>0)return`${head} <b>${res.results.length}</b> home${res.results.length===1?'':'s'} match now.`;
+ const top=topBlocker(res.near);
+ if(top)return`${head} No homes match all of that. <b>${top.count}</b> ${top.count===1?'is':'are'} close — only missing on ${esc(BLOCK_LABEL[top.key])}.`;
+ return`${head} No homes match, and nothing is close on just one criterion — try loosening a couple of filters.`;
+}
+
+/* ===================== shared markup ===================== */
+function chipRow(c,removable){
+ const parts=[];
+ if(c.priceMin!=null||c.priceMax!=null)parts.push(['price',priceLabel(c)]);
+ for(const a of c.areas)parts.push(['area:'+a,a]);
+ for(const ty of c.types)parts.push(['type:'+ty,ty]);
+ if(c.bedsMin)parts.push(['beds',`${c.bedsMin}+ bd`]);
+ if(c.sqftMin!=null||c.sqftMax!=null)parts.push(['sqft',sqftLabel(c)]);
+ if(c.commuteMax)parts.push(['commute',`≤ ${c.commuteMax} min`]);
+ if(c.hoaMax!=null)parts.push(['hoa',`HOA ≤ $${c.hoaMax}`]);
+ for(const f of c.features)parts.push(['feat:'+f,FEAT_LABEL[f]]);
+ if(c.noHighway)parts.push(['highway','Away from highway']);
+ if(!parts.length)return `<span class="small muted">No filters yet — say what the client wants.</span>`;
+ return `<div class="chips">${parts.map(([k,l])=>`<span class="chip ${removable?'rm':''}">${esc(l)}${removable?`<button data-act="chip-rm" data-k="${k}" aria-label="Remove ${esc(l)}">${icon('x','sm')}</button>`:''}</span>`).join('')}</div>`;
+}
+function listingRow(l){
+ const feats=[l.garage&&'garage',l.yard&&'yard',l.office&&'office'].filter(Boolean);
+ return `<div class="resultCard"><div class="ph t${l.tone}"></div><div class="info grow"><span class="price num">${money(l.price)}</span><span class="facts">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.type}</span><span class="addr">${esc(l.addr)}, ${l.hood} · ${l.commute} min commute</span></div><div class="featTags" title="${feats.join(', ')||'no standout features'}">${feats.map(f=>icon(f==='garage'?'car':f==='yard'?'tree':'desk')).join('')}</div></div>`;
+}
+function cardC(l){
+ return `<article class="cardC"><div class="ph t${l.tone}"></div><div class="body"><span class="price num">${money(l.price)}</span><span class="small sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft</span><span class="small muted">${esc(l.addr)}, ${l.hood}</span></div></article>`;
+}
+function nearList(near,c){
+ const top=topBlocker(near);
+ return `<div class="col" style="gap:0">${near.slice(0,4).map(n=>`<div class="nearRow"><div class="ph t${n.l.tone}" style="width:40px;height:30px;border-radius:6px"></div><div class="col grow" style="gap:0"><span class="s13 m">${money(n.l.price)} · ${esc(n.l.addr)}</span><span class="small muted">${n.l.hood} · ${n.l.beds} bd · ${nf(n.l.sqft)} sqft</span></div><span class="why">${esc(n.f.why(n.l,c))}</span></div>`).join('')}
+ </div>${top?`<div class="row" style="padding-top:8px">${btn(`Loosen ${BLOCK_LABEL[top.key]}`,{kind:'sec',sm:1,act:'relax',data:`data-k="${top.key}"`})}</div>`:''}`;
+}
+function resultsBlock(res,c,opts={}){
+ if(res.results.length===0){
+  return `<div class="zeroBox">${icon('help')}<b>No exact matches.</b>${res.near.length?nearList(res.near,c):`<span class="s13 sub">Nothing is close on a single criterion — try loosening more than one.</span>`}</div>`;
+ }
+ const shown=opts.limit?res.results.slice(0,opts.limit):res.results;
+ return (opts.grid?`<div class="${opts.gridClass||'gridA'}">${shown.map(listingRow).join('')}</div>`:`<div class="col" style="gap:8px">${shown.map(listingRow).join('')}</div>`)
+  +(res.results.length>shown.length?`<button class="btn sec sm" style="margin-top:8px" data-act="show-all">Show all ${res.results.length}</button>`:'');
+}
+
+/* ===================== preferences panel (grouped, like the main app) ===================== */
+const PREF_FIELD_LABEL={price:'Price range',hoa:'Max HOA / mo',areas:'Areas',commute:'Max commute',highway:'Avoid the highway',types:'Home type',beds:'Bedrooms',sqft:'Size (sqft)',garage:'Garage',yard:'Yard',office:'Home office'};
+function agoShort(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+'m ago';return Math.round(m/60)+'h ago';}
+function pendingBadge(key){return S.pendingKeys[key]?`<span class="pendingDot" title="Changed by voice — not saved yet"></span>`:'';}
+function rowCls(key){return `pfRow ${S.pendingKeys[key]?'pending':''}`;}
+function ctlPrice(){const c=S.criteria;return `<div class="pfInline"><input class="pfNum" data-pf="priceMin" value="${c.priceMin?nf(c.priceMin):''}" placeholder="Min" inputmode="numeric"><span class="muted">–</span><input class="pfNum" data-pf="priceMax" value="${c.priceMax?nf(c.priceMax):''}" placeholder="Max" inputmode="numeric"></div>`;}
+function ctlHoa(){const c=S.criteria;return `<input class="pfNum" data-pf="hoaMax" value="${c.hoaMax!=null?nf(c.hoaMax):''}" placeholder="No limit" inputmode="numeric">`;}
+function ctlAreas(){const c=S.criteria;return `<div class="chips">${Object.keys(HOODS).map(h=>`<button class="pfChip" data-act="pf-area" data-h="${h}" aria-pressed="${c.areas.includes(h)}">${h}</button>`).join('')}</div>`;}
+function ctlTypes(){const c=S.criteria;return `<div class="chips">${['Single-family','Townhouse','Condo'].map(ty=>`<button class="pfChip" data-act="pf-type" data-t="${ty}" aria-pressed="${c.types.includes(ty)}">${ty}</button>`).join('')}</div>`;}
+function ctlBeds(){const c=S.criteria;return `<span class="pfStepper"><button type="button" data-act="pf-beds-step" data-d="-1" aria-label="Fewer bedrooms">${icon('minus','sm')}</button><span>${c.bedsMin?c.bedsMin+'+':'Any'}</span><button type="button" data-act="pf-beds-step" data-d="1" aria-label="More bedrooms">${icon('plus','sm')}</button></span>`;}
+function ctlCommute(){const c=S.criteria;return `<span class="pfStepper"><button type="button" data-act="pf-commute-step" data-d="-5" aria-label="Shorter commute">${icon('minus','sm')}</button><span>${c.commuteMax?c.commuteMax+' min':'Any'}</span><button type="button" data-act="pf-commute-step" data-d="5" aria-label="Longer commute">${icon('plus','sm')}</button></span>`;}
+function ctlSqft(){const c=S.criteria;return `<div class="pfInline"><input class="pfNum" data-pf="sqftMin" value="${c.sqftMin?nf(c.sqftMin):''}" placeholder="Min" inputmode="numeric"><span class="muted">–</span><input class="pfNum" data-pf="sqftMax" value="${c.sqftMax?nf(c.sqftMax):''}" placeholder="Max" inputmode="numeric"></div>`;}
+function ctlHighway(){const c=S.criteria;return `<button type="button" class="pfToggle" role="switch" aria-checked="${!!c.noHighway}" data-act="pf-highway" aria-label="Avoid the highway"></button>`;}
+function ctlFeat(f){const c=S.criteria;return `<button type="button" class="pfToggle" role="switch" aria-checked="${c.features.includes(f)}" data-act="pf-feat" data-f="${f}" aria-label="${PREF_FIELD_LABEL[f]} required"></button>`;}
+function prefPanelHTML(){
+ const row=(key,ctl)=>`<div class="${rowCls(key)}"><span class="pfLbl">${PREF_FIELD_LABEL[key]}${pendingBadge(key)}</span>${ctl}</div>`;
+ const grp=(t,inner)=>`<div class="pfGroup"><div class="pfGroupTitle">${t}</div>${inner}</div>`;
+ return `<div class="pfBody">
+  ${grp('Budget', row('price',ctlPrice())+row('hoa',ctlHoa()))}
+  ${grp('Location', row('areas',ctlAreas())+row('commute',ctlCommute())+row('highway',ctlHighway()))}
+  ${grp('Property', row('types',ctlTypes())+row('beds',ctlBeds())+row('sqft',ctlSqft()))}
+  ${grp('Features', row('garage',ctlFeat('garage'))+row('yard',ctlFeat('yard'))+row('office',ctlFeat('office')))}
+ </div>`;
+}
+function saveBarHTML(){
+ const n=Object.keys(S.pendingKeys).length;
+ return `<div class="saveBar">${n?btn(`Save ${n} change${n>1?'s':''} to Alex Kim`,{icon:'check',act:'save-prefs'}).replace('class="btn ','class="btn saveBtn '):`<span class="savedTick s13 row" style="gap:5px">${icon('check','sm')}All saved</span>`}${S.changeHistory.length?`<span class="histNote">saved ${agoShort(S.changeHistory[0].at)}</span>`:''}</div>`;
+}
+function prefsPanelFull(){
+ return `<div class="pfHeader"><div class="col" style="gap:0"><span class="who">Alex Kim</span><span class="sub">Buyer preferences</span></div></div>${saveBarHTML()}${prefPanelHTML()}`;
+}
+
+/* ===================== state ===================== */
+const QUICK=[
+ 'Let\'s raise the budget to $700,000.',
+ 'Drop Westgate, but add Linden Hills.',
+ 'At least 2,600 square feet now.',
+ 'We don\'t need the home office anymore.',
+ 'Actually, the highway doesn\'t matter anymore.',
+ 'Start over.'];
+function initState(){return{variant:'A',criteria:baselineCriteria(),showAll:false,draft:'',listening:false,
+ pendingKeys:{},changeHistory:[],showPrefs:false,showHistory:false,
+ messages:[{who:'sys',html:`Here’s where <b>Alex Kim’s</b> preferences stand today. Tell me what’s changed — I’ll keep the match count live, and you can Save when it’s right.`}]};}
+let S=initState();
+let THEME='light';try{THEME=localStorage.getItem('scc-theme')||'light';}catch(e){}
+document.documentElement.dataset.theme=THEME;
+
+const VARIANTS={
+ A:{label:'A · Split view',desc:'Conversation on the left, results always visible on the right. Full exchange history plus a live board — best when the agent wants to keep scanning homes while talking.'},
+ B:{label:'B · Inline timeline',desc:'One chat column; every answer is a rich card inside the thread, so narrowing the search IS the conversation history. Minimal chrome, good on a narrower screen.'},
+ C:{label:'C · Search bar first',desc:'A single dictation bar drives a full-width live board; the chips are the only “memory” shown by default. Maximizes space for browsing homes; history is tucked away.'}};
+
+/* ===================== render ===================== */
+function render(){
+ const act=document.activeElement,aid=act&&act.id,sel=aid&&act.selectionStart!=null?[act.selectionStart,act.selectionEnd]:null;
+ const scrolls={};document.querySelectorAll('[data-scroll]').forEach(el=>scrolls[el.dataset.scroll]=el.scrollTop);
+ document.getElementById('top').innerHTML=topBar();
+ document.getElementById('stage').innerHTML=S.variant==='A'?renderA():S.variant==='B'?renderB():renderC();
+ document.querySelectorAll('[data-scroll]').forEach(el=>{el.scrollTop=el.dataset.autoscroll!=null?el.scrollHeight:(scrolls[el.dataset.scroll]||0);});
+ if(aid){const el=document.getElementById(aid);if(el){el.focus();if(sel&&el.setSelectionRange)try{el.setSelectionRange(sel[0],sel[1]);}catch(e){}}}
+}
+function topBar(){
+ return `<div class="brand"><span class="logo">${icon('house')}</span>Conversational search — concepts</div>
+ <div class="seg" role="group" aria-label="Variant">${Object.entries(VARIANTS).map(([k,v])=>`<button data-act="variant" data-v="${k}" aria-pressed="${S.variant===k}">${v.label}</button>`).join('')}</div>
+ <span class="desc">${VARIANTS[S.variant].desc}</span>
+ ${btn('Reset demo',{kind:'ghost',sm:1,act:'reset'})}`;
+}
+function composer(idPrefix){
+ return `<form class="composer" data-form="say" id="${idPrefix}-form"><input id="${idPrefix}-input" placeholder="Tell it what the client wants…" value="${esc(S.draft)}" data-input="draft" autocomplete="off"><button type="button" class="iconbtn ${S.listening?'on':''}" data-act="mic" aria-label="Dictate" title="Dictate">${icon('mic')}</button><button type="submit" class="send" aria-label="Send" ${S.draft.trim()?'':'disabled'}>${icon('send','sm')}</button></form>
+ <div class="quickRow">${QUICK.map(q=>`<button class="chip ghost" data-act="quick" data-q="${esc(q)}">${esc(q.length>42?q.slice(0,40)+'…':q)}</button>`).join('')}</div>`;
+}
+
+function renderA(){
+ const res=runSearch(S.criteria);
+ return `<div class="rootA">
+ <div class="chatPaneA"><div class="hd">${icon('msg')}Search assistant</div>
+  <div class="chatScrollA" data-scroll="A" data-autoscroll="1">${S.messages.map(m=>m.who==='agent'?`<div class="bubble agent">${esc(m.text)}</div>`:`<div class="bubble sys"><span class="headline">${m.html}</span></div>`).join('')}</div>
+  <div class="ft">${composer('a')}</div></div>
+ <div class="prefsPaneA">${prefsPanelFull()}</div>
+ <div class="resultsPaneA"><div class="countRow"><span class="countBig num">${res.results.length}</span><span class="sub">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+  ${chipRow(S.criteria,false)}
+  ${resultsBlock(res,S.criteria,{grid:true,gridClass:'gridA',limit:S.showAll?null:9})}</div>
+ </div>`;
+}
+
+function renderB(){
+ const res=runSearch(S.criteria);
+ const nPend=Object.keys(S.pendingKeys).length;
+ return `<div class="rootB">
+ <div class="hdB"><span class="live">${res.results.length} home${res.results.length===1?'':'s'} match now</span>${nPend?btn(`Save ${nPend}`,{sm:1,icon:'check',act:'save-prefs'}).replace('class="btn ','class="btn quickSave '):''}<span class="grow"></span>${btn(S.showPrefs?'Hide preferences':'Preferences',{kind:'ghost',sm:1,act:'toggle-prefs'})}</div>
+ <div class="chipGlanceB">${chipRow(S.criteria,false)}</div>
+ ${S.showPrefs?`<div class="drawerB">${prefsPanelFull()}</div>`:''}
+ <div class="chatScrollB" data-scroll="B" data-autoscroll="1">${S.messages.map(m=>{
+   if(m.who==='agent')return `<div class="bubble agent">${esc(m.text)}</div>`;
+   const inline=m.snapshot&&m.snapshot.results.length>0&&m.snapshot.results.length<=4;
+   return `<div class="bubble sys"><span class="headline">${m.html}</span>${inline?`<div class="miniRow">${m.snapshot.results.map(listingRow).join('')}</div>`:(m.snapshot&&m.snapshot.results.length===0?nearList(m.snapshot.near,m.snapshot.criteria):'')}</div>`;
+  }).join('')}</div>
+ <div class="ftB">${composer('b')}</div>
+ </div>`;
+}
+
+function renderC(){
+ const res=runSearch(S.criteria);
+ const last=S.messages[S.messages.length-1];
+ const nPend=Object.keys(S.pendingKeys).length;
+ return `<div class="rootC">
+ <div class="omniWrap"><div class="omnibar"><button type="button" class="iconbtn ${S.listening?'on':''}" data-act="mic" aria-label="Dictate" title="Dictate">${icon('mic','lg')}</button><form id="c-form" data-form="say" style="flex:1"><input id="c-input" placeholder="Tell it what the client wants…" value="${esc(S.draft)}" data-input="draft" autocomplete="off"></form>${btn('Send',{sm:1,icon:'send',act:'say-c',disabled:!S.draft.trim()})}</div>
+  ${chipRow(S.criteria,true)}
+  <div class="row wrap" style="gap:8px">${nPend?btn(`Save ${nPend} to Alex Kim`,{sm:1,icon:'check',act:'save-prefs'}).replace('class="btn ','class="btn quickSave '):''}<span class="grow"></span></div>
+  <div class="replyLineC">${last?last.html:''}</div>
+  <div class="quickRow">${QUICK.map(q=>`<button class="chip ghost" data-act="quick" data-q="${esc(q)}">${esc(q.length>42?q.slice(0,40)+'…':q)}</button>`).join('')}</div>
+ </div>
+ <div class="drawerToggles">${btn(S.showPrefs?'Hide preferences':'Preferences',{kind:'ghost',sm:1,act:'toggle-prefs'})}${btn(S.showHistory?`Hide history`:`History (${S.messages.length})`,{kind:'ghost',sm:1,act:'toggle-history'})}</div>
+ ${S.showPrefs?`<div class="drawerC">${prefsPanelFull()}</div>`:''}
+ ${S.showHistory?`<div class="drawerC hist">${S.messages.map(m=>`<div class="h">${m.who==='agent'?'🗣 ':'↳ '}${m.who==='agent'?esc(m.text):m.html}</div>`).join('')}</div>`:''}
+ <div class="boardWrapC" data-scroll="C">${res.results.length?`<div class="gridC">${(S.showAll?res.results:res.results.slice(0,24)).map(cardC).join('')}</div>${res.results.length>24&&!S.showAll?`<button class="btn sec sm" style="margin-top:12px" data-act="show-all">Show all ${res.results.length}</button>`:''}`:`<div class="zeroBox" style="max-width:460px">${icon('help')}<b>No exact matches.</b>${res.near.length?nearList(res.near,S.criteria):`<span class="s13 sub">Nothing is close on a single criterion.</span>`}</div>`}</div>
+ </div>`;
+}
+
+/* ===================== actions ===================== */
+function say(text){
+ text=text.trim();if(!text)return;
+ S.messages.push({who:'agent',text});
+ const parsed=parseUtterance(text,S.criteria);
+ S.criteria=parsed.criteria;
+ for(const k of parsed.touched||[])S.pendingKeys[k]=Date.now();
+ const res=runSearch(S.criteria);
+ let html=summarize(parsed,res);
+ if(Object.keys(S.pendingKeys).length)html+=` <span style="color:var(--accent);font-weight:600">Save to apply this to Alex Kim’s profile.</span>`;
+ S.messages.push({who:'sys',html,snapshot:{criteria:JSON.parse(JSON.stringify(S.criteria)),results:res.results,near:res.near}});
+ S.draft='';S.showAll=false;
+}
+let REC=null;
+function mic(){
+ if(REC){REC.stop();return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){S.draft='Voice input isn’t supported in this browser — type instead';render();return;}
+ const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;
+ const base=S.draft.trim()?S.draft.trim()+' ':'';let fin='';
+ r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else tmp+=x;}S.draft=(base+fin+tmp).replace(/\s+/g,' ').trimStart();render();};
+ r.onend=()=>{REC=null;S.listening=false;render();};
+ try{r.start();REC=r;S.listening=true;}catch(e){}
+}
+const A={
+ variant:d=>{S.variant=d.v;},
+ reset:()=>{if(REC)REC.abort();S=initState();},
+ mic:()=>mic(),
+ quick:d=>say(d.q),
+ 'say-c':()=>say(S.draft),
+ 'show-all':()=>{S.showAll=true;},
+ 'toggle-prefs':()=>{S.showPrefs=!S.showPrefs;},
+ 'toggle-history':()=>{S.showHistory=!S.showHistory;},
+ 'chip-rm':d=>{const k=d.k,c=S.criteria;let fkey=null;
+  if(k==='price'){c.priceMin=null;c.priceMax=null;fkey='price';}
+  else if(k.startsWith('area:')){c.areas=c.areas.filter(x=>x!==k.slice(5));fkey='areas';}
+  else if(k.startsWith('type:')){c.types=c.types.filter(x=>x!==k.slice(5));fkey='types';}
+  else if(k==='beds'){c.bedsMin=null;fkey='beds';}
+  else if(k==='sqft'){c.sqftMin=null;c.sqftMax=null;fkey='sqft';}
+  else if(k==='commute'){c.commuteMax=null;fkey='commute';}
+  else if(k==='hoa'){c.hoaMax=null;fkey='hoa';}
+  else if(k.startsWith('feat:')){const f=k.slice(5);c.features=c.features.filter(x=>x!==f);fkey=f;}
+  else if(k==='highway'){c.noHighway=false;fkey='highway';}
+  if(fkey)delete S.pendingKeys[fkey];
+  const res=runSearch(S.criteria);
+  S.messages.push({who:'sys',html:`Removed that filter. <b>${res.results.length}</b> home${res.results.length===1?'':'s'} match now.`,snapshot:{criteria:JSON.parse(JSON.stringify(S.criteria)),results:res.results,near:res.near}});},
+ relax:d=>{S.criteria=relax(S.criteria,d.k);delete S.pendingKeys[d.k];const res=runSearch(S.criteria);
+  S.messages.push({who:'sys',html:`Loosened ${esc(BLOCK_LABEL[d.k])}. <b>${res.results.length}</b> home${res.results.length===1?'':'s'} match now.`,snapshot:{criteria:JSON.parse(JSON.stringify(S.criteria)),results:res.results,near:res.near}});},
+ 'pf-area':d=>{const c=S.criteria;c.areas=c.areas.includes(d.h)?c.areas.filter(x=>x!==d.h):[...c.areas,d.h];delete S.pendingKeys.areas;},
+ 'pf-type':d=>{const c=S.criteria;c.types=c.types.includes(d.t)?c.types.filter(x=>x!==d.t):[...c.types,d.t];delete S.pendingKeys.types;},
+ 'pf-feat':d=>{const c=S.criteria;c.features=c.features.includes(d.f)?c.features.filter(x=>x!==d.f):[...c.features,d.f];delete S.pendingKeys[d.f];},
+ 'pf-highway':()=>{S.criteria.noHighway=!S.criteria.noHighway;delete S.pendingKeys.highway;},
+ 'pf-beds-step':d=>{const c=S.criteria;c.bedsMin=Math.max(1,Math.min(6,(c.bedsMin||1)+(+d.d)));delete S.pendingKeys.beds;},
+ 'pf-commute-step':d=>{const c=S.criteria;c.commuteMax=Math.max(10,Math.min(60,(c.commuteMax||30)+(+d.d)));delete S.pendingKeys.commute;},
+ 'save-prefs':()=>{const keys=Object.keys(S.pendingKeys);if(!keys.length)return;
+  S.changeHistory.unshift({n:keys.length,at:Date.now()});S.pendingKeys={};
+  S.messages.push({who:'sys',html:`✓ Saved ${keys.length} change${keys.length>1?'s':''} to <b>Alex Kim</b>’s preferences. They’ll be used for every future search.`});},
+};
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
+ const fn=A[el.dataset.act];if(!fn)return;
+ fn(el.dataset,e);render();
+});
+document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();say(S.draft);render();});
+document.addEventListener('input',e=>{if(e.target.dataset.input==='draft'){S.draft=e.target.value;const sendBtn=document.querySelector('.send');if(sendBtn)sendBtn.disabled=!S.draft.trim();}});
+document.addEventListener('change',e=>{
+ const f=e.target.dataset.pf;if(!f)return;
+ const v=e.target.value.replace(/\D/g,'');
+ S.criteria[f]=v?parseInt(v,10):null;
+ const fkey={priceMin:'price',priceMax:'price',hoaMax:'hoa',sqftMin:'sqft',sqftMax:'sqft'}[f];
+ if(fkey)delete S.pendingKeys[fkey];
+ render();
+});
+render();
+</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9v12h14V9"/><path d="M10 21v-6h4v6"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 2-2.5 2-2.5 4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16l1.5-5h11l1.5 5"/><rect x="3" y="16" width="18" height="4" rx="1"/></symbol>
+<symbol id="i-tree" viewBox="0 0 24 24"><path d="M12 3l5 7h-3l4 6h-4v5h-4v-5H6l4-6H7z"/></symbol>
+<symbol id="i-desk" viewBox="0 0 24 24"><path d="M3 7h18M5 7v13M19 7v13M3 20h18M9 7v5h3V7"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+</defs>
+</svg>

@@ -1,0 +1,1006 @@
+<meta charset="UTF-8">
+<title>RealtorHelper — Split-view layout concepts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F5F6F8;--surface:#FFFFFF;--surface-2:#F1F3F6;--surface-3:#E6E9EE;--text:#111827;--text-2:#4B5563;--muted:#8A93A3;--border:#E3E6EB;--accent:#2F5BEA;--accent-soft:#ECF0FE;--ink:#111827;--on-ink:#FFFFFF;--good:#1A7F4E;--shadow:0 1px 2px rgba(16,24,40,.05),0 10px 28px rgba(16,24,40,.08);--cardshadow:0 1px 2px rgba(16,24,40,.04),0 1px 1px rgba(16,24,40,.03)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0D1015;--surface:#141920;--surface-2:#1B212A;--surface-3:#252C37;--text:#E7EAF0;--text-2:#AEB5C1;--muted:#7C8594;--border:#262D38;--accent:#86A2FF;--accent-soft:#1B2540;--ink:#E7EAF0;--on-ink:#0D1015;--good:#5FCF9A;--shadow:0 10px 30px rgba(0,0,0,.4);--cardshadow:0 1px 2px rgba(0,0,0,.3)}}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none;padding:0;text-align:inherit}
+input,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.ic{width:16px;height:16px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ic.sm{width:13px;height:13px}.ic.lg{width:22px;height:22px}
+.num{font-variant-numeric:tabular-nums}
+.row{display:flex;align-items:center;gap:10px;min-width:0}
+.row.wrap{flex-wrap:wrap}
+.col{display:flex;flex-direction:column;gap:4px;min-width:0}
+.grow{flex:1;min-width:0}
+.muted{color:var(--muted)}.sub{color:var(--text-2)}
+.small{font-size:12px}.s13{font-size:13px}.b{font-weight:600}.m{font-weight:500}
+
+#top{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;white-space:nowrap}
+.logo{width:26px;height:26px;border-radius:7px;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;flex:none}
+.seg{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:3px;gap:2px}
+.seg button{padding:7px 14px;border-radius:7px;font-weight:600;font-size:13px;color:var(--text-2)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+#top .desc{flex:1;min-width:220px;font-size:12.5px;color:var(--muted);line-height:1.4}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;font-weight:500;white-space:nowrap;background:var(--ink);color:var(--on-ink)}
+.btn:hover{opacity:.88}
+.btn.sec{background:var(--surface);color:var(--text);border:1px solid var(--border)}
+.btn.sec:hover{background:var(--surface-2)}
+.btn.ghost{background:none;color:var(--text-2)}
+.btn.ghost:hover{color:var(--text)}
+.btn.sm{padding:5px 11px;font-size:12.5px}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;background:var(--surface-2);color:var(--text-2);font-weight:500;font-size:12.5px;border:1px solid transparent;white-space:nowrap}
+.chip.ghost{background:var(--surface);border-color:var(--border);color:var(--text-2)}
+.chip.ghost:hover{border-color:var(--text-2);color:var(--text)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+
+#stage{min-height:calc(100vh - 54px)}
+
+/* ---- shared chat bits ---- */
+.bubble{max-width:86%;padding:9px 13px;border-radius:14px;font-size:13.5px;line-height:1.45}
+.bubble.agent{align-self:flex-end;background:var(--ink);color:var(--on-ink);border-bottom-right-radius:4px}
+.bubble.sys{align-self:flex-start;background:var(--surface-2);border-bottom-left-radius:4px}
+.composer{display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:12px;padding:8px 8px 8px 14px;background:var(--surface)}
+.composer input{flex:1;border:0;outline:none;background:none;min-width:0;font-size:13.5px}
+.iconbtn{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--muted);flex:none}
+.iconbtn:hover{background:var(--surface-2);color:var(--text)}
+.iconbtn.on{color:var(--accent);background:var(--accent-soft)}
+.iconbtn.sm{width:26px;height:26px}
+.send{width:32px;height:32px;border-radius:8px;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;flex:none}
+.send:disabled{opacity:.35}
+.quickRow{display:flex;gap:7px;flex-wrap:wrap}
+
+/* ---- big result cards (shared by all layouts) ---- */
+.gridBig{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.listingCardBig{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--cardshadow)}
+.listingCardBig .ph{aspect-ratio:16/10;background:linear-gradient(135deg,var(--a),var(--b))}
+.t0{--a:#D9DEE5;--b:#A9B4C2}.t1{--a:#E5E1DB;--b:#BFB7AC}.t2{--a:#DCE3DE;--b:#AEBDB4}.t3{--a:#E2DFE7;--b:#B8B1C4}.t4{--a:#DCE3E9;--b:#A3B2C0}.t5{--a:#E7E3DD;--b:#C8BFB3}
+.listingCardBig .body{padding:12px 14px;display:flex;flex-direction:column;gap:3px}
+.listingCardBig .price{font-weight:700;font-size:15px}
+.featTags{display:flex;gap:4px;flex:none}
+.featTags .ic{color:var(--good)}
+
+.nearRow{display:flex;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--border)}
+.nearRow:first-child{border-top:0}
+.nearRow .why{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.zeroBox{display:flex;flex-direction:column;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+
+/* ---- preferences: card style (L1 / L3) ---- */
+.pfHeader{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:2px 2px 12px;flex-wrap:wrap}
+.pfHeader .who{font-weight:700;font-size:14px}
+.pfHeader .sub{font-size:11.5px;color:var(--muted)}
+.pfCard{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 14px;margin-bottom:8px;box-shadow:var(--cardshadow)}
+.pfCard:last-child{margin-bottom:0}
+.pfCardTitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);padding:2px 0 4px}
+.pfLbl{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--text-2)}
+.pendingDot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+/* compact one-line field row, expands on click */
+.pfRowC{border-top:1px solid var(--border)}
+.pfRowC:first-of-type{border-top:0}
+.pfRowC.pending{background:var(--accent-soft);margin:0 -8px;padding:0 8px;border-radius:7px;border-top-color:transparent}
+.pfRowHead{display:flex;align-items:center;gap:8px;width:100%;padding:6px 0;color:var(--text)}
+.pfRowHead .pfLbl{flex:none;width:88px;font-size:11.5px}
+.pfRowHead .pfVal{flex:1;min-width:0;font-size:12.5px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfRowHead .ic{color:var(--muted);flex:none}
+.pfRowC.open .pfRowHead .ic{color:var(--accent)}
+.pfRowCtl{padding:2px 0 10px}
+.pfInline{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pfNum{width:78px;border:1px solid var(--border);border-radius:7px;padding:6px 8px;background:var(--surface);font-size:12.5px;color:var(--text)}
+.pfChip{padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:500;background:var(--surface-2);color:var(--text-2);border:1px solid transparent}
+.pfChip[aria-pressed="true"]{background:var(--ink);color:var(--on-ink)}
+.pfStepper{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:8px;height:26px}
+.pfStepper button{width:24px;height:24px;display:grid;place-items:center;color:var(--text-2)}
+.pfStepper span{padding:0 6px;font-size:12.5px;font-weight:600;min-width:34px;text-align:center}
+.pfToggle{width:34px;height:19px;border-radius:10px;background:var(--surface-3);position:relative;flex:none}
+.pfToggle::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:var(--surface);transition:left .15s}
+.pfToggle[aria-checked="true"]{background:var(--ink)}
+.pfToggle[aria-checked="true"]::after{left:17px}
+.saveBar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.saveBar .btn{white-space:normal}
+.saveBtn{background:var(--accent);color:#fff}
+.savedTick{color:var(--good)}
+.histNote{font-size:11px;color:var(--muted);white-space:nowrap}
+.quickSave{background:var(--accent);color:#fff;border-radius:999px;padding:6px 13px;font-size:12.5px;font-weight:600;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+
+/* ---- preferences: ribbon style (L2) ---- */
+.ribbonWrap{background:var(--surface);border-bottom:1px solid var(--border)}
+.ribbonRow{display:flex;gap:8px;flex-wrap:wrap;padding:14px 22px}
+.ribbonPill{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 12px;border-radius:10px;background:var(--surface-2);border:1px solid transparent;min-width:76px}
+.ribbonPill.open{background:var(--surface);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.ribbonPill.pending{background:var(--accent-soft)}
+.ribbonPill.toggle{flex-direction:row;align-items:center;gap:6px}
+.ribbonPill.toggle.on{background:var(--ink);color:var(--on-ink)}
+.rpLbl{font-size:10px;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:4px;opacity:.7}
+.rpVal{font-size:12.5px;font-weight:600}
+.ribbonExpand{margin:0 22px 14px;padding:12px 14px;background:var(--surface);border:1px solid var(--accent);border-radius:10px;display:flex;flex-direction:column;gap:10px}
+
+/* ================= L1 — preferences on top, results dominant, chat floats ================= */
+.rootL1{display:flex;flex-direction:column;height:calc(100vh - 54px);position:relative}
+.paneHead{height:54px;flex:none;display:flex;align-items:center;gap:8px;padding:0 18px;border-bottom:1px solid var(--border);font-weight:600;font-size:13.5px}
+.chatBody{flex:1;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:12px}
+.chatFoot{padding:12px 16px 16px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.countBig{font-size:20px;font-weight:700;letter-spacing:-.01em}
+.prefsStripL1{flex:none;background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px}
+.prefsStripL1 .pfHeader{padding:0 0 10px}
+.prefsCardsRow{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.resultsPaneL1{flex:1;overflow:auto;padding:20px 24px 110px}
+.resultsHeadL1{display:flex;align-items:baseline;gap:8px;padding-bottom:14px}
+@media (max-width:1100px){.prefsCardsRow{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:620px){.prefsCardsRow{grid-template-columns:1fr}}
+
+/* floating search assistant (L1) */
+.chatFab{position:fixed;right:28px;bottom:28px;width:56px;height:56px;border-radius:50%;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;box-shadow:var(--shadow);z-index:40}
+.chatFab .fabBadge{position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;background:var(--accent);color:#fff;font-size:10.5px;font-weight:700;display:grid;place-items:center;border:2px solid var(--bg)}
+.chatFloat{position:fixed;right:28px;bottom:96px;width:360px;max-height:min(70vh,560px);background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;z-index:40;overflow:hidden}
+@media (max-width:480px){.chatFloat{right:12px;left:12px;width:auto;bottom:88px}.chatFab{right:16px;bottom:16px}}
+
+/* ================= L5 — one-tap AI voice button ================= */
+.aiMicBtn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#7C4DFF);color:#fff;font-weight:700;font-size:13.5px;box-shadow:var(--shadow);flex:none}
+.aiMicBtn:hover{opacity:.92}
+.aiMicBtn.on{animation:micPulse 1.6s ease-in-out infinite}
+.aiMicIconWrap{position:relative;display:inline-flex}
+.aiMicIconWrap .ic.sm{position:absolute;top:-5px;right:-6px;color:#FFD866}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,91,234,.45)}50%{box-shadow:0 0 0 9px rgba(47,91,234,0)}}
+.voiceInterim{display:flex;align-items:center;gap:6px;padding:8px 2px 0;font-size:12.5px;font-style:italic;color:var(--accent)}
+.voiceStatus{padding:8px 2px 0;font-size:12.5px;color:var(--text-2)}
+.voiceStatus b{color:var(--text)}
+
+/* ================= L2 — filter ribbon + narrow rail ================= */
+.rootL2{display:flex;height:calc(100vh - 54px)}
+.chatRailL2{width:280px;flex:none;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.mainL2{flex:1;display:flex;flex-direction:column;min-height:0}
+.resultsHeadL2{flex:none;padding:16px 22px 10px;display:flex;align-items:baseline;gap:8px}
+.resultsBodyL2{flex:1;overflow:auto;padding:4px 22px 40px}
+@media (max-width:760px){.rootL2{flex-direction:column;height:auto}.chatRailL2{width:auto;height:40vh}}
+
+/* ================= L3 — chat docked on top ================= */
+.rootL3{display:flex;flex-direction:column;height:calc(100vh - 54px)}
+.chatStripL3{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 22px;position:relative;flex:none}
+.chatStripRow{display:flex;align-items:center;gap:10px}
+.peekCol{display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.peekLine{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
+.peekLine.agent{color:var(--text);font-weight:600}
+.chatHistoryPopL3{position:absolute;top:100%;left:22px;right:22px;background:var(--surface);border:1px solid var(--border);border-top:0;border-radius:0 0 14px 14px;box-shadow:var(--shadow);max-height:340px;overflow:auto;padding:14px 18px;z-index:15;display:flex;flex-direction:column;gap:10px}
+.quickRowL3{padding:8px 22px 0}
+.bodyL3{flex:1;display:grid;grid-template-columns:320px minmax(0,1fr);min-height:0}
+.prefsColL3{border-right:1px solid var(--border);overflow:auto;padding:16px}
+.resultsColL3{overflow:auto;padding:18px 22px 40px}
+.resultsHeadL3{display:flex;align-items:baseline;gap:8px;padding-bottom:14px}
+@media (max-width:860px){.bodyL3{grid-template-columns:1fr;grid-template-rows:auto auto}.prefsColL3{max-height:38vh}}
+
+/* ================= L4 — linked feed (chat drives preferences, visibly) ================= */
+.rootL4{display:grid;height:calc(100vh - 54px);grid-template-columns:420px minmax(0,1fr);grid-template-areas:"feed results"}
+.feedPaneL4{grid-area:feed;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;min-height:0}
+.prefsBlockL4{flex:none;max-height:44vh;overflow:auto;padding:14px 16px;border-bottom:2px solid var(--accent-soft)}
+.feedDividerL4{flex:none;padding:8px 16px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--accent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;background:var(--accent-soft)}
+.chatScrollL4{flex:1;overflow:auto;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.chatFootL4{flex:none;padding:12px 16px 16px;border-top:1px solid var(--border)}
+.resultsPaneL4{grid-area:results;overflow:auto;padding:18px 22px 40px}
+.pfQuoteBtn{display:block;text-align:left;font-size:11px;font-style:italic;color:var(--accent);background:none;border:0;padding:2px 0 0;margin:0}
+.pfQuoteBtn:hover{text-decoration:underline}
+.linkChips{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.linkChip{padding:3px 9px;border-radius:999px;background:var(--surface);color:var(--accent);font-size:11px;font-weight:600;border:1px solid var(--accent-soft)}
+.linkChip:hover{border-color:var(--accent)}
+.pfRowC.flash{animation:flashRow 1.6s ease}
+@keyframes flashRow{0%,55%{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}100%{background:transparent;box-shadow:0 0 0 0 transparent}}
+.bubble.flash{animation:flashBubble 1.6s ease}
+@keyframes flashBubble{0%,55%{box-shadow:0 0 0 3px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}
+@media (max-width:1000px){.rootL4{grid-template-columns:1fr;grid-template-rows:auto auto;grid-template-areas:"feed" "results"}.feedPaneL4{height:62vh}}
+
+@media (max-width:640px){#top .desc{display:none}}
+
+/* ================= L6 / L7 — preferences-only accordion, centered column, no results ================= */
+.acc-wrap{max-width:640px;margin:0 auto;padding:28px 24px 60px;display:flex;flex-direction:column;gap:18px}
+.accHead{display:flex;flex-direction:column;gap:2px;padding:0 2px}
+.accHead .who{font-weight:700;font-size:16px}
+.accHead .sub{font-size:12.5px;color:var(--muted)}
+.accCatTitle{font-size:14px;font-weight:600;display:flex;align-items:center}
+.accCatSummary{font-size:12.5px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.accField{display:flex;flex-direction:column;gap:7px}
+.accFieldLbl{font-size:12px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:6px}
+
+/* L6 — elevated cards, one open */
+.accCat{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:var(--cardshadow);transition:box-shadow .15s}
+.accCat.open{box-shadow:0 0 0 1px var(--accent),var(--cardshadow)}
+.accCat.pending{background:var(--accent-soft)}
+.accCatHead{display:flex;align-items:center;gap:13px;width:100%;padding:16px 18px;text-align:left}
+.accCatIcon{width:36px;height:36px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.accCat.open .accCatIcon{background:var(--ink);color:var(--on-ink)}
+.accCatHead .ic.chevD,.accCatHead .ic.chevU{color:var(--muted);flex:none}
+.accCatBody{padding:2px 18px 18px;display:flex;flex-direction:column;gap:16px;border-top:1px solid var(--border);margin-top:2px;padding-top:16px}
+
+/* L7 — flat numbered list, plus/minus */
+.accFlatWrap .acc-wrap,.accFlatWrap{max-width:680px}
+.accFlatCat{border-bottom:1px solid var(--border)}
+.accFlatCat:first-child{border-top:1px solid var(--border)}
+.accFlatHead{display:flex;align-items:center;gap:16px;width:100%;padding:18px 2px;text-align:left}
+.accFlatNum{font-size:11px;color:var(--muted);font-weight:700;letter-spacing:.03em;width:22px;flex:none}
+.accFlatChips{display:flex;gap:6px;flex-wrap:wrap}
+.accFlatChip{padding:3px 9px;border-radius:999px;background:var(--surface-2);font-size:11.5px;color:var(--text-2)}
+.accFlatPlus{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:grid;place-items:center;flex:none;color:var(--text-2)}
+.accFlatCat.open .accFlatPlus{background:var(--ink);color:var(--on-ink);border-color:var(--ink)}
+.accFlatBody{padding:0 2px 22px 38px;display:grid;grid-template-columns:1fr 1fr;gap:16px 24px}
+@media (max-width:560px){.accFlatBody{grid-template-columns:1fr}}
+
+/* L6 — update from a note (voice or text), review by category, Save / Cancel */
+.link{color:var(--accent);font-weight:600;font-size:12.5px}
+.link:hover{text-decoration:underline}
+.ptEntry{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ptCard{background:var(--surface);border:1px solid var(--accent);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.ptTextarea{width:100%;min-height:68px;border:1px solid var(--border);border-radius:10px;padding:10px 12px;background:var(--bg);color:var(--text);font:inherit;resize:vertical}
+.ptChips{display:flex;gap:6px;flex-wrap:wrap}
+.ptChip{padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11.5px;font-weight:600}
+.ptReviewBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:2px;border-top:1px dashed var(--border)}
+.saveBtn{background:var(--accent);color:#fff}
+.accCat.changed{box-shadow:0 0 0 1px var(--accent)}
+.accCat.changed .accCatIcon{background:var(--accent);color:#fff}
+.changedTag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--accent);background:var(--accent-soft);padding:2px 7px;border-radius:999px;margin-left:8px;flex:none}
+.ptDiffRow{display:flex;flex-direction:column;gap:3px;padding:9px 12px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 8px 8px 0}
+.ptDiffOld{text-decoration:line-through;color:var(--muted);font-size:12px}
+.ptDiffNew{font-weight:700;color:var(--text);font-size:13px}
+
+/* ================= L8 — agent/client collaboration, static walkthrough (no logic wired up) ================= */
+.collabWrap{max-width:1040px;margin:0 auto;padding:28px 24px 60px;display:flex;flex-direction:column;gap:20px}
+.collabLegend{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--text-2);padding:2px}
+.collabLegend .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;flex:none}
+.collabCols{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media (max-width:820px){.collabCols{grid-template-columns:1fr}}
+.collabPane{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.collabPaneHead{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+.roleAvatar{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff;flex:none}
+.roleAvatar.agent{background:var(--ink)}
+.roleAvatar.client{background:var(--accent)}
+.collabPaneBody{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.collabCat{border:1px solid var(--border);border-radius:11px;padding:11px 13px;display:flex;flex-direction:column;gap:10px}
+.collabCatTitle{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.collabField{display:flex;flex-direction:column;gap:6px;padding-top:10px;border-top:1px solid var(--border)}
+.collabField:first-of-type{border-top:0;padding-top:0}
+.collabFieldHead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.collabFieldLbl{font-size:12.5px;font-weight:600;color:var(--text-2);display:flex;align-items:center;gap:6px}
+.collabFieldVal{font-size:12.5px;font-weight:600}
+.lockTag{font-size:10px;color:var(--muted);display:inline-flex;align-items:center;gap:3px;font-weight:500;text-transform:none;letter-spacing:0}
+.statusLine{font-size:11.5px;display:flex;align-items:center;gap:5px}
+.statusLine.wait{color:var(--accent)}
+.statusLine.ok{color:var(--good)}
+.statusLine .ic{flex:none}
+.suggBox{padding:9px 11px;border-radius:10px;display:flex;flex-direction:column;gap:6px;border-left:3px solid var(--accent);background:var(--accent-soft)}
+.suggBox.fromAgent{border-left-color:#7C4DFF;background:rgba(124,77,255,.1)}
+.suggWho{font-size:11px;font-weight:700;color:var(--accent)}
+.suggBox.fromAgent .suggWho{color:#7C4DFF}
+.suggWhy{font-size:11.5px;color:var(--text-2);font-style:italic}
+.suggActions{display:flex;gap:8px;padding-top:2px}
+.collabLog{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:11px}
+.logRow{display:flex;align-items:center;gap:10px;font-size:12.5px}
+.logRow .roleAvatar{width:22px;height:22px;font-size:9px}
+.logTime{color:var(--muted);font-size:11px;margin-left:auto;white-space:nowrap;flex:none}
+</style>
+
+<div id="top"></div>
+<div id="stage"></div>
+
+<script>
+/* ===================== helpers ===================== */
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const money=n=>'$'+Math.round(n).toLocaleString('en-US');
+const fmtK=n=>'$'+Math.round(n/1000)+'k';
+const nf=n=>Math.round(n).toLocaleString('en-US');
+const icon=(n,c='')=>`<svg class="ic ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+function btn(label,o={}){return `<button type="${o.submit?'submit':'button'}" class="btn ${o.kind||''} ${o.sm?'sm':''}" ${o.act?`data-act="${o.act}"`:''} ${o.data||''} ${o.disabled?'disabled':''}>${o.icon?icon(o.icon):''}${label}</button>`;}
+function pill(label,cls,act){return `<button type="button" class="${cls}" data-act="${act}">${label}</button>`;}
+
+/* ===================== mock inventory ===================== */
+const HOODS={'Oak Park':[615000,22],'Cedar Grove':[590000,29],'Westgate':[585000,19],'Linden Hills':[560000,25],'Riverside':[540000,15],'Hillcrest':[680000,34],'Downtown':[520000,12]};
+const STREETS=['Elm','Ash','Willow','Juniper','Aspen','Chestnut','Hawthorn','Magnolia','Sycamore','Laurel','Poplar','Spruce','Alder','Beacon','Harbor','Summit','Garden','Meadow','Prairie','Ridge'],SUF=['St','Ave','Ln','Ct','Dr','Way','Pl','Rd'];
+function rng(s){return()=>(s=(s*16807)%2147483647)/2147483647;}
+const DATA=(()=>{const r=rng(20261001),out=[],hs=Object.keys(HOODS);let id=1;
+ for(let i=0;i<56;i++){const hood=hs[i%hs.length],[base,com]=HOODS[hood],urban=hood==='Downtown'||hood==='Riverside';
+  const type=urban?(r()<.65?'Condo':'Townhouse'):(r()<.8?'Single-family':'Townhouse');
+  let beds=type==='Condo'?1+Math.floor(r()*3):2+Math.floor(r()*4);
+  let price=Math.round((base*(.8+r()*.42)+(beds-3)*28000)/1000)*1000;
+  let sqft=Math.round((type==='Condo'?650+beds*320:950+beds*360+r()*420)/10)*10;
+  let garage=type==='Condo'?r()<.35:r()<.72,yard=type==='Condo'?false:r()<.68,office=r()<.42;
+  let commute=Math.max(8,com+Math.round((r()-.5)*14));
+  const hoa=type==='Condo'?260+Math.round(r()*22)*10:type==='Townhouse'?(r()<.5?120:0):(r()<.15?45:0);
+  const highway=(hood==='Hillcrest'&&r()<.5)||r()<.05;
+  const num=100+Math.floor(r()*4800),st=STREETS[Math.floor(r()*STREETS.length)],sf=SUF[Math.floor(r()*SUF.length)];
+  const baths=Math.max(1,beds-1+(r()<.5?.5:0)),dom=1+Math.floor(r()*35);
+  out.push({id:id++,addr:`${num} ${st} ${sf}${type==='Condo'?' #'+(2+Math.floor(r()*7))+'0'+(1+Math.floor(r()*4)):''}`,hood,price,beds,baths,sqft,hoa,commute,type,garage,yard,office,highway,dom,tone:i%6});}
+ return out;})();
+
+/* ===================== search engine ===================== */
+const FEAT_LABEL={garage:'Garage',yard:'Yard',office:'Home office'};
+function emptyCriteria(){return{priceMin:null,priceMax:null,areas:[],types:[],bedsMin:null,sqftMin:null,sqftMax:null,commuteMax:null,hoaMax:null,features:[],noHighway:false};}
+function baselineCriteria(){return{priceMin:550000,priceMax:650000,hoaMax:250,areas:['Oak Park','Cedar Grove','Westgate'],types:['Single-family','Townhouse'],bedsMin:4,sqftMin:1700,sqftMax:2600,commuteMax:30,noHighway:true,features:['garage','yard','office']};}
+function priceLabel(c){if(c.priceMin==null&&c.priceMax==null)return'Any budget';if(c.priceMin&&c.priceMax)return`${fmtK(c.priceMin)}–${fmtK(c.priceMax)}`;if(c.priceMax)return`Up to ${fmtK(c.priceMax)}`;return`From ${fmtK(c.priceMin)}`;}
+function sqftLabel(c){if(c.sqftMin==null&&c.sqftMax==null)return'Any size';if(c.sqftMin&&c.sqftMax)return`${nf(c.sqftMin)}–${nf(c.sqftMax)} sqft`;if(c.sqftMin)return`${nf(c.sqftMin)}+ sqft`;return`Up to ${nf(c.sqftMax)} sqft`;}
+const FILTERS=[
+ {k:'price',on:c=>c.priceMin!=null||c.priceMax!=null,test:(l,c)=>(c.priceMin==null||l.price>=c.priceMin)&&(c.priceMax==null||l.price<=c.priceMax),label:priceLabel,why:(l,c)=>c.priceMax!=null&&l.price>c.priceMax?`${fmtK(l.price-c.priceMax)} over budget`:`${fmtK(c.priceMin-l.price)} under the minimum`},
+ {k:'areas',on:c=>c.areas.length>0,test:(l,c)=>c.areas.includes(l.hood),label:c=>c.areas.join(' or '),why:l=>`In ${l.hood}, not a chosen area`},
+ {k:'types',on:c=>c.types.length>0,test:(l,c)=>c.types.includes(l.type),label:c=>c.types.join(' or '),why:l=>`${l.type}, not a chosen type`},
+ {k:'beds',on:c=>!!c.bedsMin,test:(l,c)=>l.beds>=c.bedsMin,label:c=>`${c.bedsMin}+ bedrooms`,why:l=>`${l.beds} bedrooms`},
+ {k:'sqft',on:c=>c.sqftMin!=null||c.sqftMax!=null,test:(l,c)=>(c.sqftMin==null||l.sqft>=c.sqftMin)&&(c.sqftMax==null||l.sqft<=c.sqftMax),label:sqftLabel,why:l=>`${nf(l.sqft)} sqft`},
+ {k:'commute',on:c=>!!c.commuteMax,test:(l,c)=>l.commute<=c.commuteMax,label:c=>`Commute ≤ ${c.commuteMax} min`,why:l=>`${l.commute} min commute`},
+ {k:'hoa',on:c=>c.hoaMax!=null,test:(l,c)=>l.hoa<=c.hoaMax,label:c=>`HOA ≤ $${c.hoaMax}`,why:l=>`$${l.hoa}/mo HOA`},
+ {k:'garage',on:c=>c.features.includes('garage'),test:l=>l.garage,label:()=>'Garage required',why:()=>'No garage'},
+ {k:'yard',on:c=>c.features.includes('yard'),test:l=>l.yard,label:()=>'Yard required',why:()=>'No yard'},
+ {k:'office',on:c=>c.features.includes('office'),test:l=>l.office,label:()=>'Home office required',why:()=>'No office / den'},
+ {k:'highway',on:c=>c.noHighway,test:l=>!l.highway,label:()=>'Away from the highway',why:()=>'Near the highway'}];
+function runSearch(c){const active=FILTERS.filter(f=>f.on(c));
+ const results=DATA.filter(l=>active.every(f=>f.test(l,c)));
+ const near=DATA.filter(l=>!results.includes(l)).map(l=>{const fails=active.filter(f=>!f.test(l,c));return fails.length===1?{l,f:fails[0]}:null;}).filter(Boolean);
+ return{results,near,active};}
+
+/* ===================== utterance parser ===================== */
+function extractNums(t){const out=[],rx=/\$?(\d{1,3}(?:,\d{3})+|\d+(?:\.\d+)?)\s*(k|m|mil|thousand|million)?\b/g;let x;while((x=rx.exec(t))){let v=parseFloat(x[1].replace(/,/g,''));const u=x[2];if(u==='k'||u==='thousand')v*=1e3;else if(u)v*=1e6;out.push({v,i:x.index,end:x.index+x[0].length,u:!!u});}return out;}
+const NEG=/\b(no|not|don'?t|doesn'?t|without|skip|except|exclude|avoid|drop|away from)\b/;
+function negatedBefore(t,idx){return NEG.test(t.slice(Math.max(0,idx-26),idx));}
+function parseUtterance(raw,prevC){
+ const touched=new Set();
+ if(/\b(start over|reset|clear( all)? filters|new search)\b/i.test(raw))return{criteria:emptyCriteria(),changes:['cleared all filters'],reset:true,touched:FILTERS.map(f=>f.k)};
+ const c=JSON.parse(JSON.stringify(prevC)),changes=[];
+ const t=' '+raw.toLowerCase().replace(/[’']/g,"'")+' ';
+
+ if(/\$|\bprice\b|\bbudget\b|\bafford\b|\bspend\b|\d+\s*(k|thousand|million|m)\b/.test(t)){
+  const nums=extractNums(t).map(n=>(!n.u&&n.v<5000)?{...n,v:n.v*1000}:n).filter(n=>n.v>=100000&&n.v<=5000000);
+  if(nums.length>=2&&/^\s*(to|-|–|and)\s*$/.test(t.slice(nums[0].end,nums[1].i))){
+   c.priceMin=Math.min(nums[0].v,nums[1].v);c.priceMax=Math.max(nums[0].v,nums[1].v);changes.push(`budget ${fmtK(c.priceMin)}–${fmtK(c.priceMax)}`);touched.add('price');
+  }else if(nums.length){
+   for(const n of nums){const pre=t.slice(Math.max(0,n.i-28),n.i);
+    const dir=/(at least|over|above|from|minimum|more than|starting at)\s*$/.test(pre)?'min':/(under|below|up to|max|no more than|at most|less than|cap(?:ped)? at|tops? out at|budget of)\s*$/.test(pre)?'max':'max';
+    if(dir==='min'){c.priceMin=n.v;changes.push(`budget from ${fmtK(n.v)}`);}else{c.priceMax=n.v;changes.push(`budget up to ${fmtK(n.v)}`);}touched.add('price');}
+  }}
+
+ for(const h of Object.keys(HOODS)){const j=t.indexOf(h.toLowerCase());if(j<0)continue;
+  if(negatedBefore(t,j)){if(c.areas.includes(h)){c.areas=c.areas.filter(x=>x!==h);changes.push(`dropped ${h}`);touched.add('areas');}}
+  else if(!c.areas.includes(h)){c.areas.push(h);changes.push(`added ${h}`);touched.add('areas');}}
+
+ const TYPES={'Single-family':/single[- ]family|detached/,'Townhouse':/town ?houses?|row ?houses?/,'Condo':/condos?|condominiums?|apartments?/};
+ for(const[ty,rx]of Object.entries(TYPES)){const m=t.match(rx);if(!m)continue;if(negatedBefore(t,m.index)){c.types=c.types.filter(x=>x!==ty);changes.push(`excluded ${ty.toLowerCase()}s`);touched.add('types');}else if(!c.types.includes(ty)){c.types.push(ty);changes.push(`type ${ty.toLowerCase()}`);touched.add('types');}}
+
+ const bm=t.match(/(\d+)\s*\+?\s*(?:bed(?:room)?s?|br)\b/);if(bm){c.bedsMin=+bm[1];changes.push(`${bm[1]}+ bedrooms`);touched.add('beds');}
+
+ if(/sqft|square\s*f(?:ee|oo)t|sq\.?\s*ft/.test(t)){
+  const ns=extractNums(t).map(n=>n.v).filter(v=>v>=400&&v<=8000);
+  if(ns.length>=2){c.sqftMin=Math.min(...ns);c.sqftMax=Math.max(...ns);changes.push(`${nf(c.sqftMin)}–${nf(c.sqftMax)} sqft`);touched.add('sqft');}
+  else if(ns.length){const pre=t.slice(0,t.indexOf(String(ns[0])));const isMax=/(under|below|up to|max|no more than|less than)\s*$/.test(pre.slice(-24));
+   if(isMax){c.sqftMax=ns[0];changes.push(`up to ${nf(ns[0])} sqft`);}else{c.sqftMin=ns[0];changes.push(`at least ${nf(ns[0])} sqft`);}touched.add('sqft');}}
+
+ const cm=t.match(/(\d+)\s*[- ]?min(?:ute)?s?\b.*?(?:commute|drive)|(?:commute|drive).*?(\d+)\s*[- ]?min(?:ute)?s?\b/);
+ if(cm){c.commuteMax=+(cm[1]||cm[2]);changes.push(`commute ≤ ${c.commuteMax} min`);touched.add('commute');}
+
+ if(/\bhoa\b/.test(t)){if(/\bno hoa\b/.test(t)){c.hoaMax=0;changes.push('no HOA');touched.add('hoa');}else{const m=t.match(/hoa[^\d]{0,12}(\d+)/);if(m){c.hoaMax=+m[1];changes.push(`HOA ≤ $${m[1]}`);touched.add('hoa');}}}
+
+ const FEAT={garage:/garage|parking/,yard:/\byard\b|backyard|garden/,office:/\boffice\b|\bden\b|home office|study/};
+ for(const[f,rx]of Object.entries(FEAT)){const m=t.match(rx);if(!m)continue;
+  if(negatedBefore(t,m.index)){if(c.features.includes(f)){c.features=c.features.filter(x=>x!==f);changes.push(`${FEAT_LABEL[f].toLowerCase()} no longer required`);touched.add(f);}}
+  else if(!c.features.includes(f)){c.features.push(f);changes.push(`needs a ${FEAT_LABEL[f].toLowerCase()}`);touched.add(f);}}
+
+ if(/highway|freeway|interstate|i-?94/.test(t)){
+  if(/(fine|ok|okay|don'?t mind|doesn'?t matter|no problem)/.test(t)){c.noHighway=false;changes.push('highway is fine now');}
+  else{c.noHighway=true;changes.push('avoiding the highway');}touched.add('highway');}
+
+ return{criteria:c,changes,reset:false,touched:[...touched]};
+}
+
+/* ===================== near-match summary ===================== */
+function topBlocker(near){const by={};for(const n of near)by[n.f.k]=(by[n.f.k]||0)+1;
+ const top=Object.entries(by).sort((a,b)=>b[1]-a[1])[0];if(!top)return null;
+ const f=FILTERS.find(x=>x.k===top[0]);return{key:top[0],count:top[1],label:f.k};}
+function relax(criteria,key){const c=JSON.parse(JSON.stringify(criteria));
+ if(key==='sqft'){if(c.sqftMin)c.sqftMin=Math.max(0,c.sqftMin-300);}
+ else if(key==='price'){if(c.priceMax)c.priceMax=Math.round(c.priceMax+50000);}
+ else if(key==='commute'){if(c.commuteMax)c.commuteMax+=10;}
+ else if(key==='garage'||key==='yard'||key==='office'){c.features=c.features.filter(x=>x!==key);}
+ else if(key==='highway'){c.noHighway=false;}
+ else if(key==='beds'){if(c.bedsMin)c.bedsMin=Math.max(1,c.bedsMin-1);}
+ else if(key==='areas'){c.areas=[];}
+ else if(key==='types'){c.types=[];}
+ else if(key==='hoa'){c.hoaMax=null;}
+ return c;}
+const BLOCK_LABEL={price:'the budget',areas:'the chosen areas',types:'the home type',beds:'the bedroom minimum',sqft:'the size minimum',commute:'the commute limit',hoa:'the HOA cap',garage:'the garage requirement',yard:'the yard requirement',office:'the office requirement',highway:'avoiding the highway'};
+
+function summarize(parsed,res){
+ const{changes,reset}=parsed;
+ if(reset)return`Cleared everything. Showing all ${DATA.length} homes.`;
+ const head=changes.length?`Got it — ${changes.join(', ')}.`:`I didn't catch a new filter in that.`;
+ if(res.results.length>0)return`${head} <b>${res.results.length}</b> home${res.results.length===1?'':'s'} match now.`;
+ const top=topBlocker(res.near);
+ if(top)return`${head} No homes match all of that. <b>${top.count}</b> ${top.count===1?'is':'are'} close — only missing on ${esc(BLOCK_LABEL[top.key])}.`;
+ return`${head} No homes match, and nothing is close on just one criterion — try loosening a couple of filters.`;
+}
+
+/* ===================== shared result markup ===================== */
+function listingCardBig(l){
+ const feats=[l.garage&&'garage',l.yard&&'yard',l.office&&'office'].filter(Boolean);
+ return `<article class="listingCardBig"><div class="ph t${l.tone}"></div><div class="body">
+  <div class="row" style="justify-content:space-between"><span class="price num">${money(l.price)}</span>${feats.length?`<span class="featTags" title="${feats.join(', ')}">${feats.map(f=>icon(f==='garage'?'car':f==='yard'?'tree':'desk','sm')).join('')}</span>`:''}</div>
+  <span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.type}</span>
+  <span class="small muted">${esc(l.addr)}, ${l.hood} · ${l.commute} min commute</span></div></article>`;
+}
+function nearList(near,c){
+ const top=topBlocker(near);
+ return `<div class="col" style="gap:0">${near.slice(0,4).map(n=>`<div class="nearRow"><div class="ph t${n.l.tone}" style="width:40px;height:30px;border-radius:6px"></div><div class="col grow" style="gap:0"><span class="s13 m">${money(n.l.price)} · ${esc(n.l.addr)}</span><span class="small muted">${n.l.hood} · ${n.l.beds} bd · ${nf(n.l.sqft)} sqft</span></div><span class="why">${esc(n.f.why(n.l,c))}</span></div>`).join('')}
+ </div>${top?`<div class="row" style="padding-top:8px">${btn(`Loosen ${BLOCK_LABEL[top.key]}`,{kind:'sec',sm:1,act:'relax',data:`data-k="${top.key}"`})}</div>`:''}`;
+}
+function resultsGrid(res,c,opts={}){
+ if(res.results.length===0){
+  return `<div class="zeroBox">${icon('help')}<b>No exact matches.</b>${res.near.length?nearList(res.near,c):`<span class="s13 sub">Nothing is close on a single criterion — try loosening more than one.</span>`}</div>`;
+ }
+ const shown=opts.limit?res.results.slice(0,opts.limit):res.results;
+ return `<div class="gridBig">${shown.map(listingCardBig).join('')}</div>`
+  +(res.results.length>shown.length?`<button class="btn sec sm" style="margin-top:12px" data-act="show-all">Show all ${res.results.length}</button>`:'');
+}
+
+/* ===================== preferences — shared field controls ===================== */
+const PREF_FIELD_LABEL={price:'Price range',hoa:'Max HOA / mo',areas:'Areas',commute:'Max commute',highway:'Avoid the highway',types:'Home type',beds:'Bedrooms',sqft:'Size (sqft)',garage:'Garage',yard:'Yard',office:'Home office'};
+function agoShort(t){const m=Math.round((Date.now()-t)/60000);if(m<1)return'just now';if(m<60)return m+'m ago';return Math.round(m/60)+'h ago';}
+function pendingBadge(key){return S.pendingKeys[key]?`<span class="pendingDot" title="Changed by voice — not saved yet"></span>`:'';}
+function fieldDisplayValue(key,c=S.criteria){
+ if(key==='price')return priceLabel(c);
+ if(key==='hoa')return c.hoaMax!=null?`$${nf(c.hoaMax)} max`:'Any';
+ if(key==='areas')return c.areas.length?c.areas.join(', '):'Any';
+ if(key==='commute')return c.commuteMax?`≤ ${c.commuteMax} min`:'Any';
+ if(key==='highway')return c.noHighway?'Avoiding':'OK';
+ if(key==='types')return c.types.length?c.types.join(', '):'Any';
+ if(key==='beds')return c.bedsMin?c.bedsMin+'+':'Any';
+ if(key==='sqft')return sqftLabel(c);
+ return c.features.includes(key)?'Required':'Optional';}
+function fieldCtl(key){
+ if(key==='price')return ctlPrice();
+ if(key==='hoa')return ctlHoa();
+ if(key==='areas')return ctlAreas();
+ if(key==='commute')return ctlCommute();
+ if(key==='highway')return ctlHighway();
+ if(key==='types')return ctlTypes();
+ if(key==='beds')return ctlBeds();
+ if(key==='sqft')return ctlSqft();
+ return ctlFeat(key);}
+function ctlPrice(){const c=S.criteria;return `<div class="pfInline"><input class="pfNum" data-pf="priceMin" value="${c.priceMin?nf(c.priceMin):''}" placeholder="Min" inputmode="numeric"><span class="muted">–</span><input class="pfNum" data-pf="priceMax" value="${c.priceMax?nf(c.priceMax):''}" placeholder="Max" inputmode="numeric"></div>`;}
+function ctlHoa(){const c=S.criteria;return `<input class="pfNum" data-pf="hoaMax" value="${c.hoaMax!=null?nf(c.hoaMax):''}" placeholder="No limit" inputmode="numeric">`;}
+function ctlAreas(){const c=S.criteria;return `<div class="chips">${Object.keys(HOODS).map(h=>`<button class="pfChip" data-act="pf-area" data-h="${h}" aria-pressed="${c.areas.includes(h)}">${h}</button>`).join('')}</div>`;}
+function ctlTypes(){const c=S.criteria;return `<div class="chips">${['Single-family','Townhouse','Condo'].map(ty=>`<button class="pfChip" data-act="pf-type" data-t="${ty}" aria-pressed="${c.types.includes(ty)}">${ty}</button>`).join('')}</div>`;}
+function ctlBeds(){const c=S.criteria;return `<span class="pfStepper"><button type="button" data-act="pf-beds-step" data-d="-1" aria-label="Fewer bedrooms">${icon('minus','sm')}</button><span>${c.bedsMin?c.bedsMin+'+':'Any'}</span><button type="button" data-act="pf-beds-step" data-d="1" aria-label="More bedrooms">${icon('plus','sm')}</button></span>`;}
+function ctlCommute(){const c=S.criteria;return `<span class="pfStepper"><button type="button" data-act="pf-commute-step" data-d="-5" aria-label="Shorter commute">${icon('minus','sm')}</button><span>${c.commuteMax?c.commuteMax+' min':'Any'}</span><button type="button" data-act="pf-commute-step" data-d="5" aria-label="Longer commute">${icon('plus','sm')}</button></span>`;}
+function ctlSqft(){const c=S.criteria;return `<div class="pfInline"><input class="pfNum" data-pf="sqftMin" value="${c.sqftMin?nf(c.sqftMin):''}" placeholder="Min" inputmode="numeric"><span class="muted">–</span><input class="pfNum" data-pf="sqftMax" value="${c.sqftMax?nf(c.sqftMax):''}" placeholder="Max" inputmode="numeric"></div>`;}
+function ctlHighway(){const c=S.criteria;return `<button type="button" class="pfToggle" role="switch" aria-checked="${!!c.noHighway}" data-act="pf-highway" aria-label="Avoid the highway"></button>`;}
+function ctlFeat(f){const c=S.criteria;return `<button type="button" class="pfToggle" role="switch" aria-checked="${c.features.includes(f)}" data-act="pf-feat" data-f="${f}" aria-label="${PREF_FIELD_LABEL[f]} required"></button>`;}
+function saveBarHTML(){
+ const n=Object.keys(S.pendingKeys).length;
+ return `<div class="saveBar">${n?btn(`Save ${n} change${n>1?'s':''}`,{icon:'check',act:'save-prefs'}).replace('class="btn ','class="btn saveBtn '):`<span class="savedTick s13 row" style="gap:5px">${icon('check','sm')}Saved</span>`}${S.changeHistory.length?`<span class="histNote">${agoShort(S.changeHistory[0].at)}</span>`:''}</div>`;
+}
+
+/* ---- compact field row: one line (label + value), click to expand the real control.
+      Shared by the card panel (L1, L3) and the linked panel (L4, which also adds the source quote). ---- */
+function pfRowCompact(key,opts={}){
+ const open=S.expandedField===key,pend=S.pendingKeys[key];
+ const cls=`pfRowC ${pend?'pending':''} ${open?'open':''} ${S.flashKey===key?'flash':''}`;
+ const quote=opts.linked&&pend?(q=>`<button type="button" class="pfQuoteBtn" data-act="jump-msg" data-i="${pend.msgIdx}">💬 “${esc(q.length>46?q.slice(0,44)+'…':q)}”</button>`)(pend.quote):'';
+ return `<div class="${cls}" id="pf-row-${key}">
+  <button type="button" class="pfRowHead" data-act="ribbon-toggle" data-k="${key}" aria-expanded="${open}">
+   <span class="pfLbl">${PREF_FIELD_LABEL[key]}${pendingBadge(key)}</span>
+   <span class="pfVal">${esc(fieldDisplayValue(key))}</span>
+   ${icon(open?'chevU':'chevD','sm')}
+  </button>
+  ${open?`<div class="pfRowCtl">${fieldCtl(key)}</div>`:''}
+  ${quote}</div>`;
+}
+function prefCardSet(opts={}){
+ const card=(t,keys)=>`<div class="pfCard"><div class="pfCardTitle">${t}</div>${keys.map(k=>pfRowCompact(k,opts)).join('')}</div>`;
+ return card('Budget',['price','hoa'])
+  +card('Location',['areas','commute','highway'])
+  +card('Property',['types','beds','sqft'])
+  +card('Features',['garage','yard','office']);
+}
+function prefsPanelFull(){
+ return `<div class="pfHeader"><div class="col" style="gap:0"><span class="who">Alex Kim</span><span class="sub">Buyer preferences</span></div>${saveBarHTML()}</div>${prefCardSet()}`;
+}
+
+/* ---- ribbon panel (L2) ---- */
+function ribbonHTML(){
+ const c=S.criteria,n=Object.keys(S.pendingKeys).length;
+ const complex=[['price','Price',priceLabel(c),ctlPrice],['hoa','HOA',c.hoaMax!=null?`$${nf(c.hoaMax)} max`:'Any',ctlHoa],['areas','Areas',c.areas.length?c.areas.join(', '):'Any',ctlAreas],['commute','Commute',c.commuteMax?`≤ ${c.commuteMax} min`:'Any',ctlCommute],['types','Type',c.types.length?c.types.join(', '):'Any',ctlTypes],['beds','Beds',c.bedsMin?c.bedsMin+'+':'Any',ctlBeds],['sqft','Size',sqftLabel(c),ctlSqft]];
+ const toggles=[['highway','Avoid highway',c.noHighway],['garage','Garage',c.features.includes('garage')],['yard','Yard',c.features.includes('yard')],['office','Office',c.features.includes('office')]];
+ const savePill=n?`<button type="button" class="ribbonPill toggle on" style="background:var(--accent)" data-act="save-prefs"><span class="rpVal">${icon('check','sm')}Save ${n}</span></button>`:'';
+ const pills=savePill
+  +complex.map(([key,label,val])=>`<button type="button" class="ribbonPill ${S.expandedField===key?'open':''} ${S.pendingKeys[key]?'pending':''}" data-act="ribbon-toggle" data-k="${key}"><span class="rpLbl">${label}${pendingBadge(key)}</span><span class="rpVal">${esc(val)}</span></button>`).join('')
+  +toggles.map(([key,label,on])=>`<button type="button" class="ribbonPill toggle ${on?'on':''} ${S.pendingKeys[key]?'pending':''}" data-act="${key==='highway'?'pf-highway':'pf-feat'}" ${key!=='highway'?`data-f="${key}"`:''}>${pendingBadge(key)}${label}</button>`).join('');
+ const activeField=complex.find(x=>x[0]===S.expandedField);
+ const expand=activeField?`<div class="ribbonExpand"><div class="row" style="justify-content:space-between"><span class="s13 b">${activeField[1]}</span><button type="button" class="iconbtn sm" data-act="ribbon-toggle" data-k="${activeField[0]}" aria-label="Close">${icon('x','sm')}</button></div>${activeField[3]()}</div>`:'';
+ return `<div class="ribbonRow">${pills}</div>${expand}`;
+}
+
+/* ===================== state ===================== */
+const QUICK=[
+ 'Let\'s raise the budget to $700,000.',
+ 'Drop Westgate, but add Linden Hills.',
+ 'At least 2,600 square feet now.',
+ 'We don\'t need the home office anymore.',
+ 'Actually, the highway doesn\'t matter anymore.',
+ 'Start over.'];
+function initState(){return{layout:'L1',criteria:baselineCriteria(),showAll:false,draft:'',listening:false,
+ pendingKeys:{},changeHistory:[],expandedField:null,openCategory:null,chatOpen:false,chatFloatOpen:true,flashKey:null,flashMsg:null,
+ voiceListening:false,voiceInterim:'',ptOpen:false,ptText:'',ptListening:false,
+ messages:[{who:'sys',html:`Here’s where <b>Alex Kim’s</b> preferences stand today. Tell me what’s changed — I’ll keep the match count live, and you can Save when it’s right.`}]};}
+let S=initState();
+let THEME='light';try{THEME=localStorage.getItem('scl-theme')||'light';}catch(e){}
+document.documentElement.dataset.theme=THEME;
+
+const LAYOUTS={
+ L1:{label:'L1 · Preferences on top',desc:'Preferences sit as four compact cards across the top. Results fill almost the whole page below. The assistant is a floating chat bubble — open it to dictate, close it to see the full board; dictating still updates the cards above live.'},
+ L2:{label:'L2 · Filter ribbon',desc:'Chat shrinks to a narrow rail. Preferences become a single-row “active filters” ribbon above the board, like a listings site — click a pill to edit it. Results get most of the screen.'},
+ L3:{label:'L3 · Chat docked on top',desc:'The conversation becomes a slim strip at the top — last exchange plus the input, expandable for full history — freeing the whole body for a two-column Preferences + Results layout.'},
+ L4:{label:'L4 · Linked feed',desc:'Chat and preferences share one panel instead of living apart: the live profile is pinned above the conversation. Every reply tags exactly which fields it just touched, and every changed field shows the phrase that set it — click either one to jump to and flash the other, so the cause and the effect are never in doubt.'},
+ L5:{label:'L5 · One-tap AI voice',desc:'No chat panel at all: one clearly-AI, clearly-voice button. Tap it and just talk to the client\'s preference cards above — each phrase is heard, parsed and applied the moment you pause, live, with no typing and no extra window.'},
+ L6:{label:'L6 · Accordion cards',desc:'No results here — just preferences, as a centered column meant to sit inside RealtorHelper\'s own layout. Four category cards (Budget, Location, Property info, Features); tapping one opens it in place and closes whichever was open.'},
+ L7:{label:'L7 · Accordion list',desc:'Same one-at-a-time accordion, flatter: a numbered list with +/− instead of cards, chips previewing each section\'s current values when collapsed, and a two-column field grid once it\'s open.'},
+ L8:{label:'L8 · Agent ↔ client collaboration',desc:'A static walkthrough, not a working screen: Maya\'s view and Alex\'s view of the same preferences, side by side, with three example states already set up — a client suggestion waiting on a locked field, a client\'s direct edit the agent just sees, and a new idea: the agent suggesting a change to the client. One shared activity log feeds both sides.'}};
+
+/* ===================== render ===================== */
+function render(){
+ const act=document.activeElement,aid=act&&act.id,sel=aid&&act.selectionStart!=null?[act.selectionStart,act.selectionEnd]:null;
+ const scrolls={};document.querySelectorAll('[data-scroll]').forEach(el=>scrolls[el.dataset.scroll]=el.scrollTop);
+ document.getElementById('top').innerHTML=topBar();
+ const RENDERERS={L1:renderL1,L2:renderL2,L3:renderL3,L4:renderL4,L5:renderL5,L6:renderL6,L7:renderL7,L8:renderL8};
+ document.getElementById('stage').innerHTML=RENDERERS[S.layout]();
+ document.querySelectorAll('[data-scroll]').forEach(el=>{el.scrollTop=el.dataset.autoscroll!=null?el.scrollHeight:(scrolls[el.dataset.scroll]||0);});
+ if(aid){const el=document.getElementById(aid);if(el){el.focus();if(sel&&el.setSelectionRange)try{el.setSelectionRange(sel[0],sel[1]);}catch(e){}}}
+}
+function topBar(){
+ return `<div class="brand"><span class="logo">${icon('house')}</span>Split-view layout concepts</div>
+ <div class="seg" role="group" aria-label="Layout">${Object.entries(LAYOUTS).map(([k,v])=>`<button data-act="layout" data-v="${k}" aria-pressed="${S.layout===k}">${v.label}</button>`).join('')}</div>
+ <span class="desc">${LAYOUTS[S.layout].desc}</span>
+ ${btn('Reset demo',{kind:'ghost',sm:1,act:'reset'})}`;
+}
+function composer(idPrefix){
+ return `<form class="composer" data-form="say" id="${idPrefix}-form"><input id="${idPrefix}-input" placeholder="Tell it what the client wants…" value="${esc(S.draft)}" data-input="draft" autocomplete="off"><button type="button" class="iconbtn ${S.listening?'on':''}" data-act="mic" aria-label="Dictate" title="Dictate">${icon('mic')}</button><button type="submit" class="send" aria-label="Send" ${S.draft.trim()?'':'disabled'}>${icon('send','sm')}</button></form>
+ <div class="quickRow">${QUICK.map(q=>`<button type="button" class="chip ghost" data-act="quick" data-q="${esc(q)}">${esc(q.length>40?q.slice(0,38)+'…':q)}</button>`).join('')}</div>`;
+}
+function chatThread(idPrefix){
+ return `<div class="chatBody" data-scroll="${idPrefix}" data-autoscroll="1">${S.messages.map(m=>m.who==='agent'?`<div class="bubble agent">${esc(m.text)}</div>`:`<div class="bubble sys">${m.html}</div>`).join('')}</div>`;
+}
+
+/* ===================== L1 — preferences on top, results dominant, chat floats ===================== */
+function renderL1(){
+ const res=runSearch(S.criteria);
+ const nPend=Object.keys(S.pendingKeys).length;
+ const fab=`<button type="button" class="chatFab" data-act="chat-float-toggle" aria-label="${S.chatFloatOpen?'Close':'Open'} search assistant">${icon(S.chatFloatOpen?'x':'msg','lg')}${(!S.chatFloatOpen&&nPend)?`<span class="fabBadge">${nPend}</span>`:''}</button>`;
+ const floatPanel=S.chatFloatOpen?`<div class="chatFloat">
+  <div class="paneHead">${icon('msg')}Search assistant<span class="grow"></span><button type="button" class="iconbtn sm" data-act="chat-float-toggle" aria-label="Close">${icon('x','sm')}</button></div>
+  ${chatThread('L1f')}
+  <div class="chatFoot">${composer('l1f')}</div>
+ </div>`:'';
+ return `<div class="rootL1">
+ <div class="prefsStripL1">
+  <div class="pfHeader"><div class="col" style="gap:0"><span class="who">Alex Kim</span><span class="sub">Buyer preferences</span></div>${saveBarHTML()}</div>
+  <div class="prefsCardsRow">${prefCardSet()}</div>
+ </div>
+ <div class="resultsPaneL1"><div class="resultsHeadL1"><span class="countBig num">${res.results.length}</span><span class="sub s13">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+  ${resultsGrid(res,S.criteria,{limit:S.showAll?null:16})}</div>
+ ${fab}${floatPanel}
+ </div>`;
+}
+
+/* ===================== L2 — filter ribbon + narrow rail ===================== */
+function renderL2(){
+ const res=runSearch(S.criteria);
+ return `<div class="rootL2">
+ <div class="chatRailL2"><div class="paneHead">${icon('msg')}Assistant</div>
+  ${chatThread('L2')}
+  <div class="chatFoot">${composer('l2')}</div></div>
+ <div class="mainL2">
+  <div class="ribbonWrap">${ribbonHTML()}</div>
+  <div class="resultsHeadL2"><span class="countBig num">${res.results.length}</span><span class="sub s13">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+  <div class="resultsBodyL2">${resultsGrid(res,S.criteria,{limit:S.showAll?null:12})}</div>
+ </div>
+ </div>`;
+}
+
+/* ===================== L3 — chat docked on top ===================== */
+function renderL3(){
+ const res=runSearch(S.criteria);
+ const lastAgent=[...S.messages].reverse().find(m=>m.who==='agent');
+ const lastSys=[...S.messages].reverse().find(m=>m.who==='sys');
+ return `<div class="rootL3">
+ <div class="chatStripL3">
+  <div class="chatStripRow">
+   <button type="button" class="iconbtn ${S.listening?'on':''}" data-act="mic" aria-label="Dictate" title="Dictate">${icon('mic')}</button>
+   <div class="peekCol">${lastAgent?`<span class="peekLine agent">${esc(lastAgent.text)}</span>`:''}${lastSys?`<span class="peekLine">${lastSys.html.replace(/<[^>]+>/g,'')}</span>`:''}</div>
+   <form data-form="say" id="l3-form" style="flex:1;max-width:320px"><input id="l3-input" placeholder="Tell it what the client wants…" value="${esc(S.draft)}" data-input="draft" autocomplete="off" class="composer" style="padding:7px 12px"></form>
+   <button type="button" class="btn sec sm" data-act="chat-toggle">${S.chatOpen?'Hide history':`History (${S.messages.length})`}</button>
+  </div>
+  <div class="quickRowL3 quickRow">${QUICK.map(q=>`<button type="button" class="chip ghost" data-act="quick" data-q="${esc(q)}">${esc(q.length>40?q.slice(0,38)+'…':q)}</button>`).join('')}</div>
+  ${S.chatOpen?`<div class="chatHistoryPopL3">${S.messages.map(m=>m.who==='agent'?`<div class="bubble agent">${esc(m.text)}</div>`:`<div class="bubble sys">${m.html}</div>`).join('')}</div>`:''}
+ </div>
+ <div class="bodyL3">
+  <div class="prefsColL3">${prefsPanelFull()}</div>
+  <div class="resultsColL3"><div class="resultsHeadL3"><span class="countBig num">${res.results.length}</span><span class="sub s13">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+   ${resultsGrid(res,S.criteria,{limit:S.showAll?null:12})}</div>
+ </div>
+ </div>`;
+}
+
+/* ===================== L4 — linked feed ===================== */
+function sysBubbleL4(m,i){
+ const chips=(m.touched||[]).map(k=>`<button type="button" class="linkChip" data-act="jump-field" data-k="${k}">${PREF_FIELD_LABEL[k]}</button>`).join('');
+ return `<div class="bubble sys ${S.flashMsg===i?'flash':''}" id="msg-${i}">${m.html}${chips?`<div class="linkChips">${chips}</div>`:''}</div>`;
+}
+function renderL4(){
+ const res=runSearch(S.criteria);
+ return `<div class="rootL4">
+ <div class="feedPaneL4">
+  <div class="prefsBlockL4"><div class="pfHeader"><div class="col" style="gap:0"><span class="who">Alex Kim</span><span class="sub">Buyer preferences</span></div>${saveBarHTML()}</div>${prefCardSet({linked:true})}</div>
+  <div class="feedDividerL4">${icon('msg','sm')}Conversation — dictate below to change the preferences above</div>
+  <div class="chatScrollL4" data-scroll="L4" data-autoscroll="1">${S.messages.map((m,i)=>m.who==='agent'?`<div class="bubble agent ${S.flashMsg===i?'flash':''}" id="msg-${i}">${esc(m.text)}</div>`:sysBubbleL4(m,i)).join('')}</div>
+  <div class="chatFootL4">${composer('l4')}</div>
+ </div>
+ <div class="resultsPaneL4"><div class="row" style="align-items:baseline;gap:8px;padding-bottom:14px"><span class="countBig num">${res.results.length}</span><span class="sub s13">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+  ${resultsGrid(res,S.criteria,{limit:S.showAll?null:12})}</div>
+ </div>`;
+}
+
+/* ===================== L5 — one-tap AI voice ===================== */
+function renderL5(){
+ const res=runSearch(S.criteria);
+ const lastSys=[...S.messages].reverse().find(m=>m.who==='sys');
+ return `<div class="rootL1">
+ <div class="prefsStripL1">
+  <div class="pfHeader">
+   <div class="col" style="gap:0"><span class="who">Alex Kim</span><span class="sub">Buyer preferences</span></div>
+   <div class="row" style="gap:10px;flex-wrap:wrap">
+    ${saveBarHTML()}
+    <button type="button" class="aiMicBtn ${S.voiceListening?'on':''}" data-act="voice-toggle" aria-pressed="${S.voiceListening}">
+     <span class="aiMicIconWrap">${icon('mic','lg')}${icon('spark','sm')}</span>
+     <span>${S.voiceListening?'Listening…':'AI Voice'}</span>
+    </button>
+   </div>
+  </div>
+  ${S.voiceListening?`<div class="voiceInterim">${icon('mic','sm')}${S.voiceInterim?`“${esc(S.voiceInterim)}”`:'Listening for preferences…'}</div>`
+   :lastSys?`<div class="voiceStatus">${lastSys.html}</div>`:''}
+  <div class="prefsCardsRow">${prefCardSet({linked:true})}</div>
+ </div>
+ <div class="resultsPaneL1"><div class="resultsHeadL1"><span class="countBig num">${res.results.length}</span><span class="sub s13">home${res.results.length===1?'':'s'} match${res.results.length===1?'es':''} right now</span></div>
+  ${resultsGrid(res,S.criteria,{limit:S.showAll?null:16})}</div>
+ </div>`;
+}
+
+/* ===================== L6 / L7 — preferences-only accordion (no results on this page) ===================== */
+const CATEGORIES=[
+ {key:'budget',title:'Budget',icon:'wallet',fields:['price','hoa']},
+ {key:'location',title:'Location',icon:'pin',fields:['areas','commute','highway']},
+ {key:'property',title:'Property info',icon:'house',fields:['types','beds','sqft']},
+ {key:'features',title:'Features',icon:'tag',fields:['garage','yard','office']}];
+const TOGGLE_FIELDS=['highway','garage','yard','office'];
+function catSummary(fields,c=S.criteria){
+ const parts=fields.map(k=>fieldDisplayValue(k,c)).filter(v=>v&&v!=='Any'&&v!=='Optional'&&v!=='OK');
+ return parts.length?parts.join(' · '):'Open to anything';
+}
+function catPending(fields){return fields.some(k=>S.pendingKeys[k]);}
+function catTouched(cat,draft){return !!draft&&cat.fields.some(f=>draft.touched.includes(f));}
+function accFieldRow(key,draft){
+ if(draft&&draft.touched.includes(key)){
+  const oldV=fieldDisplayValue(key,S.criteria),newV=fieldDisplayValue(key,draft.draft);
+  return `<div class="accField">
+   <span class="accFieldLbl">${PREF_FIELD_LABEL[key]}<span class="changedTag">From your note</span></span>
+   <div class="ptDiffRow"><span class="ptDiffOld">${esc(oldV)}</span><span class="ptDiffNew">${esc(newV)}</span></div>
+  </div>`;
+ }
+ const val=fieldDisplayValue(key);
+ return `<div class="accField">
+  <span class="accFieldLbl">${PREF_FIELD_LABEL[key]}${pendingBadge(key)}${TOGGLE_FIELDS.includes(key)?`<span class="muted" style="font-weight:500;margin-left:auto">${esc(val)}</span>`:''}</span>
+  ${fieldCtl(key)}
+ </div>`;
+}
+function accHeader(){
+ return `<div class="accHead"><span class="who">Alex Kim’s preferences</span><span class="sub">Tap a category to edit it — opening one closes the others.</span></div>`;
+}
+
+/* ---- L6 only: update from a note (voice or text) — detect, highlight the changed categories, review, then Save or Cancel ---- */
+function ptDraft(){
+ const text=S.ptText.trim();if(!text)return null;
+ const parsed=parseUtterance(text,S.criteria);
+ return {text,draft:parsed.criteria,touched:parsed.touched,changes:parsed.changes};
+}
+function ptCardHTML(draft,changedCats){
+ const hasChanges=draft&&draft.touched.length>0;
+ return `<div class="ptCard">
+  <div class="row" style="gap:10px;flex-wrap:wrap">
+   <button type="button" class="aiMicBtn ${S.ptListening?'on':''}" data-act="pt-mic" aria-pressed="${S.ptListening}"><span class="aiMicIconWrap">${icon('mic')}${icon('spark','sm')}</span><span>${S.ptListening?'Listening… tap to stop':'AI Voice'}</span></button>
+   <span class="grow"></span>
+   ${btn('Clear',{kind:'ghost',sm:1,act:'pt-clear'})}
+  </div>
+  <textarea id="pt-input" class="ptTextarea" placeholder="e.g. “They can stretch the budget to $675k, and a home office is a must now.”" data-input="ptText">${esc(S.ptText)}</textarea>
+  ${!draft?'':hasChanges?`<div class="ptChips">${draft.changes.map(c=>`<span class="ptChip">${esc(c)}</span>`).join('')}</div>
+   <div class="ptReviewBar"><span class="s13 sub">${changedCats.length} categor${changedCats.length===1?'y':'ies'} will change — review ${changedCats.length===1?'it':'them'} below.</span><span class="grow"></span>${btn('Cancel',{kind:'ghost',sm:1,act:'pt-cancel'})}${btn(`Save ${draft.touched.length} change${draft.touched.length>1?'s':''}`,{sm:1,act:'pt-save',icon:'check'}).replace('class="btn ','class="btn saveBtn ')}</div>`
+   :`<span class="small muted">No changes detected in that note yet.</span>`}
+ </div>`;
+}
+function renderL6(){
+ const draft=ptDraft();
+ const changedCats=draft?CATEGORIES.filter(cat=>catTouched(cat,draft)):[];
+ const entry=(S.ptOpen||S.ptListening||S.ptText.trim())?ptCardHTML(draft,changedCats)
+  :`<div class="ptEntry"><button type="button" class="aiMicBtn" data-act="pt-mic"><span class="aiMicIconWrap">${icon('mic')}${icon('spark','sm')}</span><span>AI Voice</span></button><button type="button" class="link" data-act="pt-open">or type a note</button></div>`;
+ return `<div class="acc-wrap">${accHeader()}
+ ${entry}
+ <div class="col" style="gap:10px">
+ ${CATEGORIES.map(cat=>{
+  const open=S.openCategory===cat.key,pend=catPending(cat.fields),changed=catTouched(cat,draft);
+  const summaryC=changed?draft.draft:S.criteria;
+  return `<div class="accCat ${open?'open':''} ${pend&&!open?'pending':''} ${changed?'changed':''}">
+   <button type="button" class="accCatHead" data-act="acc-toggle" data-c="${cat.key}" aria-expanded="${open}">
+    <span class="accCatIcon">${icon(cat.icon)}</span>
+    <span class="col grow" style="gap:1px;min-width:0">
+     <span class="accCatTitle">${cat.title}${pend?`<span class="pendingDot" style="margin-left:6px" title="Changed by voice — not saved yet"></span>`:''}${changed?`<span class="changedTag">Changed</span>`:''}</span>
+     ${!open?`<span class="accCatSummary">${esc(catSummary(cat.fields,summaryC))}</span>`:''}
+    </span>
+    ${icon(open?'chevU':'chevD')}
+   </button>
+   ${open?`<div class="accCatBody">${cat.fields.map(k=>accFieldRow(k,draft)).join('')}</div>`:''}
+  </div>`;
+ }).join('')}
+ </div></div>`;
+}
+function renderL7(){
+ return `<div class="accFlatWrap"><div class="acc-wrap">${accHeader()}<div class="col" style="gap:0">
+ ${CATEGORIES.map((cat,i)=>{
+  const open=S.openCategory===cat.key,pend=catPending(cat.fields);
+  const chips=cat.fields.map(k=>{const v=fieldDisplayValue(k);return(v&&v!=='Any'&&v!=='Optional'&&v!=='OK')?`<span class="accFlatChip">${esc(v)}</span>`:'';}).join('');
+  return `<div class="accFlatCat ${open?'open':''}">
+   <button type="button" class="accFlatHead" data-act="acc-toggle" data-c="${cat.key}" aria-expanded="${open}">
+    <span class="accFlatNum">0${i+1}</span>
+    <span class="col grow" style="gap:5px;min-width:0">
+     <span class="accCatTitle">${cat.title}${pend?`<span class="pendingDot" style="margin-left:6px" title="Changed by voice — not saved yet"></span>`:''}</span>
+     ${!open?(chips?`<span class="accFlatChips">${chips}</span>`:`<span class="small muted">Open to anything</span>`):''}
+    </span>
+    <span class="accFlatPlus">${icon(open?'minus':'plus','sm')}</span>
+   </button>
+   ${open?`<div class="accFlatBody">${cat.fields.map(accFieldRow).join('')}</div>`:''}
+  </div>`;
+ }).join('')}
+ </div></div></div>`;
+}
+
+/* ===================== L8 — agent/client collaboration: static walkthrough, nothing is wired up ===================== */
+function collabFieldPlain(label,val){
+ return `<div class="collabField"><div class="collabFieldHead"><span class="collabFieldLbl">${esc(label)}</span><span class="collabFieldVal">${esc(val)}</span></div></div>`;
+}
+function renderL8(){
+ const c=S.criteria;
+ const priceNow=priceLabel(c),priceProposedByClient='$550,000–$700,000';
+ const commuteWas='≤ 30 min',commuteNow=c.commuteMax?`≤ ${c.commuteMax} min`:'Any';
+ const sqftNow=sqftLabel(c),sqftProposedByAgent='2,000–2,600 sqft';
+ const hoaVal=c.hoaMax!=null?`$${nf(c.hoaMax)} max`:'Any',areasVal=c.areas.join(', '),bedsVal=(c.bedsMin||1)+'+';
+ return `<div class="collabWrap">
+ <div class="accHead"><span class="who">How Maya and Alex share one preference profile</span><span class="sub">Static example only — nothing here actually applies or saves. It's meant to show the states, not drive them.</span></div>
+ <div class="collabLegend">
+  <span><span class="dot" style="background:var(--muted)"></span>Normal field — shared, nothing pending</span>
+  <span><span class="dot" style="background:var(--accent)"></span>Alex's direct edit or suggestion</span>
+  <span><span class="dot" style="background:#7C4DFF"></span>Maya's suggestion to Alex (new)</span>
+ </div>
+ <div class="collabCols">
+  <div class="collabPane">
+   <div class="collabPaneHead"><span class="roleAvatar agent">MC</span><div class="col" style="gap:0"><span class="b s13">Maya — agent view</span><span class="small muted">Sees every change Alex makes; can't silently overwrite a field Alex owns</span></div></div>
+   <div class="collabPaneBody">
+    <div class="collabCat"><div class="collabCatTitle">Budget</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Price range<span class="lockTag">${icon('lock','sm')}Locked by you</span></span></div>
+      <div class="suggBox"><span class="suggWho">Alex suggests</span>
+       <div class="row" style="gap:6px"><span class="ptDiffOld">${esc(priceNow)}</span><span class="ptDiffNew">${esc(priceProposedByClient)}</span></div>
+       <span class="suggWhy">“A few homes just over budget keep coming up — can we stretch it?”</span>
+       <div class="suggActions">${btn('Approve',{sm:1})}${btn('Decline',{sm:1,kind:'ghost'})}</div>
+      </div>
+     </div>
+     ${collabFieldPlain('Max HOA / mo',hoaVal)}
+    </div>
+    <div class="collabCat"><div class="collabCatTitle">Location</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Max commute</span><span class="pendingDot" title="Alex changed this"></span></div>
+      <div class="statusLine ok">${icon('check','sm')}Alex changed this — <span class="ptDiffOld">${esc(commuteWas)}</span> <span class="ptDiffNew">${esc(commuteNow)}</span> — already applied</div>
+      ${btn('Mark as reviewed',{sm:1,kind:'ghost'})}
+     </div>
+     ${collabFieldPlain('Areas',areasVal)}
+    </div>
+    <div class="collabCat"><div class="collabCatTitle">Property info</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Size (sqft)</span></div>
+      <div class="suggBox fromAgent"><span class="suggWho">You suggested</span>
+       <div class="row" style="gap:6px"><span class="ptDiffOld">${esc(sqftNow)}</span><span class="ptDiffNew">${esc(sqftProposedByAgent)}</span></div>
+       <span class="statusLine wait">${icon('msg','sm')}Waiting for Alex</span>
+      </div>
+     </div>
+     ${collabFieldPlain('Bedrooms',bedsVal)}
+    </div>
+   </div>
+  </div>
+  <div class="collabPane">
+   <div class="collabPaneHead"><span class="roleAvatar client">AK</span><div class="col" style="gap:0"><span class="b s13">Alex — client view</span><span class="small muted">Edits freely; a field Maya locked goes to her as a suggestion instead</span></div></div>
+   <div class="collabPaneBody">
+    <div class="collabCat"><div class="collabCatTitle">Budget</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Price range</span><span class="small muted">Set with Maya</span></div>
+      <div class="statusLine wait">${icon('msg','sm')}Suggestion sent — waiting for Maya</div>
+     </div>
+     ${collabFieldPlain('Max HOA / mo',hoaVal)}
+    </div>
+    <div class="collabCat"><div class="collabCatTitle">Location</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Max commute</span></div>
+      <div class="statusLine ok">${icon('check','sm')}Saved — Maya was notified</div>
+     </div>
+     ${collabFieldPlain('Areas',areasVal)}
+    </div>
+    <div class="collabCat"><div class="collabCatTitle">Property info</div>
+     <div class="collabField">
+      <div class="collabFieldHead"><span class="collabFieldLbl">Size (sqft)</span></div>
+      <div class="suggBox fromAgent"><span class="suggWho">Maya suggests</span>
+       <div class="row" style="gap:6px"><span class="ptDiffOld">${esc(sqftNow)}</span><span class="ptDiffNew">${esc(sqftProposedByAgent)}</span></div>
+       <span class="suggWhy">“More homes open up above 2,000 sqft — want me to raise the minimum?”</span>
+       <div class="suggActions">${btn('Accept',{sm:1})}${btn('Decline',{sm:1,kind:'ghost'})}</div>
+      </div>
+     </div>
+     ${collabFieldPlain('Bedrooms',bedsVal)}
+    </div>
+   </div>
+  </div>
+ </div>
+ <div class="collabLog">
+  <span class="s13 b">Activity — one shared log feeds both sides, no separate copies to keep in sync</span>
+  ${[
+   {who:'client',ini:'AK',text:`Alex changed Max commute: ${esc(commuteWas)} → ${esc(commuteNow)}`,time:'2m ago'},
+   {who:'client',ini:'AK',text:`Alex suggested Price range: ${esc(priceNow)} → ${esc(priceProposedByClient)}`,time:'14m ago'},
+   {who:'agent',ini:'MC',text:`Maya suggested Size (sqft): ${esc(sqftNow)} → ${esc(sqftProposedByAgent)}`,time:'1h ago'},
+  ].map(l=>`<div class="logRow"><span class="roleAvatar ${l.who}">${l.ini}</span><span class="grow">${l.text}</span><span class="logTime">${l.time}</span></div>`).join('')}
+ </div>
+ </div>`;
+}
+
+/* ===================== actions ===================== */
+function say(text){
+ text=text.trim();if(!text)return;
+ S.messages.push({who:'agent',text});
+ const agentIdx=S.messages.length-1;
+ const parsed=parseUtterance(text,S.criteria);
+ S.criteria=parsed.criteria;
+ for(const k of parsed.touched||[])S.pendingKeys[k]={at:Date.now(),quote:text,msgIdx:agentIdx};
+ const res=runSearch(S.criteria);
+ let html=summarize(parsed,res);
+ if(Object.keys(S.pendingKeys).length)html+=` <span style="color:var(--accent);font-weight:600">Save to apply this to Alex Kim’s profile.</span>`;
+ S.messages.push({who:'sys',html,touched:parsed.touched||[]});
+ S.draft='';S.showAll=false;
+}
+let REC=null;
+function mic(){
+ if(REC){REC.stop();return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){S.draft='Voice input isn’t supported in this browser — type instead';render();return;}
+ const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;
+ const base=S.draft.trim()?S.draft.trim()+' ':'';let fin='';
+ r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else tmp+=x;}S.draft=(base+fin+tmp).replace(/\s+/g,' ').trimStart();render();};
+ r.onend=()=>{REC=null;S.listening=false;render();};
+ try{r.start();REC=r;S.listening=true;}catch(e){}
+}
+/* L5: continuous hands-free voice — each finished phrase is parsed and applied immediately, no typing, no send step */
+let REC5=null;
+function voiceToggleL5(){
+ if(REC5){REC5.stop();return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){S.messages.push({who:'sys',html:'Voice input isn’t supported in this browser.'});render();return;}
+ const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;
+ r.onresult=e=>{
+  let interim='';
+  for(let i=e.resultIndex;i<e.results.length;i++){
+   const res=e.results[i];
+   if(res.isFinal){const text=res[0].transcript.trim();if(text)say(text);}
+   else interim+=res[0].transcript;
+  }
+  S.voiceInterim=interim;render();
+ };
+ r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){S.messages.push({who:'sys',html:'Microphone access is blocked — allow it to use AI Voice.'});render();}};
+ r.onend=()=>{REC5=null;S.voiceListening=false;S.voiceInterim='';render();};
+ try{r.start();REC5=r;S.voiceListening=true;render();}catch(e){}
+}
+/* L6: dictate or type a note; parsed live into a draft the categories highlight, applied only on Save */
+let RECpt=null;
+function ptMic(){
+ if(RECpt){RECpt.stop();return;}
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){S.ptOpen=true;S.ptText=S.ptText||'Voice input isn’t supported in this browser — type instead';render();return;}
+ const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;
+ const base=S.ptText.trim()?S.ptText.trim()+' ':'';let fin='';
+ r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else tmp+=x;}S.ptText=(base+fin+tmp).replace(/\s+/g,' ').trimStart();render();};
+ r.onerror=e=>{if(e.error==='not-allowed'||e.error==='service-not-allowed'){S.ptText='Microphone access is blocked — type instead';render();}};
+ r.onend=()=>{RECpt=null;S.ptListening=false;render();};
+ try{r.start();RECpt=r;S.ptListening=true;S.ptOpen=true;render();}catch(e){}
+}
+const A={
+ layout:d=>{S.layout=d.v;S.expandedField=null;S.openCategory=null;},
+ 'acc-toggle':d=>{S.openCategory=S.openCategory===d.c?null:d.c;},
+ 'pt-open':()=>{S.ptOpen=true;},
+ 'pt-mic':()=>ptMic(),
+ 'pt-clear':()=>{if(RECpt)RECpt.stop();S.ptText='';S.ptOpen=false;},
+ 'pt-cancel':()=>{if(RECpt)RECpt.stop();S.ptText='';S.ptOpen=false;},
+ 'pt-save':()=>{const d=ptDraft();if(!d||!d.touched.length)return;if(RECpt)RECpt.stop();
+  S.criteria=d.draft;S.changeHistory.unshift({n:d.touched.length,at:Date.now()});S.ptText='';S.ptOpen=false;},
+ reset:()=>{if(REC)REC.abort();if(REC5)REC5.abort();if(RECpt)RECpt.abort();S=initState();},
+ 'voice-toggle':()=>voiceToggleL5(),
+ mic:()=>mic(),
+ quick:d=>say(d.q),
+ 'show-all':()=>{S.showAll=true;},
+ 'chat-toggle':()=>{S.chatOpen=!S.chatOpen;},
+ 'chat-float-toggle':()=>{S.chatFloatOpen=!S.chatFloatOpen;},
+ 'ribbon-toggle':d=>{S.expandedField=S.expandedField===d.k?null:d.k;},
+ 'jump-field':d=>{S.flashKey=d.k;},
+ 'jump-msg':d=>{S.flashMsg=+d.i;},
+ relax:d=>{S.criteria=relax(S.criteria,d.k);delete S.pendingKeys[d.k];const res=runSearch(S.criteria);
+  S.messages.push({who:'sys',html:`Loosened ${esc(BLOCK_LABEL[d.k])}. <b>${res.results.length}</b> home${res.results.length===1?'':'s'} match now.`});},
+ 'pf-area':d=>{const c=S.criteria;c.areas=c.areas.includes(d.h)?c.areas.filter(x=>x!==d.h):[...c.areas,d.h];delete S.pendingKeys.areas;},
+ 'pf-type':d=>{const c=S.criteria;c.types=c.types.includes(d.t)?c.types.filter(x=>x!==d.t):[...c.types,d.t];delete S.pendingKeys.types;},
+ 'pf-feat':d=>{const c=S.criteria;c.features=c.features.includes(d.f)?c.features.filter(x=>x!==d.f):[...c.features,d.f];delete S.pendingKeys[d.f];},
+ 'pf-highway':()=>{S.criteria.noHighway=!S.criteria.noHighway;delete S.pendingKeys.highway;},
+ 'pf-beds-step':d=>{const c=S.criteria;c.bedsMin=Math.max(1,Math.min(6,(c.bedsMin||1)+(+d.d)));delete S.pendingKeys.beds;},
+ 'pf-commute-step':d=>{const c=S.criteria;c.commuteMax=Math.max(10,Math.min(60,(c.commuteMax||30)+(+d.d)));delete S.pendingKeys.commute;},
+ 'save-prefs':()=>{const keys=Object.keys(S.pendingKeys);if(!keys.length)return;
+  S.changeHistory.unshift({n:keys.length,at:Date.now()});S.pendingKeys={};
+  S.messages.push({who:'sys',html:`✓ Saved ${keys.length} change${keys.length>1?'s':''} to <b>Alex Kim</b>’s preferences. They’ll be used for every future search.`});},
+};
+let flashT1=null,flashT2=null;
+document.addEventListener('click',e=>{
+ const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
+ const act=el.dataset.act,fn=A[act];if(!fn)return;
+ fn(el.dataset,e);render();
+ if(act==='jump-field'){
+  const row=document.getElementById('pf-row-'+el.dataset.k);
+  if(row)row.scrollIntoView({behavior:'smooth',block:'center'});
+  clearTimeout(flashT1);flashT1=setTimeout(()=>{S.flashKey=null;render();},1600);
+ }
+ if(act==='jump-msg'){
+  const msg=document.getElementById('msg-'+el.dataset.i);
+  if(msg)msg.scrollIntoView({behavior:'smooth',block:'center'});
+  clearTimeout(flashT2);flashT2=setTimeout(()=>{S.flashMsg=null;render();},1600);
+ }
+});
+document.addEventListener('submit',e=>{const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();say(S.draft);render();});
+document.addEventListener('input',e=>{if(e.target.dataset.input==='draft'){S.draft=e.target.value;document.querySelectorAll('.send').forEach(b=>b.disabled=!S.draft.trim());}else if(e.target.dataset.input==='ptText'){S.ptText=e.target.value;render();}});
+document.addEventListener('change',e=>{
+ const f=e.target.dataset.pf;if(!f)return;
+ const v=e.target.value.replace(/\D/g,'');
+ S.criteria[f]=v?parseInt(v,10):null;
+ const fkey={priceMin:'price',priceMax:'price',hoaMax:'hoa',sqftMin:'sqft',sqftMax:'sqft'}[f];
+ if(fkey)delete S.pendingKeys[fkey];
+ render();
+});
+render();
+</script>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-house" viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9v12h14V9"/><path d="M10 21v-6h4v6"/></symbol>
+<symbol id="i-msg" viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></symbol>
+<symbol id="i-send" viewBox="0 0 24 24"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 015 0c0 2-2.5 2-2.5 4"/><path d="M12 17h.01"/></symbol>
+<symbol id="i-car" viewBox="0 0 24 24"><path d="M5 16l1.5-5h11l1.5 5"/><rect x="3" y="16" width="18" height="4" rx="1"/></symbol>
+<symbol id="i-tree" viewBox="0 0 24 24"><path d="M12 3l5 7h-3l4 6h-4v5h-4v-5H6l4-6H7z"/></symbol>
+<symbol id="i-desk" viewBox="0 0 24 24"><path d="M3 7h18M5 7v13M19 7v13M3 20h18M9 7v5h3V7"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+<symbol id="i-chevD" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-chevU" viewBox="0 0 24 24"><path d="M6 15l6-6 6 6"/></symbol>
+<symbol id="i-spark" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24"><path d="M3 7a2 2 0 012-2h13a1 1 0 011 1v2"/><rect x="3" y="7" width="18" height="12" rx="2"/><circle cx="16" cy="13" r="1.3"/></symbol>
+<symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-11.2A7 7 0 005 9.8C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.8" r="2.4"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M3 11.5V5a1 1 0 011-1h6.5a1 1 0 01.7.3l8.5 8.5a1 1 0 010 1.4l-6.5 6.5a1 1 0 01-1.4 0l-8.5-8.5a1 1 0 01-.3-.7z"/><circle cx="8" cy="8" r="1.3"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></symbol>
+</defs>
+</svg>

@@ -1,3 +1,4 @@
+﻿<meta charset="UTF-8">
 <title>RealtorHelper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -156,6 +157,24 @@ h3{font-size:16px;font-weight:600}
 .love{color:var(--accent)}
 .pf{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border);min-width:0}
 .pf:last-child{border-bottom:0}
+.pfRowC{border-top:1px solid var(--border)}
+.pfRowC:first-of-type{border-top:0}
+.pfRowC.pending{background:var(--accent-soft);margin:0 -8px;padding:0 8px;border-radius:7px;border-top-color:transparent}
+.pfRowHead{display:flex;align-items:center;gap:8px;width:100%;padding:7px 0;color:var(--text)}
+.pfLbl{flex:none;width:84px;font-size:11.5px;font-weight:500;color:var(--text-2);display:flex;align-items:center;gap:5px}
+.pfVal{flex:1;min-width:0;font-size:12.5px;font-weight:600;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pfRowHead .ic{color:var(--muted);flex:none}
+.pfRowCtl{padding:2px 0 10px;display:flex;flex-direction:column;gap:8px}
+.pendingDot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex:none}
+/* client's Preferences screen: one category open at a time, no field rows visible until expanded */
+.accCat{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.accCat.open{box-shadow:0 0 0 1px var(--accent)}
+.accCatHead{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;text-align:left}
+.accCatIcon{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.accCat.open .accCatIcon{background:var(--ink);color:var(--on-ink)}
+.accCatTitle{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.accCatSummary{font-size:12px;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.accCatBody{padding:4px 16px 12px;border-top:1px solid var(--border)}
 .imp{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:12px;font-weight:500;white-space:nowrap;border:1px solid transparent}
 .imp.must{background:var(--ink);color:var(--on-ink)}
 .imp.nice{background:var(--surface-2);color:var(--text-2)}
@@ -173,6 +192,12 @@ button.imp:hover{filter:brightness(.95)}
 .btn.mic.on{border-color:var(--accent);color:var(--accent)}
 .btn.mic.on .ic{animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{50%{opacity:.3}}
+.aiMicBtn{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;background:linear-gradient(135deg,var(--accent),#7C4DFF);color:#fff;font-weight:600;font-size:13px}
+.aiMicBtn:hover{opacity:.9}
+.aiMicBtn.on{animation:micPulse 1.6s ease-in-out infinite}
+.aiMicIconWrap{position:relative;display:inline-flex}
+.aiMicIconWrap .ic.sm{position:absolute;top:-5px;right:-6px;color:#FFD866}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(47,91,234,.45)}50%{box-shadow:0 0 0 8px rgba(47,91,234,0)}}
 .ptchips .chip{white-space:normal;text-align:left}
 .ptrow{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
 .ptrow:last-child{border-bottom:0}
@@ -260,17 +285,6 @@ button.imp:hover{filter:brightness(.95)}
 .ndot{width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--on-ink);display:grid;place-items:center;font-size:12px;font-weight:700;flex:none}
 .drive{display:flex;gap:8px;align-items:center;color:var(--muted);font-size:12px;padding:5px 0 5px 44px}
 .thumb{width:64px;height:48px;border-radius:6px;flex:none}
-.map{background:var(--map);border:1px solid var(--border);border-radius:12px;overflow:hidden;position:relative}
-.map svg{width:100%;height:auto;display:block}
-.map .road{stroke:var(--map-road);fill:none;stroke-linecap:round}
-.map .park{fill:var(--map-park)}
-.map .route{stroke:var(--ink);fill:none;stroke-width:4;stroke-linejoin:round;stroke-linecap:round}
-.map .pin{fill:var(--ink)}
-.map .pint{fill:var(--on-ink);font:700 13px Inter,system-ui,sans-serif}
-.map .gd{fill:var(--muted);opacity:.6}
-.map .lbl{fill:var(--text);font:500 12px Inter,system-ui,sans-serif}
-.map .lblbg{fill:var(--surface);stroke:var(--border)}
-.map-legend{position:absolute;top:14px;left:14px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;display:flex;gap:14px;font-size:13px;color:var(--text-2);flex-wrap:wrap}
 .scards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
 .scard{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
 .scard:hover{border-color:var(--text-2)}
@@ -295,20 +309,10 @@ button.imp:hover{filter:brightness(.95)}
 .fgroup .inp{flex:1}
 .rrow{display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--border);min-width:0}
 .rrow:last-of-type{border-bottom:0}
-.ldot{display:inline-block;width:10px;height:10px;border-radius:50%}
-.ldot.hollow{background:var(--surface);border:2px solid var(--ink)}
-.map .nm{fill:var(--surface);stroke:var(--ink);stroke-width:2}
-.map .hood{fill:var(--muted);font:600 10px Inter,system-ui,sans-serif;letter-spacing:.08em}
-.map .spin{cursor:pointer}
-.map .spin:hover .pin{fill:var(--accent)}
-.map .onb{fill:var(--on-ink)}
 @media (max-width:1180px){.sgrid,.mapping{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){.frow{grid-template-columns:minmax(0,1fr) 36px 40px}.frow .ftrack{grid-column:1/-1;grid-row:2}}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .checkrow{display:flex;gap:10px;align-items:center;padding:6px 0}
-.vtabs{display:inline-flex;background:var(--surface-2);border-radius:10px;padding:4px;gap:4px;flex-wrap:wrap}
-.vtab{padding:6px 12px;border-radius:7px;font-size:13px;font-weight:500;color:var(--text-2)}
-.vtab.on{background:var(--surface);color:var(--text);font-weight:600;border:1px solid var(--border)}
 .steps{display:flex;flex-direction:column}
 .step{display:flex;gap:12px;min-height:46px}
 .step .rail{display:flex;flex-direction:column;align-items:center}
@@ -346,7 +350,7 @@ button.imp:hover{filter:brightness(.95)}
 .phone-cap{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
 .c-status{height:44px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;font-weight:600;font-size:15px}
 .c-status svg{fill:currentColor}
-.c-screen{flex:1;overflow:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.c-screen{flex:1;overflow:auto;padding:4px 16px 24px;display:flex;flex-direction:column;gap:14px;min-height:0;min-width:0}
 .c-screen.flush{padding:0;gap:0}
 .c-screen.white{background:var(--surface)}
 .c-tabs{flex:none;display:flex;background:var(--surface);border-top:1px solid var(--border);padding:6px 6px 20px}
@@ -417,6 +421,7 @@ button.imp:hover{filter:brightness(.95)}
 }
 @media (max-width:520px){
  .stage.mode-client{padding:0}
+ .stage.mode-client .phone-wrap{width:100%;flex:1 1 auto;min-width:0}
  .stage.mode-client .phone{width:100%;height:100%;border:0;border-radius:0;box-shadow:none}
  .stage.mode-client .c-status,.stage.mode-client .phone-cap{display:none}
  .bar .hint{display:none}
@@ -496,12 +501,11 @@ const media=(l,inner='',cls='')=>`<div class="media ${cls}"><div class="ph t${l.
 /* ============ data ============ */
 const ADJ={'Linden Hills':['Oak Park'],'Hillcrest':['Cedar Grove'],'Riverside':[]};
 const COORD={0:[70,380],1:[270,150],2:[505,325],3:[430,118],4:[160,240],5:[360,300],6:[110,86],7:[318,222],8:[528,80]};
-function drive(a,b){const [x1,y1]=COORD[a],[x2,y2]=COORD[b];return Math.max(6,Math.round(Math.hypot(x2-x1,y2-y1)/18));}
 const BASE=[
  {id:1,addr:'1248 Linden Ave',hood:'Oak Park',price:629000,beds:'3 + den',bedsN:3,baths:2.5,sqft:1920,lot:6200,year:1998,hoa:0,commute:22,school:8,monthly:3980,dom:6,tone:0,type:'Single-family',garage:1,yard:1,office:1,primaryMain:false,highway:false,status:'Shortlisted',pick:true,reaction:'love',onBoard:true,
   note:'Quiet cul-de-sac side street, the den works as an office, and the seller wants a fall close.',
   desc:'Updated 1998 colonial on a quiet, tree-lined block two streets from Linden Park. Open kitchen with quartz counters, a sunlit den that works as a home office, and a fenced 6,200 sqft yard. New roof (2021), central air, finished basement.'},
- {id:2,addr:'4410 Cedar Grove Ln',hood:'Cedar Grove',price:612500,beds:'4',bedsN:4,baths:3,sqft:2340,lot:7800,year:2004,hoa:45,commute:31,school:7,monthly:3870,dom:12,tone:1,type:'Single-family',garage:1,yard:1,office:0.5,primaryMain:false,highway:false,status:'Touring',reaction:'like',onBoard:true,
+ {id:2,addr:'4410 Cedar Grove Ln',hood:'Cedar Grove',price:612500,beds:'4',bedsN:4,baths:3,sqft:2340,lot:7800,year:2004,hoa:45,commute:31,school:7,monthly:3870,dom:12,tone:1,type:'Single-family',garage:1,yard:1,office:0.5,primaryMain:false,highway:false,status:'Shortlisted',reaction:'like',onBoard:true,
   desc:'Four-bedroom 2004 build on a wide lot backing onto the greenway. Bonus room over the garage, three full baths and a large eat-in kitchen. A light HOA covers the community pool.'},
  {id:3,addr:'17 Westgate Ct',hood:'Westgate',price:598000,beds:'3',bedsN:3,baths:2,sqft:1780,lot:5400,year:1987,hoa:0,commute:18,school:9,monthly:3760,dom:3,tone:2,type:'Single-family',garage:0.5,yard:1,office:0.5,primaryMain:true,highway:false,status:'New',reaction:'love',onBoard:true,
   desc:'Single-level 1987 ranch a block from Westgate Elementary (rated 9/10). Primary suite on the main floor, a flexible front room, one-car garage and a deep backyard with mature maples.'},
@@ -542,8 +546,8 @@ const INV=(()=>{const r=rng(20260925),out=[],hs=Object.keys(HOODS);
 function initState(){
  const now=Date.now();
  return {
-  a:{route:'dashboard',tab:'overview',id:1,nav:'Home',selected:[1,2,3],filter:'all',sort:'fit',modal:null,privateNote:false,clientFilter:'All',clientSearch:'',searchId:'s1',showNear:true,showAll:false,ptText:'',listening:false,pt:null},
-  c:{route:'invite',id:4,filter:'review',sheet:null,from:'board',searchId:null},
+  a:{route:'dashboard',tab:'overview',id:1,nav:'Home',selected:[1,2,3],filter:'all',sort:'fit',modal:null,privateNote:false,clientSearch:'',searchId:'s1',ptText:'',listening:false,pt:null,openCategory:null,ptOpen:false},
+  c:{route:'invite',id:4,filter:'review',sheet:null,from:'board',ptText:'',listening:false,ptOpen:false,openCategory:null},
   listings:[...BASE,...INV].map(l=>({pick:false,reaction:null,reasons:[],addedBy:'agent',note:'',priceDrop:0,...l,reasons:[...(l.reasons||[])]})),
   searches:[{id:'s1',name:'Oak Park houses',synced:false,criteria:{price:[550000,650000],areas:['Oak Park'],types:['Single-family'],beds:3,features:[],noHighway:false},alerts:'daily',mode:'auto',by:'agent',hidden:[],t:now-9*DAY}],
   prefs:{price:{min:550000,max:650000,imp:'must',lock:true},hoa:{v:250,imp:'nice'},areas:{v:['Oak Park','Cedar Grove','Westgate'],imp:'must'},commute:{v:30,imp:'must'},highway:{imp:'never'},type:{v:['Single-family','Townhouse'],imp:'must'},beds:{v:4,imp:'must'},size:{min:1700,max:2600,imp:'nice'},garage:{imp:'must'},yard:{imp:'must'},office:{imp:'must'},primaryMain:{imp:'nice'}},
@@ -552,21 +556,15 @@ function initState(){
   suggestions:[{id:'sg1',g:'g1',k:'price',from:{min:550000,max:650000},to:{min:550000,max:700000},note:'The Hillcrest homes are just above our range.',status:'pending',t:now-16*MIN}],
   prefNotes:[],
   prefHistory:[{who:'client',text:'Suggested Max price → $700,000',t:now-16*MIN},{who:'client',text:'Bedrooms 3+ → 4+',t:now-3*DAY},{who:'agent',text:'Locked Price range',t:now-7*DAY},{who:'client',text:'Added area Westgate',t:now-8*DAY},{who:'client',text:'Completed onboarding questionnaire',t:now-10*DAY}],
-  comments:{1:[{who:'client',text:'Love the backyard and the office nook. Is the street busy at rush hour?',t:now-12*MIN},{who:'agent',text:'It’s a cul-de-sac side street — very little through traffic. I can check during the tour on Saturday.',t:now-8*MIN},{who:'agent',text:'Seller motivated — relocating in Nov. Room to go $610–615k.',t:now-5*MIN,priv:true}],
+  comments:{1:[{who:'client',text:'Love the backyard and the office nook. Is the street busy at rush hour?',t:now-12*MIN},{who:'agent',text:'It’s a cul-de-sac side street — very little through traffic.',t:now-8*MIN},{who:'agent',text:'Seller motivated — relocating in Nov. Room to go $610–615k.',t:now-5*MIN,priv:true}],
    2:[{who:'client',text:'Commute might be a stretch, but that yard!',t:now-DAY}],3:[{who:'client',text:'A primary bedroom on the main floor would be great when my parents visit.',t:now-40*MIN}],5:[{who:'client',text:'Nice views but tight for the three of us.',t:now-2*DAY}],6:[{who:'agent',text:'Backs onto the highway sound wall — flagging since you want to avoid I-94.',t:now-2*DAY}]},
   activity:[{who:'client',text:'loved 1248 Linden Ave',t:now-12*MIN},{who:'client',text:'loved 17 Westgate Ct',t:now-40*MIN},{who:'client',text:'passed on 902 Hillcrest Rd — Price, Location',t:now-DAY},{who:'agent',text:'added 3 homes from “Oak Park houses”',t:now-DAY-3*HOUR},{who:'client',text:'changed Bedrooms from 3+ to 4+',t:now-3*DAY}],
-  notes:[{text:'Very price sensitive above $630k. Wants to close before the school year break.',t:now-4*DAY}],
-  messages:[{who:'client',type:'req',kind:'prefs_update',ref:'u1',items:[{text:'Bedrooms: 3+ → 4+',t:now-3*DAY}],t:now-3*DAY},{who:'agent',text:'Morning! I added 3021 Maple St — under budget with a big yard. Take a look when you can.',t:now-2*HOUR},{who:'client',text:'Will do. Can we fit Westgate into Saturday too?',t:now-HOUR},{who:'client',type:'req',kind:'prefs',ref:'g1',t:now-16*MIN}],
+  notes:[{text:'Very price sensitive above $630k.',t:now-4*DAY}],
+  messages:[{who:'client',type:'req',kind:'prefs_update',ref:'u1',items:[{text:'Bedrooms: 3+ → 4+',t:now-3*DAY}],t:now-3*DAY},{who:'agent',text:'Morning! I added 3021 Maple St — under budget with a big yard. Take a look when you can.',t:now-2*HOUR},{who:'client',text:'Will do. What do you think about Westgate?',t:now-HOUR},{who:'client',type:'req',kind:'prefs',ref:'g1',t:now-16*MIN}],
   unread:{agent:1,client:1},
   seen:{loves:false,comments:false},
   newLoves:[1,3],unseenComments:[1],clientAdds:[],
-  showReq:[],
-  tour:{status:'draft',date:'Sat, Sep 27',start:600,stops:[1,3,2],requested:[3],optimize:true,changeNote:''},
-  pastTours:[{status:'completed',date:'Sat, Sep 20',start:600,stops:[5,6],requested:[]}],
-  fbQueue:[5,6],feedback:{},agentFb:{},fb:{stars:0,liked:[],disliked:[],offer:null},
   compare:[1,2,3],front:1,diffOnly:true,
-  offer:{status:'draft',listing:1,version:3,price:618000,earnest:12000,closing:'2026-11-30',expires:'Sep 27 · 5:00 pm',financing:'Conventional · 20% down',cont:{inspection:true,appraisal:true,financing:true,sale:false},note:'Meeting them near the middle and taking their closing date. I think this gets it done — happy to talk it through tonight.',clientNote:'',
-   steps:[{text:'v1 drafted — $615,000',t:'Sep 24, 11:02 am'},{text:'Alex approved v1',t:'Sep 24, 1:40 pm'},{text:'Submitted to listing agent',t:'Sep 24, 5:12 pm'},{text:'Seller countered — $624,000, close Nov 30',t:'Sep 25, 9:30 am'}]},
   ai:null,
   toasts:[]
  };
@@ -588,7 +586,7 @@ function fitParts(l){
  add('price','Price',l.price>=P.price.min&&l.price<=P.price.max?1:(l.price<=P.price.max*1.1&&l.price>=P.price.min*.9?.5:0),`${money(l.price)} · budget ${kf(P.price.min)}–${kf(P.price.max)}`);
  const inA=P.areas.v.includes(l.hood),adj=(ADJ[l.hood]||[]).some(a=>P.areas.v.includes(a));
  add('areas','Area',inA?1:adj?.5:0,inA?`${l.hood} — a preferred area`:adj?`${l.hood} — next to a preferred area`:`${l.hood} — outside preferred areas`);
- add('commute','Commute',l.commute<=P.commute.v?1:l.commute<=P.commute.v*1.1?.5:0,`${l.commute} min drive to Medical Center`);
+ add('commute','Commute',l.commute<=P.commute.v?1:l.commute<=P.commute.v*1.1?.5:0,`${l.commute} min commute`);
  add('beds','Bedrooms',l.bedsN>=P.beds.v?1:l.bedsN===P.beds.v-1?.5:0,`${l.beds} bd — wants ${P.beds.v}+`);
  add('type','Home type',P.type.v.includes(l.type)?1:0,l.type);
  add('garage','Garage',l.garage,l.garage===1?'2-car garage':l.garage?'1-car garage':'No garage');
@@ -642,39 +640,19 @@ function runSearch(c){
 const isNew=l=>l.dom<=7;
 function newMatches(s){return runSearch(criteriaOf(s)).results.filter(l=>!l.onBoard&&isNew(l)&&!s.hidden.includes(l.id));}
 function allNewMatches(){const seen=new Set(),out=[];for(const s of S.searches)for(const l of newMatches(s))if(!seen.has(l.id)){seen.add(l.id);out.push(l);}return out.sort((a,b)=>fit(b).score-fit(a).score);}
-const curSearch=()=>S.searches.find(s=>s.id===S.a.searchId)||S.searches[0];
 function newPrefSearch(by){const n=S.searches.filter(x=>x.fromPrefs).length;const s={id:'s'+Date.now(),name:'Alex — preferences'+(n?` ${n+1}`:''),synced:false,fromPrefs:true,criteria:JSON.parse(JSON.stringify(prefCriteria())),alerts:'daily',mode:'curated',by,hidden:[],t:Date.now()};S.searches.unshift(s);log(by,'created a search from preferences');return s;}
 function createPrefSearch(by){return S.searches.find(x=>x.fromPrefs)||newPrefSearch(by);}
 
 /* ============ derived ============ */
-function stage(){const o=S.offer.status;if(o==='accepted')return'Under contract';if(['awaiting','approved','submitted'].includes(o))return'Offer out';if(['proposed','confirmed','completed'].includes(S.tour.status))return'Touring';return'Actively searching';}
-function tourTimes(T=S.tour){let t=T.start,prev=0;const out=[];for(const id of T.stops){const d=drive(prev,id);t+=d;out.push({id,drive:d,at:t});t+=30;prev=id;}return{stops:out,end:t,driveTotal:out.reduce((a,b)=>a+b.drive,0)};}
-const hm=m=>{const h=Math.floor(m/60),mm=m%60,ap=h>=12?'pm':'am',h12=((h+11)%12)+1;return `${h12}:${String(mm).padStart(2,'0')} ${ap}`;};
-function nnOrder(ids){const left=[...ids],out=[];let cur=0;while(left.length){left.sort((a,b)=>drive(cur,a)-drive(cur,b));cur=left.shift();out.push(cur);}return out;}
-function optimize(){if(S.tour.optimize)S.tour.stops=nnOrder(S.tour.stops);}
-const tourOpen=()=>['draft','changes','proposed','confirmed'].includes(S.tour.status);
-const dchip=(d,big)=>{const m=String(d).match(/^(\w{3}), \w{3} (\d+)/)||['','',''];return `<div class="col" style="background:var(--surface-2);border-radius:8px;padding:6px ${big?12:10}px;align-items:center;gap:0"><span class="small muted">${m[1].toUpperCase()}</span><b ${big?'style="font-size:18px"':''}>${m[2]}</b></div>`;};
-const TOUR_DATES=['Sat, Sep 27','Sun, Sep 28','Sat, Oct 4','Sun, Oct 5','Sat, Oct 11'];
-function openPlan(pre){const T=S.tour,req=S.showReq.map(r=>r.id).filter(id=>L(id).onBoard);
- const def=pre&&pre.length?pre:[...new Set([...req,...board().filter(l=>l.reaction==='love'&&l.status!=='Rejected').map(l=>l.id)])];
- S.a.plan={date:T.status==='draft'?T.date:TOUR_DATES.find(d=>d!==T.date&&!S.pastTours.some(p=>p.date===d))||TOUR_DATES[2],start:600,stops:def,optimize:true};S.a.modal='plan';}
 function attention(){
  const a=[];const go=(r,t,id)=>`data-act="a-go" data-r="${r}" ${t?`data-t="${t}"`:''} ${id?`data-id="${id}"`:''}`;
  if(S.prefUpdates.length){const u=S.prefUpdates;a.push({ini:'AK',title:`To do: review Alex’s preference changes (${u.length})`,meta:`${u.slice(0,2).map(x=>x.text).join(' · ')} · ${ago(u[0].t)}`,label:'Review',attrs:go('client','prefs')});}
  for(const sg of pendingSugg())a.push({ini:'AK',title:`Alex suggested a change to ${PLBL(sg.k)}`,meta:`${sgDesc(sg)} · ${ago(sg.t)}`,label:'Review',attrs:go('client','prefs')});
- if(S.offer.status==='approved')a.push({ini:'AK',title:`Alex approved the counter-offer on ${L(S.offer.listing).addr}`,meta:'Ready to submit to the listing agent',label:'Submit',attrs:go('client','offers')});
- if(S.offer.status==='changes')a.push({ini:'AK',title:'Alex asked for changes to the offer',meta:S.offer.clientNote?`“${S.offer.clientNote}”`:'Offers',label:'Open offer',attrs:go('client','offers')});
- if(S.tour.status==='confirmed')a.push({ini:'MC',title:`To do: complete the ${S.tour.date} tour after the showings`,meta:`${S.tour.stops.length} homes · approved by Alex · then add feedback`,label:'Open tour',attrs:go('client','tours')});
- for(const m of S.messages.filter(x=>x.type==='req'&&x.kind==='tour_request'&&!x.done))a.push({ini:'AK',title:`Alex requested a tour on ${m.date}`,meta:`${m.ids.length} homes · around ${hm(m.start)}`,label:'Plan',attrs:`data-act="req-plan" data-ref="${m.ref}"`});
- {const miss=fbTours().flatMap(t=>t.stops).filter(id=>!(S.agentFb[id]&&S.agentFb[id].verdict));if(miss.length)a.push({ini:'MC',title:`To do: add your feedback for ${miss.length} toured home${miss.length>1?'s':''}`,meta:miss.slice(0,2).map(id=>L(id).addr).join(' · '),label:'Add feedback',attrs:go('client','tours')});}
- if(S.tour.status==='changes')a.push({ini:'AK',title:'Alex asked to change the tour',meta:S.tour.changeNote?`“${S.tour.changeNote}”`:'Tours',label:'Edit tour',attrs:go('client','tours')});
- for(const r of S.showReq)a.push({ini:'AK',title:`Alex requested a showing at ${L(r.id).addr}`,meta:`${ago(r.t)} · ${r.slots.join(', ')||'Any time'}`,label:'Schedule',attrs:go('client','tours')});
- const anm=allNewMatches();if(anm.length)a.push({ini:'MC',title:`${anm.length} new ${anm.length===1?'listing matches':'listings match'} Alex’s searches`,meta:`Top fit: ${anm[0].addr} · ${fit(anm[0]).score}`,label:'Review',attrs:go('client','searches')});
+ const anm=allNewMatches();if(anm.length)a.push({ini:'MC',title:`${anm.length} new ${anm.length===1?'listing matches':'listings match'} Alex’s searches`,meta:`Top fit: ${anm[0].addr} · ${fit(anm[0]).score}`,label:'Review',attrs:go('client','prefs')});
  if(S.newLoves.length)a.push({ini:'AK',title:`Alex loved ${S.newLoves.length===1?L(S.newLoves[0]).addr:S.newLoves.length+' homes'}`,meta:'Board',label:'Open board',attrs:go('client','board')});
  for(const id of S.unseenComments)a.push({ini:'AK',title:`Alex commented on ${L(id).addr}`,meta:'“'+(S.comments[id].filter(c=>c.who==='client').slice(-1)[0]?.text||'')+'”',label:'Reply',attrs:go('listing',null,id)});
  for(const id of S.clientAdds)a.push({ini:'AK',title:`Alex added ${L(id).addr} to the board`,meta:'From saved search',label:'View',attrs:go('listing',null,id)});
  if(S.unread.agent)a.push({ini:'AK',title:'New message from Alex',meta:'“'+S.messages.filter(m=>m.who==='client').slice(-1)[0].text+'”',label:'Reply',attrs:go('client','messages')});
- for(const id of Object.keys(S.feedback)){const f=S.feedback[id];if(!f.seen)a.push({ini:'AK',title:`Alex rated ${L(+id).addr} ${f.stars}★`,meta:`Would offer: ${f.offer||'—'} · ${[...f.liked,...f.disliked].slice(0,3).join(', ')}`,label:'View',attrs:`data-act="fb-seen" data-id="${id}"`});}
  return a;
 }
 
@@ -703,10 +681,10 @@ function protoBar(m){
 function agentApp(){
  const r=S.a.route;let body;
  if(r==='dashboard')body=aDashboard();else if(r==='clients')body=aClients();else if(r==='inbox')body=aInbox();else if(r==='listing')body=aListing();else body=aClient();
- return `<section class="agent" aria-label="Agent app">${aSide()}<div class="a-col">${aTop()}<main class="a-main" data-scroll="a-${r}-${S.a.tab}-${S.a.id}">${body}</main></div>${S.a.modal==='add'?aAddModal():S.a.modal==='plan'&&S.a.plan?aPlanModal():S.a.modal==='prefs'&&S.a.pt?aPrefsModal():''}</section>`;
+ return `<section class="agent" aria-label="Agent app">${aSide()}<div class="a-col">${aTop()}<main class="a-main" data-scroll="a-${r}-${S.a.tab}-${S.a.id}">${body}</main></div>${S.a.modal==='add'?aAddModal():S.a.modal==='prefs'&&S.a.pt?aPrefsModal():''}</section>`;
 }
 function aSide(){
- const items=[['Home','home','dashboard'],['Clients','users','clients'],['Inbox','inbox','inbox',S.unread.agent],['Tours','calendar','tours'],['Listings','search','listings'],['Documents','file','documents']];
+ const items=[['Home','home','dashboard'],['Clients','users','clients'],['Inbox','inbox','inbox',S.unread.agent],['Listings','search','listings']];
  return `<nav class="a-side" aria-label="Main"><div class="brand brandrow" style="padding:2px 8px"><span class="logo">${icon('house')}</span>RealtorHelper</div>
  <div class="a-nav">${items.map(([l,i,r,c])=>`<button class="nav-i" data-act="a-nav" data-r="${r}" ${S.a.nav===l?'aria-current="page"':''}>${icon(i,'lg')}${l}${c?badge(c,'ink'):''}</button>`).join('')}</div>
  <div class="fill"></div><button class="nav-i settings" data-act="toast" data-msg="Settings aren’t part of this prototype">${icon('settings','lg')}Settings</button>
@@ -716,81 +694,106 @@ function aTop(){const n=attention().length;return `<div class="a-top"><label cla
 
 function aDashboard(){
  const items=attention();
- const others=[{ini:'DO',title:'Offer on 4410 Cedar Grove Ln expires in 20 h',meta:'Daniel Ortiz · Countered at $618,000',label:'View offer'},{ini:'PS',title:'Priya Shah requested a showing at 17 Westgate Ct',meta:'1 h ago · Sat 10:00–12:00',label:'Schedule'},{ini:'EN',title:'Emma Novak has been inactive for 9 days',meta:'Last seen Sep 16 · 3 unreviewed homes',label:'Message'}];
+ const others=[{ini:'PS',title:'Priya Shah loved 2 homes this week',meta:'7 homes on board · 3 loved',label:'Message'},{ini:'EN',title:'Emma Novak has been inactive for 9 days',meta:'Last seen Sep 16 · 3 unreviewed homes',label:'Message'}];
  const row=(x,sample)=>`<div class="li">${av(x.ini)}<div class="col grow"><span class="m">${esc(x.title)}</span><span class="small muted">${esc(x.meta)}</span></div>${sample?btn(x.label,{kind:'sec',sm:1,act:'toast',data:'data-msg="Sample data covers Alex Kim only"'}):`<button class="btn sec sm" ${x.attrs}>${x.label}</button>`}</div>`;
- const tt=tourTimes();
- const tourLine=tourOpen()&&S.tour.stops.length?`<div class="li" data-act="a-go" data-r="client" data-t="tours" style="cursor:pointer">${dchip(S.tour.date)}<div class="col grow"><span class="m">Alex Kim · ${S.tour.stops.length} homes</span><span class="small muted">${hm(S.tour.start)} – ${hm(tt.end)} · ${tourStatusLabel()}</span></div>${icon('chev','muted')}</div>`:'';
- const bar=(l,n)=>`<div class="col" style="gap:6px"><div class="row"><span class="grow s13 sub">${l}</span><b class="s13 num">${n}</b></div><div class="bar-track"><i style="width:${n/8*100}%"></i></div></div>`;
- const offersOut=1+(['awaiting','approved','submitted'].includes(S.offer.status)?1:0);
  return `<div class="row wrap"><div class="col grow"><h1>Good morning, Maya</h1><span class="sub">Thursday, September 25 · ${items.length+others.length} things need your attention</span></div></div>
- <div class="stats">${[['Active clients','18','+2 this month'],['Tours this week',String(5+(S.tour.status!=='draft'?1:0)),'Next: Sat 10:00'],['Offers out',String(offersOut),'1 expires in 20 h'],['New matches',String(allNewMatches().length+9),`For Alex: ${allNewMatches().length} · 6 other clients: 9`]].map(([l,v,d])=>`<div class="card tight stat"><span class="s13 m sub">${l}</span><span class="v num">${v}</span><span class="small muted">${d}</span></div>`).join('')}</div>
+ <div class="stats">${[['Active clients','18','+2 this month'],['New matches',String(allNewMatches().length+9),`For Alex: ${allNewMatches().length} · 6 other clients: 9`],['Homes on board',String(board().length+34),`For Alex: ${board().length} · 6 other clients: 34`],['Reports sent',String((S.ai&&S.ai.sent?1:0)+4),'This month across clients']].map(([l,v,d])=>`<div class="card tight stat"><span class="s13 m sub">${l}</span><span class="v num">${v}</span><span class="small muted">${d}</span></div>`).join('')}</div>
  <div class="cols"><div class="card" style="gap:4px"><div class="row"><h3 class="grow">Needs attention</h3><span class="small muted">${items.length} from Alex · live</span></div>
   ${items.length?items.map(x=>row(x)).join(''):`<div class="li"><span class="muted">Nothing new from Alex. Try reacting to a home on the phone.</span></div>`}${others.map(x=>row(x,1)).join('')}</div>
- <div class="stack"><div class="card" style="gap:4px"><h3>Upcoming tours</h3>${tourLine}<div class="li"><div class="col" style="background:var(--surface-2);border-radius:8px;padding:6px 10px;align-items:center;gap:0"><span class="small muted">SUN</span><b>28</b></div><div class="col grow"><span class="m">Priya Shah · 2 homes</span><span class="small muted">2:30 pm – 3:40 pm · Confirmed</span></div></div></div>
- <div class="card"><h3>Pipeline</h3>${bar('Onboarding',3)}${bar('Actively searching',stage()==='Actively searching'?8:7)}${bar('Touring',stage()==='Touring'?5:4)}${bar('Offer out',stage()==='Offer out'?3:2)}${bar('Under contract',stage()==='Under contract'?2:1)}</div></div></div>`;
+ <div class="card" style="gap:2px"><h3 style="padding-bottom:6px">Recent activity</h3>${S.activity.slice(0,5).map(a=>`<div class="li">${av(a.who==='client'?'AK':'MC',a.who==='agent','sm')}<div class="col grow"><span class="s13">${a.who==='client'?'Alex':'You'} ${esc(a.text)}</span><span class="small muted">${ago(a.t)}</span></div></div>`).join('')}</div></div>`;
 }
-function tourStatusLabel(T=S.tour){return{draft:'Draft',proposed:'Waiting for Alex’s approval',confirmed:'Approved by Alex',changes:'Changes requested',completed:'Completed',canceled:'Canceled'}[T.status];}
 
-const CLIENTS=()=>[['AK','Alex Kim','alex.kim@email.com',stage(),'$550–650k','Oak Park, Cedar Grove','$650k',ago(Math.max(...S.activity.map(a=>a.t))),board().filter(l=>l.reaction==='love').length,1],['PS','Priya Shah','priya.shah@email.com','Touring','$500–600k','Westgate','$600k','1 h ago',3],['DO','Daniel Ortiz','d.ortiz@email.com','Offer out','$580–640k','Cedar Grove','$640k','2 h ago',2],['SL','Sam Lee','sam.lee@email.com','Actively searching','$600–700k','Riverside, Downtown','$650k','3 h ago',5],['EN','Emma Novak','emma.n@email.com','Actively searching','$400–480k','Linden Hills','—','9 days ago',0],['JB','Jordan Brooks','jbrooks@email.com','Onboarding','—','—','—','Yesterday',0],['MW','Mia Wong','mia.wong@email.com','Under contract','$700–800k','Hillcrest','$800k','2 days ago',6],['RT','Ravi Thomas','ravi.t@email.com','Touring','$450–520k','Riverside','$520k','3 days ago',2],['LG','Lena Garcia','lena.g@email.com','Onboarding','$350–420k','—','Pending','4 days ago',0]];
+const CLIENTS=()=>[['AK','Alex Kim','alex.kim@email.com','$550–650k','Oak Park, Cedar Grove',ago(Math.max(...S.activity.map(a=>a.t))),board().filter(l=>l.reaction==='love').length,1],['PS','Priya Shah','priya.shah@email.com','$500–600k','Westgate','1 h ago',3],['DO','Daniel Ortiz','d.ortiz@email.com','$580–640k','Cedar Grove','2 h ago',2],['SL','Sam Lee','sam.lee@email.com','$600–700k','Riverside, Downtown','3 h ago',5],['EN','Emma Novak','emma.n@email.com','$400–480k','Linden Hills','9 days ago',0],['JB','Jordan Brooks','jbrooks@email.com','—','—','Yesterday',0],['MW','Mia Wong','mia.wong@email.com','$700–800k','Hillcrest','2 days ago',6],['RT','Ravi Thomas','ravi.t@email.com','$450–520k','Riverside','3 days ago',2],['LG','Lena Garcia','lena.g@email.com','$350–420k','—','4 days ago',0]];
 function aClients(){
- const all=CLIENTS(),stages=['All','Onboarding','Actively searching','Touring','Offer out','Under contract'];
+ const all=CLIENTS();
  const q=S.a.clientSearch.toLowerCase();
- const rows=all.filter(r=>(S.a.clientFilter==='All'||r[3]===S.a.clientFilter)&&(!q||(r[1]+' '+r[5]).toLowerCase().includes(q)));
- const tone=s=>s==='Under contract'?'ink':(s==='Offer out'||s==='Touring')?'accent':'';
+ const rows=all.filter(r=>!q||(r[1]+' '+r[4]).toLowerCase().includes(q));
  return `<div class="row wrap"><div class="col grow"><h1>Clients</h1><span class="sub">18 active · 4 archived</span></div>${btn('Add client',{icon:'plus',act:'toast',data:'data-msg="Adding clients isn’t part of this prototype"'})}</div>
- <div class="row wrap"><div class="chips grow">${stages.map(s=>`<button class="chip" data-act="c-filter-a" data-v="${s}" aria-pressed="${S.a.clientFilter===s}">${s} ${s==='All'?all.length:all.filter(r=>r[3]===s).length}</button>`).join('')}</div>
- <label class="inp" style="width:260px">${icon('search','muted')}<input id="client-search" data-input="clientSearch" value="${esc(S.a.clientSearch)}" placeholder="Filter by name or area"></label></div>
- <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Client</th><th>Stage</th><th>Budget</th><th>Areas</th><th>Pre-approved</th><th>Last activity</th><th>Loved</th></tr></thead><tbody>
- ${rows.map(r=>`<tr ${r[9]?'data-act="a-go" data-r="client" data-t="overview"':'data-act="toast" data-msg="Sample data covers Alex Kim only"'}><td><div class="row">${av(r[0])}<div class="col" style="gap:0"><span class="m" style="color:var(--text)">${r[1]}</span><span class="small muted">${r[2]}</span></div></div></td><td>${badge(r[3],tone(r[3]))}</td><td class="num">${r[4]}</td><td>${r[5]}</td><td>${r[6].startsWith('$')?`<span class="meta">${icon('check')}${r[6]}</span>`:`<span class="muted">${r[6]}</span>`}</td><td>${r[7]}</td><td><span class="meta">${icon('heart')}${r[8]}</span></td></tr>`).join('')}
- ${rows.length?'':'<tr><td colspan="7" class="muted">No clients match this filter.</td></tr>'}</tbody></table></div>`;
+ <div class="row wrap"><div class="grow"></div><label class="inp" style="width:260px">${icon('search','muted')}<input id="client-search" data-input="clientSearch" value="${esc(S.a.clientSearch)}" placeholder="Filter by name or area"></label></div>
+ <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Client</th><th>Budget</th><th>Areas</th><th>Last activity</th><th>Loved</th></tr></thead><tbody>
+ ${rows.map(r=>`<tr ${r[7]?'data-act="a-go" data-r="client" data-t="overview"':'data-act="toast" data-msg="Sample data covers Alex Kim only"'}><td><div class="row">${av(r[0])}<div class="col" style="gap:0"><span class="m" style="color:var(--text)">${r[1]}</span><span class="small muted">${r[2]}</span></div></div></td><td class="num">${r[3]}</td><td>${r[4]}</td><td>${r[5]}</td><td><span class="meta">${icon('heart')}${r[6]}</span></td></tr>`).join('')}
+ ${rows.length?'':'<tr><td colspan="5" class="muted">No clients match this filter.</td></tr>'}</tbody></table></div>`;
 }
 function aClientHeader(){
- const st=stage();
- const nmc=S.searches.reduce((a,s)=>a+newMatches(s).length,0);
- const tabs=[['overview','Overview'],['prefs','Preferences',(pendingSugg().length+S.prefUpdates.length)||''],['searches','Searches',nmc?nmc+' new':''],['board','Board',board().length],['compare','Compare'],['tours','Tours'],['messages','Messages',(openReqs().length?openReqs().length+' open':'')||S.unread.agent||''],['offers','Offers']];
+ const liveNew=runSearch(prefCriteria()).results.filter(l=>!l.onBoard&&isNew(l)).length;
+ const tabs=[['overview','Overview'],['prefs','Preferences',(pendingSugg().length+S.prefUpdates.length)||(liveNew?liveNew+' new':'')],['board','Board',board().length],['compare','Compare'],['messages','Messages',(openReqs().length?openReqs().length+' open':'')||S.unread.agent||'']];
  return `<div class="col" style="gap:16px"><nav class="crumb"><button data-act="a-nav" data-r="clients">Clients</button>${icon('chev','sm')}<span>Alex Kim</span></nav>
- <div class="row wrap" style="gap:16px">${av('AK',0,'lg')}<div class="col grow" style="gap:6px"><div class="row" style="gap:10px"><h1>Alex Kim</h1>${badge(st,st==='Under contract'?'ink':'accent')}</div><div class="row wrap metas">${meta('dollar','Pre-approved $650k · First Street Lending')}${meta('calendar','Move by Jan 2027')}${meta('check','Portal active')}</div></div>${btn('Message',{kind:'sec',icon:'msg',act:'a-go',data:'data-r="client" data-t="messages"'})}</div>
+ <div class="row wrap" style="gap:16px">${av('AK',0,'lg')}<div class="col grow" style="gap:6px"><h1>Alex Kim</h1><div class="row wrap metas">${meta('check','Portal active')}</div></div>${btn('Message',{kind:'sec',icon:'msg',act:'a-go',data:'data-r="client" data-t="messages"'})}</div>
  <div class="tabs" role="tablist">${tabs.map(([k,l,c])=>`<button class="tab" role="tab" data-act="a-go" data-r="client" data-t="${k}" ${S.a.tab===k?'aria-current="page"':''}>${l}${c!==''&&c!=null?badge(c):''}</button>`).join('')}</div></div>`;
 }
 function aClient(){
- const t=S.a.tab;const map={overview:aOverview,prefs:aPrefs,searches:aSearches,board:aBoard,compare:aCompare,tours:aTours,messages:aMessages,offers:aOffer};
+ const t=S.a.tab;const map={overview:aOverview,prefs:aSearchPrefs,board:aBoard,compare:aCompare,messages:aMessages};
  return aClientHeader()+(map[t]||aOverview)();
 }
 function aOverview(){
  const b=board();const stat=(l,v)=>`<div class="stat"><span class="v num" style="font-size:24px">${v}</span><span class="s13 sub">${l}</span></div>`;
  const kv=(k,v)=>`<div class="row top" style="padding:5px 0"><span class="s13 muted" style="width:120px;flex:none">${k}</span><span class="s13 grow">${v}</span></div>`;
- const tt=tourTimes();
  return `<div class="cols"><div class="stack"><div class="card"><div class="row"><h3 class="grow">Search progress</h3><button class="link" data-act="a-go" data-r="client" data-t="board">Open board</button></div>
-  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">${stat('Homes on board',b.length)}${stat('Loved',b.filter(l=>l.reaction==='love').length)}${stat('Shortlisted',b.filter(l=>l.status==='Shortlisted').length)}${stat('Toured',Object.keys(S.feedback).length+2)}${stat('Offers',S.offer.status==='draft'?0:1)}</div></div>
+  <div class="stats" style="grid-template-columns:repeat(auto-fit,minmax(90px,1fr))">${stat('Homes on board',b.length)}${stat('Loved',b.filter(l=>l.reaction==='love').length)}${stat('Shortlisted',b.filter(l=>l.status==='Shortlisted').length)}</div></div>
   <div class="card" style="gap:2px"><h3 style="padding-bottom:6px">Activity</h3>${S.activity.slice(0,7).map(a=>`<div class="li">${av(a.who==='client'?'AK':'MC',a.who==='agent','sm')}<div class="col grow"><span class="s13">${a.who==='client'?'Alex':'You'} ${esc(a.text)}</span><span class="small muted">${ago(a.t)}</span></div></div>`).join('')}</div></div>
- <div class="stack"><div class="card" style="gap:6px"><div class="row"><h3 class="grow">Personal info</h3><button class="iconbtn" data-act="toast" data-msg="Editing contact details isn’t part of this prototype" aria-label="Edit">${icon('edit')}</button></div>${kv('Email','alex.kim@email.com')}${kv('Phone','(555) 214-8890')}${kv('Current home','Renting downtown, lease ends Dec 31')}${kv('Household','2 adults, 1 child, 1 dog')}${kv('Work commute','Medical Center · max 30 min drive')}${kv('Financing','Pre-approved $650k · expires Nov 30')}${kv('Source','Referral · Mia Wong')}</div>
+ <div class="stack"><div class="card" style="gap:6px"><div class="row"><h3 class="grow">Personal info</h3><button class="iconbtn" data-act="toast" data-msg="Editing contact details isn’t part of this prototype" aria-label="Edit">${icon('edit')}</button></div>${kv('Email','alex.kim@email.com')}${kv('Phone','(555) 214-8890')}</div>
  <div class="card" style="gap:10px"><div class="row"><h3 class="grow">Private notes</h3><span class="meta small muted">${icon('lock','sm')}Only you</span></div>${S.notes.map(n=>`<div class="quote">${esc(n.text)}</div>`).join('')}
-  <form class="composer" data-form="note"><input id="note-input" name="text" placeholder="Add a private note" autocomplete="off"><button class="send" aria-label="Save note">${icon('plus')}</button></form></div>
- <div class="card" style="gap:10px"><h3>Next tour</h3>${tourOpen()&&S.tour.stops.length?`<button class="row" data-act="a-go" data-r="client" data-t="tours">${dchip(S.tour.date,1)}<div class="col grow"><span class="m">${S.tour.stops.length} homes · ${hm(S.tour.start)} – ${hm(tt.end)}</span><span class="small muted">${tourStatusLabel()}</span></div>${icon('chev','muted')}</button>`:'<span class="muted s13">No tour planned.</span>'}</div></div></div>`;
+  <form class="composer" data-form="note"><input id="note-input" name="text" placeholder="Add a private note" autocomplete="off"><button class="send" aria-label="Save note">${icon('plus')}</button></form></div></div></div>`;
 }
 const PREF_GROUPS=()=>{const P=S.prefs;return[
  ['Budget',[['price','Price range',`${money(P.price.min)} – ${money(P.price.max)}`],['hoa','Max HOA',`$${P.hoa.v} / mo`]]],
- ['Location',[['areas','Areas',P.areas.v.join(', ')],['commute','Commute',`Medical Center · ≤ ${P.commute.v} min drive`,'commute'],['highway','Avoid','Near highway I-94']]],
+ ['Location',[['areas','Areas',P.areas.v.join(', ')],['commute','Commute',`≤ ${P.commute.v} min drive`,'commute'],['highway','Avoid','Near highway I-94']]],
  ['Property',[['type','Home type',P.type.v.join(', ')],['beds','Bedrooms',`${P.beds.v}+`,'beds'],['size','Size',`${nf(P.size.min)} – ${nf(P.size.max)} sqft`]]],
  ['Features',[['garage','Garage','2-car preferred'],['yard','Yard','Fenced yard for the dog'],['office','Home office','A room with a door'],['primaryMain','Primary on main','Bedroom on the main floor']]]];};
+const GROUP_ICON={Budget:'dollar',Location:'pin',Property:'house',Features:'star'};
 const IMPL={must:'Must-have',nice:'Nice-to-have',off:'Don’t care',never:'Deal-breaker'};
 function impBtn(key,who){const i=S.prefs[key].imp;return `<button class="imp ${i}" data-act="pref-imp" data-k="${key}" data-who="${who}" title="Change importance">${i==='never'?icon('x','sm'):''}${IMPL[i]}</button>`;}
 function stepper(key,who){return `<span class="stepper"><button data-act="pref-step" data-k="${key}" data-d="-1" data-who="${who}" aria-label="Decrease">${icon('minus','sm')}</button><span class="num">${S.prefs[key].v}</span><button data-act="pref-step" data-k="${key}" data-d="1" data-who="${who}" aria-label="Increase">${icon('plus','sm')}</button></span>`;}
-function aPrefs(){
+/* field row inside an open category — controls always visible, no secondary per-field toggle (the category itself is the one that expands/collapses) */
+function aAccField(f,U){
+ const[k,l,v,step]=f,p=S.prefs[k];
+ const sugg=pendingSugg().find(x=>x.k===k);
+ const changed=U.find(u=>u.k===k);
+ return `<div class="pfRowC ${(sugg||changed)?'pending':''}">
+  <div class="pfRowHead" style="padding-bottom:2px">
+   <span class="pfLbl">${l}${p.lock?icon('lock','sm'):''}${(sugg||changed)?`<span class="pendingDot" title="${sugg?'Suggestion pending':'Changed by Alex'}"></span>`:''}</span>
+   <span class="pfVal">${esc(v)}</span>
+  </div>
+  <div class="pfRowCtl">${sugg?`<span class="s13 sub">Alex suggested: ${esc(sgDesc(sugg))}${sugg.note?` · “${esc(sugg.note)}”`:''}</span><div class="row wrap" style="gap:8px">${btn('Decline',{kind:'sec',sm:1,act:'sugg',data:`data-v="decline" data-id="${sugg.id}"`})}${btn('Approve',{sm:1,act:'sugg',data:`data-v="accept" data-id="${sugg.id}"`})}</div>`:''}${changed?`<span class="s13 sub">Changed by Alex · ${ago(changed.t)}</span>`:''}
+   <div class="row wrap" style="gap:8px">${step?stepper(step,'agent'):''}${impBtn(k,'agent')}<button class="iconbtn ${p.lock?'on':''}" data-act="pref-lock" data-k="${k}" aria-label="${p.lock?'Unlock':'Lock'} ${l}" title="${p.lock?'Unlock':'Lock'}">${icon(p.lock?'lock':'unlock')}</button></div></div>
+ </div>`;
+}
+function resultRow(l){
+ return `<div class="rrow">${media(l,'','thumb')}<button class="col grow" data-act="a-go" data-r="listing" data-id="${l.id}" style="gap:1px"><span class="row" style="gap:8px"><b class="num">${money(l.price)}</b>${isNew(l)&&!l.onBoard?badge('New','accent'):''}${l.priceDrop?badge('Price cut '+kf(l.priceDrop),'line'):''}</span><span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.type}</span><span class="small muted">${l.addr}, ${l.hood} · ${l.commute} min commute</span></button>${fitPill(l)}${l.onBoard?badge('On board'):btn('Add',{sm:1,kind:'sec',icon:'plus',act:'add-board',data:`data-id="${l.id}"`})}</div>`;
+}
+function aSearchPrefs(){
  const U=S.prefUpdates;
- const banner=(U.length?`<div class="sugg" style="border-color:var(--accent)"><span class="cbx" aria-hidden="true"></span><div class="col grow" style="gap:4px"><span class="b">To do: review ${U.length===1?'1 change':U.length+' changes'} Alex made</span><span class="s13 sub">They’re already applied to Alex’s preferences and fit scores.</span><ul class="s13 sub" style="margin:0;padding-left:18px">${U.slice(0,6).map(u=>`<li>${esc(u.text)} <span class="muted">· ${ago(u.t)}</span></li>`).join('')}</ul></div>${btn('Mark as reviewed',{sm:1,icon:'check',act:'pref-seen'})}</div>`:'')+pendingSugg().map(sg=>`<div class="sugg">${av('AK')}<div class="col grow"><span class="b">Alex suggested a change to ${esc(PLBL(sg.k))} (locked)</span><span class="s13 sub">${esc(sgDesc(sg))}${S.prefs[sg.k].lock?' · locked by you':''}${sg.note?` · “${esc(sg.note)}”`:''}</span></div>${btn('Decline',{kind:'sec',sm:1,act:'sugg',data:`data-v="decline" data-id="${sg.id}"`})}${btn('Approve',{sm:1,act:'sugg',data:`data-v="accept" data-id="${sg.id}"`})}</div>`).join('');
- const groups=PREF_GROUPS().map(([g,fields])=>`<div class="card" style="gap:0;padding:18px 20px 6px"><h3 style="padding-bottom:4px">${g}</h3>${fields.map(([k,l,v,step])=>{const p=S.prefs[k];return `<div class="pf"><div class="col grow" style="gap:2px"><span class="small muted row" style="gap:5px">${l}${p.lock?icon('lock','sm'):''}${(sg=>sg?`<span class="aitag" style="font-weight:500">Suggestion pending</span>`:'')(pendingSugg().find(x=>x.k===k))}${(u=>u?`<span class="aitag" style="font-weight:500">Changed by Alex · ${ago(u.t)}</span>`:'')(U.find(u=>u.k===k))}</span><span class="m">${esc(v)}</span>${p.lock?'<span class="small muted">Locked by you — Alex’s edits become suggestions</span>':''}</div>${step?stepper(step,'agent'):''}${impBtn(k,'agent')}<button class="iconbtn ${p.lock?'on':''}" data-act="pref-lock" data-k="${k}" aria-label="${p.lock?'Unlock':'Lock'} ${l}" title="${p.lock?'Unlock':'Lock'}">${icon(p.lock?'lock':'unlock')}</button></div>`;}).join('')}</div>`);
- const hist=`<div class="card" style="gap:2px"><div class="row" style="gap:8px;padding-bottom:6px">${icon('history')}<h3>Change history</h3></div>${S.prefHistory.slice(0,7).map(h=>`<div class="li">${av(h.who==='client'?'AK':'MC',h.who==='agent','sm')}<div class="col grow"><span class="s13">${esc(h.text)}</span><span class="small muted">${ago(h.t)}</span></div></div>`).join('')}</div>`;
+ const banner=(U.length?`<div class="sugg" style="border-color:var(--accent)"><span class="cbx" aria-hidden="true"></span><div class="col grow" style="gap:4px"><span class="b">To do: review ${U.length===1?'1 change':U.length+' changes'} Alex made</span><span class="s13 sub">They’re already applied to Alex’s preferences and fit scores.</span><ul class="s13 sub" style="margin:0;padding-left:18px">${U.slice(0,6).map(u=>`<li>${esc(u.text)} <span class="muted">· ${ago(u.t)}</span></li>`).join('')}</ul></div>${btn('Mark as reviewed',{sm:1,icon:'check',act:'pref-seen'})}</div>`:'');
+ const cardsRow=`<div class="col" style="gap:10px">${PREF_GROUPS().map(([g,fields])=>{
+  const open=S.a.openCategory===g;
+  const hasPend=fields.some(([k])=>pendingSugg().find(x=>x.k===k)||U.find(u=>u.k===k));
+  const summary=fields.map(f=>f[2]).join(' · ');
+  return `<div class="accCat ${open?'open':''}">
+   <button type="button" class="accCatHead" data-act="a-cat-toggle" data-c="${esc(g)}" aria-expanded="${open}">
+    <span class="accCatIcon">${icon(GROUP_ICON[g]||'house')}</span>
+    <span class="col grow" style="gap:1px;min-width:0">
+     <span class="accCatTitle">${g}${hasPend?`<span class="pendingDot" title="Needs your attention"></span>`:''}</span>
+     ${!open?`<span class="accCatSummary">${esc(summary)}</span>`:''}
+    </span>
+    ${icon(open?'chevU':'chevD','sm')}
+   </button>
+   ${open?`<div class="accCatBody">${fields.map(f=>aAccField(f,U)).join('')}</div>`:''}
+  </div>`;
+ }).join('')}</div>`;
+
+ /* AI Voice: a single button by default; expands in place only once there's something to review */
  const pt=S.a.ptText,has=!!pt.trim(),det=has?ptDiff(ptParse(pt)):[];
- const tcard=`<div class="card" style="gap:10px"><div class="row" style="gap:8px">${icon('msg')}<h3 class="grow">Update from a note</h3>${pt?'':'<button class="link" data-act="pt-example">Try an example</button>'}</div>
-  <span class="s13 sub">Type or dictate what Alex told you. It’s mapped to preferences, and you approve every change before it’s saved.</span>
+ const expanded=has||S.a.listening||S.a.ptOpen;
+ const micBtn=`<button type="button" class="aiMicBtn ${S.a.listening?'on':''}" data-act="pt-mic" aria-pressed="${S.a.listening}"><span class="aiMicIconWrap">${icon('mic')}${icon('spark','sm')}</span><span>${S.a.listening?'Listening… tap to stop':'AI Voice'}</span></button>`;
+ const tcard=expanded?`<div class="card ai" style="gap:10px"><div class="row" style="gap:8px">${micBtn}<span class="grow"></span>${pt?btn('Clear',{kind:'ghost',sm:1,act:'pt-clear'}):''}${btn('Save',{sm:1,icon:'check',act:'pt-save',disabled:!has})}</div>
   <div class="inp pt ${S.a.listening?'rec':''}"><textarea id="pt-input" data-input="ptText" placeholder="e.g. Office is a must now, budget up to $675k, add Linden Hills" aria-label="Preferences in your words">${esc(pt)}</textarea></div>
-  <div class="row" style="gap:8px"><button type="button" class="btn sec sm mic ${S.a.listening?'on':''}" data-act="pt-mic" aria-pressed="${S.a.listening}">${icon('mic')}${S.a.listening?'Listening… stop':'Dictate'}</button><span class="grow"></span>${pt?btn('Clear',{kind:'ghost',sm:1,act:'pt-clear'}):''}${btn('Save',{sm:1,icon:'check',act:'pt-save',disabled:!has})}</div>
-  ${has?`<div class="col" style="gap:6px"><span class="upper">${det.length?`${det.length} change${det.length>1?'s':''} detected`:'Nothing detected yet'}</span>${det.length?`<div class="chips ptchips">${det.map(c=>`<span class="chip out">${esc(c.label)}${c.kind==='i'?'':':'} ${c.kind==='i'?'→ ':''}${esc(c.to)}</span>`).join('')}</div>`:'<span class="small muted">Mention price, areas, home type, bedrooms, size, commute, HOA, the highway, or features like garage, yard and office.</span>'}</div>`:''}
-  ${S.prefNotes.length?`<div class="col" style="gap:6px"><span class="upper">Saved notes</span>${S.prefNotes.slice(0,3).map(n=>`<div class="quote">“${esc(n.text)}”<div class="small muted" style="margin-top:4px">${ago(n.t)} · ${n.applied?`${n.applied} change${n.applied>1?'s':''} applied`:'No preference changes'}</div></div>`).join('')}</div>`:''}</div>`;
- const dream=`<div class="card" style="gap:8px"><h3>Dream home, in Alex’s words</h3><p class="s13 sub" style="line-height:1.55">“A quiet street where our daughter can bike, a real office, and a yard big enough for the dog. We don’t need fancy — just not a project.”</p></div>`;
- return `${banner}<div class="row wrap"><span class="s13 sub grow">Importance drives the fit score on every listing. Alex’s changes apply right away; review them here.</span>${btn(S.searches.some(s=>s.fromPrefs)?'Open preferences search':'Create search from preferences',{kind:'sec',sm:1,icon:'search',act:'search-from-prefs'})}</div>
- <div class="cols3"><div class="stack">${groups[0]}${groups[2]}</div><div class="stack">${groups[1]}${groups[3]}</div><div class="stack">${tcard}${hist}${dream}</div></div>`;
+  ${has?`<div class="col" style="gap:6px"><span class="upper">${det.length?`${det.length} change${det.length>1?'s':''} detected`:'Nothing detected yet'}</span>${det.length?`<div class="chips ptchips">${det.map(c=>`<span class="chip out">${esc(c.label)}${c.kind==='i'?'':':'} ${c.kind==='i'?'→ ':''}${esc(c.to)}</span>`).join('')}</div>`:'<span class="small muted">Mention price, areas, home type, bedrooms, size, commute, HOA, the highway, or features like garage, yard and office.</span>'}</div>`:''}</div>`
+  :`<div class="row" style="gap:10px">${micBtn}<button class="link" data-act="pt-open">or type</button></div>`;
+
+ return `${banner}
+ ${tcard}
+ <span class="s13 sub">Importance drives the fit score on every listing. Alex’s changes apply right away; review them here.</span>
+ ${cardsRow}`;
 }
 
 /* ============ preferences from text ============ */
@@ -863,13 +866,47 @@ function ptDiff(next){const lb={...Object.fromEntries(PREF_GROUPS().flatMap(g=>g
   if(fm&&fm(a)!==fm(b))out.push({id:k+':v',k,kind:'v',label:lb[k],from:fm(a),to:fm(b)});
   if(a.imp!==b.imp)out.push({id:k+':i',k,kind:'i',label:lb[k],from:IMPL[a.imp],to:IMPL[b.imp]});}
  return out;}
-function ptPatch(changes){const P=JSON.parse(JSON.stringify(S.prefs)),nx=S.a.pt.next;
+function ptPatch(changes,nx){const P=JSON.parse(JSON.stringify(S.prefs));nx=nx||S.a.pt.next;
  for(const c of changes){if(c.kind==='i')P[c.k].imp=nx[c.k].imp;else for(const f of ['v','min','max'])if(f in nx[c.k])P[c.k][f]=JSON.parse(JSON.stringify(nx[c.k][f]));}
  return P;}
 function ptImpact(changes){const old=S.prefs,b=board(),lk=S.searches.find(s=>s.synced);
  const before=b.map(l=>fit(l).score),n0=lk?runSearch(prefCriteria()).results.length:0;
  S.prefs=ptPatch(changes);const after=b.map(l=>fit(l).score),n1=lk?runSearch(prefCriteria()).results.length:0;S.prefs=old;
  return{moved:b.filter((l,i)=>before[i]!==after[i]).length,total:b.length,lk,n0,n1};}
+/* client voice/typed note: unlocked fields apply at once (like any other client edit); locked fields become suggestions, grouped as one request */
+function cPtApply(){
+ const text=S.c.ptText.trim();if(!text)return;
+ const next=ptParse(text),changes=ptDiff(next);
+ S.c.ptText='';S.c.ptOpen=false;
+ if(!changes.length){toast('Got it — nothing to change there');return;}
+ const byField={};for(const c of changes)(byField[c.k]=byField[c.k]||[]).push(c.k);
+ const applied=[],suggested=[],g='g'+Date.now();
+ for(const k of Object.keys(byField)){
+  const p=S.prefs[k],lbl=PLBL(k),from={},to={};
+  if(next[k].imp!==p.imp){from.imp=p.imp;to.imp=next[k].imp;}
+  for(const f of ['v','min','max'])if(f in next[k]&&JSON.stringify(next[k][f])!==JSON.stringify(p[f]))from[f]=p[f],to[f]=next[k][f];
+  if(!Object.keys(to).length)continue;
+  if(p.lock){
+   const sg={id:'sg'+Date.now()+Math.random().toString(36).slice(2,6),g,k,from:JSON.parse(JSON.stringify(from)),to:JSON.parse(JSON.stringify(to)),note:`From a note: “${text.length>80?text.slice(0,78)+'…':text}”`,status:'pending',t:Date.now()};
+   S.suggestions.push(sg);
+   S.prefHistory.unshift({who:'client',text:`Suggested ${lbl}: ${sgDesc(sg)}`,t:Date.now()});
+   suggested.push(lbl);
+  }else{
+   const txt=`${lbl}: ${sgDesc({k,from,to})}`;
+   Object.assign(p,JSON.parse(JSON.stringify(to)));
+   S.prefHistory.unshift({who:'client',text:txt,t:Date.now()});
+   clientPrefChanged(k,txt);
+   applied.push(lbl);
+  }
+ }
+ if(suggested.length){log('client',`suggested ${suggested.length} change${suggested.length>1?'s':''} from a note`);pushReq('prefs',g);}
+ if(applied.length)log('client',`updated ${applied.length} preference${applied.length>1?'s':''} from a note`);
+ const parts=[];
+ if(applied.length)parts.push(`Updated ${applied.join(', ')}`);
+ if(suggested.length)parts.push(`sent ${suggested.join(', ')} to Maya as ${suggested.length>1?'suggestions':'a suggestion'}`);
+ toast(parts.join(' · ')||'Got it');
+ ping(applied.length?'Maya gets a to-do to review it':'Maya sees your suggestion');
+}
 function aPrefsModal(){
  const m=S.a.pt,on=m.changes.filter(c=>!m.off.includes(c.id)),im=ptImpact(on),n=on.length;
  const rows=m.changes.map(c=>{const ck=!m.off.includes(c.id),lock=S.prefs[c.k].lock;return `<label class="ptrow ${ck?'':'off'}"><input type="checkbox" data-act="pt-toggle" data-id="${c.id}" ${ck?'checked':''}><div class="col grow" style="gap:2px"><span class="m">${esc(c.label)}${c.kind==='i'?' <span class="small muted">· importance</span>':''}</span><span class="s13"><span class="muted" style="text-decoration:line-through">${esc(c.from)}</span> → <b>${esc(c.to)}</b></span>${lock?`<span class="small muted row" style="gap:4px">${icon('lock','sm')}Locked by you — saving overrides the lock</span>`:''}</div></label>`;}).join('');
@@ -884,32 +921,38 @@ function aPrefsModal(){
  <div class="row" style="justify-content:flex-end;gap:8px">${btn('Cancel',{kind:'sec',act:'modal-close'})}${btn(n?`Approve & save ${n} change${n>1?'s':''}`:'Nothing selected',{icon:'check',act:'pt-apply',disabled:!n})}</div></div></div>`;
 }
 let REC=null;
-function ptMic(){
+function ptMic(who){
+ const St=S[who||'a'];
  if(REC){REC.stop();return;}
  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
  if(!SR){toast('Voice input isn’t supported in this browser — type instead');return;}
  const r=new SR();r.lang='en-US';r.continuous=true;r.interimResults=true;
- const base=S.a.ptText.trim()?S.a.ptText.trim()+' ':'';let fin='';
- r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else tmp+=x;}S.a.ptText=(base+fin+tmp).replace(/\s+/g,' ').trimStart();render();};
+ const base=St.ptText.trim()?St.ptText.trim()+' ':'';let fin='';
+ r.onresult=e=>{let tmp='';for(let i=e.resultIndex;i<e.results.length;i++){const x=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=x;else tmp+=x;}St.ptText=(base+fin+tmp).replace(/\s+/g,' ').trimStart();render();};
  r.onerror=e=>toast(/not-allowed|service-not-allowed/.test(e.error)?'Microphone access is blocked — type instead':e.error==='no-speech'?'Didn’t hear anything — try again':'Voice input stopped');
- r.onend=()=>{REC=null;S.a.listening=false;render();};
- try{r.start();REC=r;S.a.listening=true;}catch(e){toast('Couldn’t start the microphone');}
+ r.onend=()=>{REC=null;St.listening=false;render();};
+ try{r.start();REC=r;St.listening=true;}catch(e){toast('Couldn’t start the microphone');}
 }
 function reactLine(l){if(!l.reaction)return`<span class="muted">Not reviewed yet</span>`;const m={love:['heart','Loved'],like:['thumb','Liked'],maybe:['help','Maybe'],pass:['x','Passed']}[l.reaction];return `<span class="meta ${l.reaction==='love'?'love':''}">${icon(m[0],l.reaction==='love'?'fill':'')}<span style="color:var(--text-2)">Alex · ${m[1]}</span></span>`;}
 function sortList(ls){const s=S.a.sort;return [...ls].sort((a,b)=>s==='price'?a.price-b.price:s==='new'?a.dom-b.dom:fit(b).score-fit(a).score);}
 function aBoard(){
  if(S.newLoves.length){S.newLoves=[];}
- const F={all:l=>true,loved:l=>l.reaction==='love',review:l=>!l.reaction,short:l=>l.status==='Shortlisted',tour:l=>S.tour.stops.includes(l.id),passed:l=>l.reaction==='pass'};
- const names=[['all','All'],['loved','Loved'],['review','To review'],['short','Shortlisted'],['tour','On tour'],['passed','Passed']];
- const b=board();const list=sortList(b.filter(F[S.a.filter]));const sel=S.a.selected;
- const selbar=sel.length?`<div class="selbar"><span class="grow m">${sel.length} ${sel.length===1?'home':'homes'} selected</span>${btn('Compare',{sm:1,kind:'inv',icon:'compare',act:'a-compare-sel',disabled:sel.length<2||sel.length>4})}${btn('Add to tour',{sm:1,kind:'inv',icon:'calendar',act:'a-tour-sel'})}${btn('Clear',{sm:1,kind:'inv',act:'a-clear-sel'})}</div>`:'';
- return `<div class="row wrap"><div class="chips grow">${names.map(([k,l])=>`<button class="chip" data-act="a-filter" data-v="${k}" aria-pressed="${S.a.filter===k}">${k==='loved'?icon('heart','sm'):''}${l} ${b.filter(F[k]).length}</button>`).join('')}</div>
+ const F={all:l=>true,loved:l=>l.reaction==='love',review:l=>!l.reaction,short:l=>l.status==='Shortlisted',passed:l=>l.reaction==='pass'};
+ const b=board();
+ const matches=runSearch(prefCriteria()).results.filter(l=>!l.onBoard);
+ const names=[['all','All',b.length],['loved','Loved',b.filter(F.loved).length],['review','To review',b.filter(F.review).length],['matches','Worth a look',matches.length],['short','Shortlisted',b.filter(F.short).length],['passed','Passed',b.filter(F.passed).length]];
+ const isMatches=S.a.filter==='matches';
+ const list=isMatches?sortList(matches):sortList(b.filter(F[S.a.filter]||F.all));
+ const sel=S.a.selected;
+ const selbar=(!isMatches&&sel.length)?`<div class="selbar"><span class="grow m">${sel.length} ${sel.length===1?'home':'homes'} selected</span>${btn('Compare',{sm:1,kind:'inv',icon:'compare',act:'a-compare-sel',disabled:sel.length<2||sel.length>4})}${btn('Clear',{sm:1,kind:'inv',act:'a-clear-sel'})}</div>`:'';
+ return `<div class="row wrap"><div class="chips grow">${names.map(([k,l,c])=>`<button class="chip" data-act="a-filter" data-v="${k}" aria-pressed="${S.a.filter===k}">${k==='loved'?icon('heart','sm'):''}${l} ${c}</button>`).join('')}</div>
  <label class="inp" style="padding:6px 10px">${icon('sliders','muted')}<select id="a-sort" data-input="sort" aria-label="Sort"><option value="fit" ${S.a.sort==='fit'?'selected':''}>Best fit</option><option value="price" ${S.a.sort==='price'?'selected':''}>Lowest price</option><option value="new" ${S.a.sort==='new'?'selected':''}>Newest</option></select></label>${btn('Add listing',{sm:1,icon:'plus',act:'modal-add'})}</div>
  ${selbar}
- ${list.length?`<div class="grid-cards">${list.map(l=>{const on=sel.includes(l.id);return `<article class="lcard ${on?'sel':''} ${l.reaction==='pass'?'dim':''}" data-act="a-go" data-r="listing" data-id="${l.id}" tabindex="0" aria-label="${l.addr}">
+ ${isMatches?(list.length?`<span class="s13 sub">Homes matching Alex’s preferences, not yet on the board — ranked by fit.</span><div class="col" style="gap:0">${list.map(resultRow).join('')}</div>`:`<div class="empty">No new matches right now.</div>`)
+ :(list.length?`<div class="grid-cards">${list.map(l=>{const on=sel.includes(l.id);return `<article class="lcard ${on?'sel':''} ${l.reaction==='pass'?'dim':''}" data-act="a-go" data-r="listing" data-id="${l.id}" tabindex="0" aria-label="${l.addr}">
  ${media(l,`<div class="ov l"><button class="cbx" role="checkbox" aria-checked="${on}" aria-label="Select ${l.addr}" data-act="a-select" data-id="${l.id}">${on?icon('check'):''}</button>${l.pick?badge('Agent pick','ink'):''}${l.addedBy==='client'?badge('Added by Alex','line'):''}</div><div class="ov r">${fitPill(l)}</div>`)}
  <div class="lbody"><div class="row"><span class="price grow num">${money(l.price)}</span>${badge(l.status,l.status==='New'?'accent':l.status==='Rejected'?'line':'')}</div><span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft</span><span class="s13 muted">${l.addr}, ${l.hood}</span>
- <div class="lfoot">${reactLine(l)}<span class="grow"></span>${icon('msg','muted')}<span class="muted">${(S.comments[l.id]||[]).length}</span></div></div></article>`;}).join('')}</div>`:`<div class="empty">No homes match this filter.</div>`}`;
+ <div class="lfoot">${reactLine(l)}<span class="grow"></span>${icon('msg','muted')}<span class="muted">${(S.comments[l.id]||[]).length}</span></div></div></article>`;}).join('')}</div>`:`<div class="empty">No homes match this filter.</div>`)}`;
 }
 function commentsBlock(id,who){
  const list=(S.comments[id]||[]).filter(c=>who==='agent'||!c.priv);
@@ -923,7 +966,6 @@ function aListing(){
  if(S.clientAdds.includes(l.id))S.clientAdds=S.clientAdds.filter(x=>x!==l.id);
  const fact=(v,k)=>`<div class="fact col" style="gap:0"><span class="v num">${v}</span><span class="small muted">${k}</span></div>`;
  const rb=(v,i,t)=>`<button class="rbtn" disabled aria-pressed="${l.reaction===v}">${icon(i,l.reaction===v&&v==='love'?'fill lg':'lg')}${t}</button>`;
- const onTour=S.tour.stops.includes(l.id);
  return `<nav class="crumb"><button data-act="a-go" data-r="client" data-t="overview">Alex Kim</button>${icon('chev','sm')}<button data-act="a-go" data-r="client" data-t="board">Board</button>${icon('chev','sm')}<span>${l.addr}</span></nav>
  <div class="gallery">${media(l,`<div class="ov l">${l.pick?badge('Agent pick','ink'):''}</div>`,'main')}<div class="side">${media({tone:(l.tone+2)%6})}${media({tone:(l.tone+4)%6},`<div class="ov br"><span class="badge line">${icon('grid','sm')}All 24 photos</span></div>`)}</div></div>
  <div class="cols"><div class="stack"><div class="col" style="gap:8px"><div class="row wrap"><span class="num" style="font-size:28px;font-weight:600">${money(l.price)}</span>${badge(l.onBoard?'Active':'Active','line')}${badge(l.status)}<span class="grow"></span><span class="sub m">Est. ${money(l.monthly)} / mo</span></div><span class="sub">${l.addr}, ${l.hood} · Listed ${l.dom} ${l.dom===1?'day':'days'} ago</span>
@@ -931,18 +973,17 @@ function aListing(){
  <div class="card" style="gap:4px"><div class="row" style="padding-bottom:8px"><span class="fitbig num ${f.score<80?'low':''}">${f.deal?icon('x','lg'):f.score}</span><div class="col grow"><h3>Why it fits Alex</h3><span class="s13 sub">${f.deal?'Conflicts with a deal-breaker: near highway I-94':`Meets ${f.musts[0]} of ${f.musts[1]} must-haves`}</span></div><button class="link" data-act="a-go" data-r="client" data-t="prefs">Edit preferences</button></div>${critList(l)}</div>
  <div class="card" style="gap:8px"><h3>About this home</h3><p class="sub" style="line-height:1.6;max-width:68ch">${l.desc}</p></div></div>
  <div class="stack"><div class="card" style="gap:12px"><div class="row"><h3 class="grow">Alex’s reaction</h3>${l.reasons.length?`<span class="small muted">${l.reasons.join(', ')}</span>`:''}</div><div class="reacts">${rb('love','heart','Love')}${rb('like','thumb','Like')}${rb('maybe','help','Maybe')}${rb('pass','x','Pass')}</div>
-  <div class="row" style="border-top:1px solid var(--border);padding-top:12px"><span class="s13 sub grow">Board status</span><label class="inp" style="padding:5px 8px"><select id="st-${l.id}" data-input="status" data-id="${l.id}" aria-label="Board status">${['New','Shortlisted','Touring','Offered','Rejected'].map(s=>`<option ${l.status===s?'selected':''}>${s}</option>`).join('')}</select></label></div>
+  <div class="row" style="border-top:1px solid var(--border);padding-top:12px"><span class="s13 sub grow">Board status</span><label class="inp" style="padding:5px 8px"><select id="st-${l.id}" data-input="status" data-id="${l.id}" aria-label="Board status">${['New','Shortlisted','Rejected','Archived'].map(s=>`<option ${l.status===s?'selected':''}>${s}</option>`).join('')}</select></label></div>
   <div class="row"><span class="s13 sub grow">Agent pick</span><button class="toggle" role="switch" aria-checked="${!!l.pick}" aria-label="Agent pick" data-act="a-pick" data-id="${l.id}"></button></div>
-  <div class="row">${l.onBoard?btn(onTour?'On the tour':'Add to tour',{kind:'sec',icon:'calendar',act:'a-addtour',data:`data-id="${l.id}"`,disabled:onTour}):btn('Add to board',{kind:'sec',icon:'plus',act:'add-board',data:`data-id="${l.id}"`})}${btn('Draft offer',{icon:'offer',act:'a-draft-offer',data:`data-id="${l.id}"`})}</div></div>
+  <div class="row">${l.onBoard?badge('On board'):btn('Add to board',{kind:'sec',icon:'plus',act:'add-board',data:`data-id="${l.id}"`})}</div></div>
  <div class="card" style="gap:14px"><h3>Comments</h3>${commentsBlock(l.id,'agent')}</div></div></div>`;
 }
 function cmpRows(agent){
- const fb=id=>S.feedback[id]?S.feedback[id].stars:null;
  return [
  ['sec','Cost'],['Price',l=>money(l.price),l=>-l.price],['Price / sqft',l=>'$'+Math.round(l.price/l.sqft),l=>-l.price/l.sqft],['Est. monthly',l=>money(l.monthly),l=>-l.monthly],['HOA',l=>l.hoa?`$${l.hoa} / mo`:'$0',l=>-l.hoa],
  ['sec','Home'],['Beds',l=>l.beds,l=>l.bedsN+(l.office===1?.3:0)],['Baths',l=>l.baths,l=>l.baths],['Size',l=>nf(l.sqft)+' sqft',l=>l.sqft],['Lot',l=>l.lot?nf(l.lot)+' sqft':'—',l=>l.lot],['Year built',l=>l.year,l=>l.year],
- ['sec',agent?'Fit & location':'Location'],['Commute to Medical Center',l=>l.commute+' min',l=>-l.commute],['School rating',l=>l.school+' / 10',l=>l.school],...(agent?[['Must-haves met',l=>{const f=fit(l);return `${f.musts[0]} of ${f.musts[1]}`;},l=>fit(l).musts[0]],['Fit score',l=>fit(l).deal?'Deal-breaker':fit(l).score,l=>fit(l).score]]:[]),
- ['sec','Alex’s take'],['Reaction',l=>({love:'Loved',like:'Liked',maybe:'Maybe',pass:'Passed'})[l.reaction]||'Not reviewed',null],['Tour rating',l=>fb(l.id)?'★ '+fb(l.id):'Not toured',l=>fb(l.id)||0]];
+ ['sec',agent?'Fit & location':'Location'],['Commute',l=>l.commute+' min',l=>-l.commute],['School rating',l=>l.school+' / 10',l=>l.school],...(agent?[['Must-haves met',l=>{const f=fit(l);return `${f.musts[0]} of ${f.musts[1]}`;},l=>fit(l).musts[0]],['Fit score',l=>fit(l).deal?'Deal-breaker':fit(l).score,l=>fit(l).score]]:[]),
+ ['sec','Alex’s take'],['Reaction',l=>({love:'Loved',like:'Liked',maybe:'Maybe',pass:'Passed'})[l.reaction]||'Not reviewed',null]];
 }
 function cmpTableRows(ls,wide){
  const rows=cmpRows(wide);const out=[];let pendingSec=null;
@@ -958,7 +999,7 @@ function cmpTableRows(ls,wide){
 const AI_CATS=[['budget','Budget',['price','hoa']],['location','Location',['areas','commute']],['property','Property',['type','beds','size']],['features','Features',['garage','yard','office','primaryMain']]];
 const AI_PHRASE={budget:'price',location:'location and commute',property:'space',features:'features'};
 const AI_SIG={features:/yard|office|nook|garage|primary|main floor/,location:/commute|street|traffic|neighbo|area|school|drive/,budget:/price|expensive|afford|budget|cost/,property:/small|tight|space|size|layout|bedroom|room/};
-const aiKey=()=>JSON.stringify([S.compare,S.prefs,S.compare.map(id=>[(S.comments[id]||[]).filter(c=>c.who==='client').length,L(id).reaction,S.feedback[id]?.stars||0])]);
+const aiKey=()=>JSON.stringify([S.compare,S.prefs,S.compare.map(id=>[(S.comments[id]||[]).filter(c=>c.who==='client').length,L(id).reaction])]);
 const aList=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
 const f1=n=>(Math.round(n*10)/10).toFixed(1);
 const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
@@ -982,7 +1023,7 @@ function aiText(k,l,ls){
  if(k==='location'){const inA=P.areas.v.includes(l.hood),adj=(ADJ[l.hood]||[]).some(a=>P.areas.v.includes(a)),d=P.commute.v-l.commute;
   if(l.highway&&P.highway.imp==='never')s.push('backs onto I-94, which Alex listed as a deal-breaker');
   s.push(inA?`${l.hood} is one of Alex’s preferred areas`:adj?`${l.hood} borders a preferred area`:`${l.hood} is outside Alex’s preferred areas`);
-  s.push((d>=0?`the ${l.commute}-min drive to Medical Center is ${d?d+' min under':'right at'} the ${P.commute.v}-min limit`:`the ${l.commute}-min drive is ${-d} min over the ${P.commute.v}-min limit`)+(best(x=>x.commute,1)?' (shortest here)':''));
+  s.push((d>=0?`the ${l.commute}-min commute is ${d?d+' min under':'right at'} the ${P.commute.v}-min limit`:`the ${l.commute}-min commute is ${-d} min over the ${P.commute.v}-min limit`)+(best(x=>x.commute,1)?' (shortest here)':''));
   s.push(`schools rate ${l.school}/10${best(x=>x.school)?', the best of the group':''} (context, not scored)`);}
  if(k==='property'){
   s.push(P.type.v.includes(l.type)?`${l.type}, a home type Alex wants`:`${l.type} isn’t on Alex’s list (${P.type.v.join(', ')})`);
@@ -1016,8 +1057,8 @@ function aiCompute(){
   esc(rk.slice(1).map(line).join(' '))];
  if(sec&&!sec.deal&&sec.leads)sum.push(esc(`If ${ph(sec)} matters more to Alex than ${top.leads?ph(top):'the overall fit'}, ${sec.l.addr} is the better pick.`));
  const checks=[];
- for(const h of homes){for(const q of h.qs)checks.push(`Alex asked about ${h.l.addr}: “${q}” Check it on the tour.`);
-  for(const p of fitParts(h.l))if(p.m===.5&&p.imp!=='off'){const t={commute:`Drive from ${h.l.addr} to Medical Center at rush hour (listed ${h.l.commute} min, limit ${P.commute.v}).`,office:`Confirm the den at ${h.l.addr} closes off as an office.`,garage:`Check whether the 1-car garage at ${h.l.addr} is enough for Alex.`,beds:`See if ${h.l.addr} has space for a ${P.beds.v}th bedroom.`,price:`Ask how firm the ${money(h.l.price)} price is at ${h.l.addr}.`,areas:`Walk ${h.l.hood} with Alex; it borders a preferred area.`,yard:`Check the yard size at ${h.l.addr} for the dog.`}[p.key];if(t)checks.push(t);}}
+ for(const h of homes){for(const q of h.qs)checks.push(`Alex asked about ${h.l.addr}: “${q}” Check it with the listing agent.`);
+  for(const p of fitParts(h.l))if(p.m===.5&&p.imp!=='off'){const t={commute:`Confirm the commute from ${h.l.addr} at rush hour (listed ${h.l.commute} min, limit ${P.commute.v}).`,office:`Confirm the den at ${h.l.addr} closes off as an office.`,garage:`Check whether the 1-car garage at ${h.l.addr} is enough for Alex.`,beds:`See if ${h.l.addr} has space for a ${P.beds.v}th bedroom.`,price:`Ask how firm the ${money(h.l.price)} price is at ${h.l.addr}.`,areas:`Walk ${h.l.hood} with Alex; it borders a preferred area.`,yard:`Check the yard size at ${h.l.addr} for the dog.`}[p.key];if(t)checks.push(t);}}
  return{homes,rank:rk.map(h=>h.l.id),summary:sum,checks:checks.slice(0,5),nPrefs:Object.values(P).filter(p=>p.imp!=='off').length};
 }
 function aiRun(){
@@ -1031,7 +1072,7 @@ const aiAdj=a=>a?`<span class="aiadj ${a.delta<0?'neg':''}">${icon('msg','sm')}$
 function aiCard(){
  const ai=S.ai;if(S.compare.length<2)return'';
  const head=(meta,acts)=>`<div class="row wrap" style="gap:10px"><span class="aitag">${icon('spark','sm')}AI comparison</span><div class="col grow" style="gap:0"><h3>How these homes fit Alex’s preferences</h3><span class="small muted">${meta}</span></div>${acts}</div>`;
- if(!ai||ai.status==='loading')return `<div class="card ai" aria-busy="true">${head(`Analyzing ${S.compare.length} homes against Alex’s preferences, comments and ratings…`,'')}<div class="aisum"><div class="skel" style="width:92%"></div><div class="skel" style="width:78%"></div><div class="skel" style="width:60%"></div></div><div class="row" style="gap:16px;align-items:flex-start">${S.compare.map(()=>`<div class="col grow" style="gap:8px"><div class="skel" style="width:40%;height:18px"></div><div class="skel"></div><div class="skel" style="width:85%"></div></div>`).join('')}</div></div>`;
+ if(!ai||ai.status==='loading')return `<div class="card ai" aria-busy="true">${head(`Analyzing ${S.compare.length} homes against Alex’s preferences and comments…`,'')}<div class="aisum"><div class="skel" style="width:92%"></div><div class="skel" style="width:78%"></div><div class="skel" style="width:60%"></div></div><div class="row" style="gap:16px;align-items:flex-start">${S.compare.map(()=>`<div class="col grow" style="gap:8px"><div class="skel" style="width:40%;height:18px"></div><div class="skel"></div><div class="skel" style="width:85%"></div></div>`).join('')}</div></div>`;
  const R=ai.res,stale=ai.key!==aiKey(),homes=R.rank.map(id=>R.homes.find(h=>h.l.id===id));
  const acts=`${btn('Regenerate',{kind:stale?'':'sec',sm:1,icon:'reset',act:'ai-run'})}`;
  const tbl=`<div class="aitbl-wrap"><table class="aitbl"><thead><tr><td style="width:150px"><span class="upper">Category</span></td>${homes.map((h,i)=>`<td><div class="row" style="gap:8px;align-items:flex-start"><div class="col grow" style="gap:1px"><button class="b s13" data-act="a-go" data-r="listing" data-id="${h.l.id}" style="text-align:left">${esc(h.l.addr)}</button><span class="small muted">${money(h.l.price)} · ${h.l.hood}</span></div>${h.deal?badge(icon('x','sm')+'Deal-breaker','line'):i===0?badge('Best fit','ink'):''}</div></td>`).join('')}</tr></thead><tbody>
@@ -1061,117 +1102,7 @@ function aCompare(){
  ${aiCard()}
  <div class="cmp-wrap"><table class="cmp"><thead>${head}</thead><tbody>${cmpTableRows(ls,1)}</tbody></table></div>`;
 }
-const MAP_BASE=`<rect x="330" y="60" width="160" height="110" rx="16" class="park"/><rect x="50" y="250" width="130" height="120" rx="16" class="park"/>
- <path class="road" stroke-width="14" d="M0 150H600"/><path class="road" stroke-width="18" d="M0 300C200 270 350 330 600 280"/><path class="road" stroke-width="10" d="M0 395H600"/><path class="road" stroke-width="10" d="M140 0V420"/><path class="road" stroke-width="12" d="M290 0C270 150 310 300 280 420"/><path class="road" stroke-width="10" d="M470 0V420"/><path class="road" stroke-width="7" d="M0 50L600 210"/><path class="road" stroke-width="7" d="M40 420L600 350"/>`;
-function searchMap(R,client){
- const res=new Set(R.results.map(l=>l.id)),near=new Set(R.near.map(x=>x.l.id));
- const hoods=Object.entries(HOODS).map(([n,[x,y]])=>`<text class="hood" x="${x}" y="${y-44}" text-anchor="middle">${n.toUpperCase()}</text>`).join('');
- const others=S.listings.filter(l=>!res.has(l.id)&&!near.has(l.id)).map(l=>`<circle class="gd" cx="${COORD[l.id][0]}" cy="${COORD[l.id][1]}" r="3.5"/>`).join('');
- const nm=R.near.map(({l,why})=>`<circle class="nm" cx="${COORD[l.id][0]}" cy="${COORD[l.id][1]}" r="6"><title>${esc(l.addr)} · ${esc(why)}</title></circle>`).join('');
- const hits=R.results.map(l=>`<g class="spin" data-act="${client?'c-open':'a-go'}" ${client?`data-id="${l.id}" data-from="search"`:`data-r="listing" data-id="${l.id}"`}><title>${esc(l.addr)} · ${money(l.price)}${client?'':` · ${fit(l).score} fit`}</title><circle class="pin" cx="${COORD[l.id][0]}" cy="${COORD[l.id][1]}" r="9"/>${l.onBoard?`<circle class="onb" cx="${COORD[l.id][0]}" cy="${COORD[l.id][1]}" r="3.5"/>`:''}</g>`).join('');
- return `<svg viewBox="0 0 600 420" role="img" aria-label="Map of ${R.results.length} matching homes">${MAP_BASE}${hoods}${others}${nm}${hits}</svg>`;
-}
 const ALERTS={instant:'Instant alerts',daily:'Daily digest',weekly:'Weekly digest',off:'No alerts'};
-function aSearches(){
- const ss=S.searches;
- const menu=S.a.newSearch?`<div class="popmenu" role="menu" aria-label="New search">
-  <button role="menuitem" data-act="sc-new" data-v="prefs">${icon('sliders')}<span class="col" style="gap:2px"><span class="b">From preferences</span><span class="small muted">Alex’s must-haves become filters, deal-breakers are excluded, nice-to-haves rank results</span></span></button>
-  <button role="menuitem" data-act="sc-new" data-v="blank">${icon('search')}<span class="col" style="gap:2px"><span class="b">From scratch</span><span class="small muted">No filters to start; results are ranked by fit</span></span></button></div>`:'';
- const top=`<div class="row wrap"><div class="col grow"><h2>Saved searches</h2><span class="s13 sub">${ss.length} search${ss.length===1?'':'es'} for Alex</span></div><div class="menuwrap"><button type="button" class="btn" data-act="sc-new-menu" aria-haspopup="menu" aria-expanded="${!!S.a.newSearch}">${icon('plus')}New search${icon('chevD','sm')}</button>${menu}</div></div>`;
- if(!ss.length)return top+`<div class="empty">No saved searches yet. Create one from Alex’s preferences or from scratch.</div>`;
- const s=curSearch(),c=criteriaOf(s),R=runSearch(c),nm=newMatches(s);
- const cards=`<div class="scards">${ss.map(x=>{const r=runSearch(criteriaOf(x)),n=newMatches(x).length;return `<button class="scard ${x===s?'on':''}" data-act="sc-select" data-id="${x.id}"><span class="row" style="gap:8px"><span class="b grow">${esc(x.name)}</span>${x.fromPrefs?badge(icon('sliders','sm')+'From preferences'):''}</span><span class="s13 sub"><b class="num" style="color:var(--text)">${r.results.length}</b> matches${n?` · <span class="love m">${n} new</span>`:''}</span><span class="small muted">${ALERTS[x.alerts]} · ${x.mode==='curated'?'You review first':'Straight to Alex'}</span></button>`;}).join('')}</div>`;
- const settings=`<div class="card tight" style="flex-direction:row;flex-wrap:wrap;align-items:flex-end;gap:14px">
-  <div class="field grow" style="min-width:220px"><label for="sc-name">Search name</label><input id="sc-name" class="titleinput" data-input="scName" value="${esc(s.name)}"><span class="small muted">Created ${ago(s.t)} by ${s.by==='client'?'Alex':'you'} · ${s.fromPrefs?'from Alex’s preferences':'from scratch'}</span></div>
-  <div class="field"><label for="sc-alerts">Alex’s notifications</label><div class="inp" style="padding:6px 10px">${icon('bell','muted')}<select id="sc-alerts" data-input="scAlerts">${Object.entries(ALERTS).map(([k,v])=>`<option value="${k}" ${s.alerts===k?'selected':''}>${v}</option>`).join('')}</select></div></div>
-  <div class="field"><label for="sc-mode">New matches</label><div class="inp" style="padding:6px 10px">${icon('send','muted')}<select id="sc-mode" data-input="scMode"><option value="curated" ${s.mode==='curated'?'selected':''}>Review first, then send to Alex</option><option value="auto" ${s.mode==='auto'?'selected':''}>Send straight to Alex</option></select></div></div>
-  <button class="iconbtn" data-act="sc-delete" aria-label="Delete search" title="Delete search">${icon('trash')}</button></div>`;
- const synced=false;const tag=synced?`<span class="badge" title="From preferences">${icon('sliders','sm')}</span>`:'';
- const tog=(k,v,label)=>`<button class="chip ${(c[k]||[]).includes(v)?'':'out'}" data-act="sc-toggle" data-k="${k}" data-v="${v}" aria-pressed="${(c[k]||[]).includes(v)}">${label||v}</button>`;
- const step=(k,v,fmt)=>`<span class="stepper"><button data-act="sc-step" data-k="${k}" data-d="-1" aria-label="Decrease">${icon('minus','sm')}</button><span class="num" style="min-width:52px">${v?fmt(v):'Any'}</span><button data-act="sc-step" data-k="${k}" data-d="1" aria-label="Increase">${icon('plus','sm')}</button></span>`;
- const grp=(l,inner)=>`<div class="fgroup"><span class="lbl">${l}${tag}</span>${inner}</div>`;
- const panel=`<div class="card" style="gap:0;padding:16px 18px 6px"><div class="row"><h3 class="grow">Filters</h3><span class="small muted">${FILTERS.filter(f=>f.on(c)).length} active</span></div>
- ${grp('Price',`<div class="row" style="gap:8px"><label class="inp" style="padding:7px 10px"><input id="sc-pmin" data-input="scPrice" data-k="0" value="${c.price&&c.price[0]>0?money(c.price[0]):''}" placeholder="No min" aria-label="Min price"></label><span class="muted">–</span><label class="inp" style="padding:7px 10px"><input id="sc-pmax" data-input="scPrice" data-k="1" value="${c.price&&c.price[1]<9999999?money(c.price[1]):''}" placeholder="No max" aria-label="Max price"></label></div>`)}
- ${grp('Areas',`<div class="chips">${Object.keys(HOODS).map(h=>tog('areas',h)).join('')}</div>`)}
- ${grp('Home type',`<div class="chips">${['Single-family','Townhouse','Condo'].map(t=>tog('types',t)).join('')}</div>`)}
- ${grp('Bedrooms',step('beds',c.beds,v=>v+'+'))}
- ${grp('Max commute to Medical Center',step('commute',c.commute,v=>v+' min'))}
- ${grp('Must include',`<div class="chips">${Object.keys(FEAT).map(f=>tog('features',f,FEAT[f])).join('')}</div>`)}
- ${grp('Deal-breakers',`<button class="row s13 m" data-act="sc-hw" style="gap:8px"><span class="grow">Exclude homes near I-94</span><span class="toggle" role="switch" aria-checked="${!!c.noHighway}"></span></button>`)}</div>`;
- const queue=nm.length&&s.mode==='curated'?`<div class="selbar"><span class="grow"><b>${nm.length} new ${nm.length===1?'match':'matches'}</b> listed in the last 7 days — Alex sees them once you send them</span>${btn(`Send ${nm.length} to Alex`,{sm:1,kind:'inv',icon:'send',act:'sc-send-all'})}</div>`:s.mode==='auto'?`<div class="row s13 sub" style="gap:8px">${icon('send')}New matches go to Alex’s board automatically.</div>`:'';
- const map=`<div class="map">${searchMap(R)}<div class="map-legend"><span class="meta"><i class="ldot" style="background:var(--ink)"></i>${R.results.length} matches</span><span class="meta"><i class="ldot hollow"></i>${R.near.length} almost</span><span class="meta"><i class="ldot" style="background:var(--muted);opacity:.6"></i>Other listings</span></div></div>`;
- const vis=R.results.filter(l=>!s.hidden.includes(l.id));const shown=S.a.showAll?vis:vis.slice(0,8);
- const row=l=>`<div class="rrow">${media(l,'','thumb')}<button class="col grow" data-act="a-go" data-r="listing" data-id="${l.id}" style="gap:1px"><span class="row" style="gap:8px"><b class="num">${money(l.price)}</b>${l.priceDrop?badge('Price cut '+kf(l.priceDrop),'line'):''}${isNew(l)&&!l.onBoard?badge('New','accent'):''}</span><span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.type}</span><span class="small muted">${esc(l.addr)}, ${l.hood} · ${l.commute} min commute</span></button>${fitPill(l)}${l.onBoard?badge('On board'):`${btn('Add',{sm:1,kind:'sec',icon:'plus',act:'add-board',data:`data-id="${l.id}"`})}<button class="iconbtn" data-act="sc-hide" data-id="${l.id}" aria-label="Hide ${esc(l.addr)}" title="Hide from this search">${icon('x')}</button>`}</div>`;
- const byK={};R.near.forEach(x=>byK[x.k]=(byK[x.k]||0)+1);const topK=Object.entries(byK).sort((a,b)=>b[1]-a[1])[0];const topLabel=topK?R.steps.find(st=>st.k===topK[0]):null;
- const near=`<div class="card" style="gap:4px"><div class="row"><div class="col grow"><h3>Almost matches</h3><span class="small muted">${R.near.length} homes miss exactly one filter${topLabel?` · relaxing “${esc(topLabel.label)}” would add ${topK[1]}`:''}</span></div><button class="link" data-act="sc-near">${S.a.showNear?'Hide':'Show'}</button></div>${S.a.showNear?R.near.slice(0,6).map(x=>`<div class="rrow">${media(x.l,'','thumb')}<button class="col grow" data-act="a-go" data-r="listing" data-id="${x.l.id}" style="gap:1px"><b class="s13 num">${money(x.l.price)} · ${esc(x.l.addr)}</b><span class="small muted">${x.l.hood} · ${x.l.beds} bd · ${nf(x.l.sqft)} sqft</span></button><span class="badge line">${icon('x','sm')}${esc(x.why)}</span>${x.l.onBoard?badge('On board'):btn('Add anyway',{sm:1,kind:'ghost',act:'add-board',data:`data-id="${x.l.id}"`})}</div>`).join(''):''}</div>`;
- const view=S.a.resView||'list';
- const results=`<div class="card" style="gap:4px"><div class="row wrap"><h3 class="grow">Results · ${vis.length}</h3><span class="small muted">Ranked by fit${s.hidden.length?` · ${s.hidden.length} hidden`:''}</span><div class="vtabs"><button class="vtab ${view==='list'?'on':''}" data-act="sc-view" data-v="list" aria-pressed="${view==='list'}">List</button><button class="vtab ${view==='map'?'on':''}" data-act="sc-view" data-v="map" aria-pressed="${view==='map'}">Map</button></div></div>
-  ${view==='map'?map:(shown.map(row).join('')||'<div class="empty">No homes match. Try loosening a filter — see “Almost matches”.</div>')+(vis.length>8?`<button class="link" style="padding-top:10px" data-act="sc-all">${S.a.showAll?'Show fewer':`Show all ${vis.length}`}</button>`:'')}</div>`;
- return `${top}${cards}${settings}${queue}<div class="sgrid">${panel}<div class="stack">${results}${near}</div></div>`;
-}
-function mapSvg(small){
- const W=600,H=420,tt=S.tour.stops;const pts=[COORD[0],...tt.map(id=>COORD[id])];
- const path=pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
- const dots=board().filter(l=>!tt.includes(l.id)).map(l=>`<circle class="gd" cx="${COORD[l.id][0]}" cy="${COORD[l.id][1]}" r="6"/>`).join('');
- return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Tour route map">${MAP_BASE}
- ${dots}${tt.length?`<path class="route" d="${path}"/>`:''}
- <g><rect class="lblbg" x="${COORD[0][0]-34}" y="${COORD[0][1]-14}" width="68" height="26" rx="7"/><text class="lbl" x="${COORD[0][0]}" y="${COORD[0][1]+4}" text-anchor="middle">Office</text></g>
- ${tt.map((id,i)=>`<g><circle class="pin" cx="${COORD[id][0]}" cy="${COORD[id][1]}" r="${small?13:16}"/><text class="pint" x="${COORD[id][0]}" y="${COORD[id][1]+4.5}" text-anchor="middle">${i+1}</text></g>`).join('')}</svg>`;
-}
-function fbTours(){return[...(S.tour.status==='completed'?[S.tour]:[]),...S.pastTours.filter(t=>t.status==='completed')];}
-function aTourFeedback(){
- const tours=fbTours();if(!tours.length)return'';
- const VERD=[['strong','Strong fit'],['maybe','Maybe'],['no','Not a fit']];
- return tours.map(t=>{const ids=t.stops,mine=ids.filter(id=>S.agentFb[id]&&S.agentFb[id].verdict).length,theirs=ids.filter(id=>S.feedback[id]).length,waiting=ids.filter(id=>S.fbQueue.includes(id)).length;
-  return `<div class="card" style="gap:4px"><div class="row wrap"><div class="col grow"><h3>Tour feedback · ${t.date}</h3><span class="small muted">Your feedback: ${mine} of ${ids.length} · Alex’s ratings: ${theirs} of ${ids.length}</span></div>${waiting?btn('Remind Alex to rate',{kind:'sec',sm:1,icon:'bell',act:'fb-remind'}):''}</div>
-  ${mine<ids.length||waiting?`<div class="warn">${icon('clock')}<span class="s13 sub">${mine<ids.length?`Add your feedback for ${ids.length-mine} home${ids.length-mine>1?'s':''} while the showings are fresh. `:''}${waiting?`Alex hasn’t rated ${waiting} home${waiting>1?'s':''} yet.`:''}</span></div>`:''}
-  ${ids.map(id=>{const l=L(id),f=S.feedback[id],a=S.agentFb[id]||{};return `<div class="rrow" style="align-items:flex-start">${media(l,'','thumb')}<div class="col grow" style="gap:6px"><span class="b s13">${esc(l.addr)}</span>
-   <span class="small ${f?'sub':'muted'}">${f?`Alex: ${'★'.repeat(f.stars)} · Would offer: ${f.offer||'—'}${[...f.liked,...f.disliked].length?' · '+[...f.liked.map(x=>'+'+x),...f.disliked.map(x=>'−'+x)].join(', '):''}`:'Alex: waiting for rating'}</span>
-   <div class="row wrap" style="gap:8px"><span class="small muted row" style="gap:4px">${icon('lock','sm')}Your feedback</span><div class="vtabs">${VERD.map(([v,lab])=>`<button class="vtab ${a.verdict===v?'on':''}" data-act="afb-verdict" data-id="${id}" data-v="${v}" aria-pressed="${a.verdict===v}">${lab}</button>`).join('')}</div></div>
-   <label class="inp" style="padding:6px 10px"><input id="afb-${id}" data-input="afb" data-id="${id}" value="${esc(a.note||'')}" placeholder="Notes: condition, pricing, what Alex reacted to…" aria-label="Your notes on ${esc(l.addr)}"></label></div></div>`;}).join('')}</div>`;}).join('');
-}
-function aTours(){
- const T=S.tour,open=tourOpen(),locked=['proposed','confirmed','changes'].includes(T.status);
- const past=[...(open?[]:[T].filter(t=>t.stops.length)),...S.pastTours];
- const reqN=S.showReq.filter(r=>!(open&&T.stops.includes(r.id))).length;
- const head=`<div class="row wrap"><div class="col grow"><h2>Tours with Alex</h2><span class="s13 sub">${open?`1 open tour · ${tourStatusLabel()}`:'No open tour'} · ${past.length} past${reqN?` · ${reqN} showing request${reqN>1?'s':''} waiting`:''}</span></div>${btn('Plan a tour',{icon:'plus',act:'plan-open',kind:open?'sec':'',disabled:locked})}</div>
- ${locked?`<span class="small muted">One open tour at a time: complete or cancel the ${esc(T.date)} tour to plan another.</span>`:''}`;
- const pastList=past.length?`<div class="card" style="gap:2px"><h3 style="padding-bottom:6px">Past tours</h3>${past.map(t=>`<div class="li">${dchip(t.date)}<div class="col grow"><span class="m">${t.date} · ${t.stops.length} homes</span><span class="small muted">${t.stops.map(id=>L(id).addr).join(' · ')}</span></div>${badge(tourStatusLabel(t),t.status==='canceled'?'line':'')}</div>`).join('')}</div>`:'';
- const empty=`<div class="empty">No open tour. Plan one to schedule showings for Alex.${reqN?` ${reqN} showing request${reqN>1?'s are':' is'} waiting.`:''}<div style="margin-top:12px">${btn('Plan a tour',{icon:'plus',act:'plan-open'})}</div></div>`;
- const remind=T.status==='confirmed'?`<div class="warn" style="border:1px solid var(--accent)">${icon('clock')}<div class="col grow" style="gap:2px"><span class="m">Reminder: complete the tour after the showings</span><span class="s13 sub">Alex approved the ${esc(T.date)} tour. After the last stop, click Complete the tour: Alex is asked to rate each home, and you add your feedback here.</span></div>${btn('Complete the tour',{sm:1,icon:'check',act:'tour-complete'})}</div>`:'';
- const tourReqs=S.messages.filter(m=>m.type==='req'&&m.kind==='tour_request'&&!m.done);
- const reqBox=tourReqs.map(m=>`<div class="sugg">${av('AK')}<div class="col grow"><span class="b">Alex requested a tour on ${esc(m.date)} around ${hm(m.start)}</span><span class="s13 sub">${m.ids.map(id=>esc(L(id).addr)).join(' · ')}${m.note?` · “${esc(m.note)}”`:''}</span></div>${btn('Plan this tour',{sm:1,icon:'calendar',act:'req-plan',data:`data-ref="${m.ref}"`})}</div>`).join('');
- return `${head}${reqBox}${remind}${open?aTourBuilder():empty}${aTourFeedback()}${pastList}`;
-}
-function aPlanModal(){
- const P=S.a.plan,T=S.tour,reqIds=S.showReq.map(r=>r.id);
- const homes=board().filter(l=>l.reaction!=='pass'&&l.status!=='Rejected').sort((a,b)=>(reqIds.includes(b.id)-reqIds.includes(a.id))||((b.reaction==='love')-(a.reaction==='love')));
- const order=P.optimize?nnOrder(P.stops):P.stops,tt=tourTimes({start:P.start,stops:order});
- const rows=homes.map(l=>{const on=P.stops.includes(l.id),rq=S.showReq.find(r=>r.id===l.id);return `<label class="ptrow ${on?'':'off'}"><input type="checkbox" data-act="plan-toggle" data-id="${l.id}" ${on?'checked':''}>${media(l,'','thumb')}<div class="col grow" style="gap:2px"><span class="m">${esc(l.addr)}</span><span class="small muted">${money(l.price)} · ${l.hood} · ${l.beds} bd</span><span class="row" style="gap:6px">${rq?badge('Requested · '+esc(rq.slots.join(', ')),'accent'):''}${l.reaction==='love'?badge(icon('heart','sm')+'Loved'):''}${l.pick?badge('Agent pick','ink'):''}</span></div></label>`;}).join('');
- return `<div class="scrim" data-act="modal-close-bg"><div class="modal" role="dialog" aria-modal="true" aria-label="Plan a tour"><div class="row"><h2 class="grow">Plan a tour with Alex</h2><button class="iconbtn" data-act="modal-close" aria-label="Close">${icon('x')}</button></div>
- ${T.status==='draft'&&T.stops.length?`<div class="warn">${icon('help')}<span class="s13 sub">This replaces your draft for ${esc(T.date)} (${T.stops.length} homes). Alex hasn’t seen it yet.</span></div>`:''}
- <div class="form-grid"><div class="field"><label for="plan-date">Date</label><div class="inp">${icon('calendar','muted')}<select id="plan-date" data-input="plan" data-k="date">${TOUR_DATES.map(d=>`<option ${P.date===d?'selected':''}>${d}</option>`).join('')}</select></div></div>
- <div class="field"><label for="plan-start">Start</label><div class="inp">${icon('clock','muted')}<select id="plan-start" data-input="plan" data-k="start">${[540,570,600,630,660].map(v=>`<option value="${v}" ${P.start===v?'selected':''}>${hm(v)}</option>`).join('')}</select></div></div></div>
- <div class="col" style="gap:0"><div class="row"><span class="upper grow">Homes from Alex’s board</span><span class="small muted">Requested and loved homes are pre-selected</span></div>${rows||'<div class="empty">No homes on Alex’s board yet.</div>'}</div>
- <button class="row s13 m" data-act="plan-opt" style="gap:8px">${icon('route')}<span class="grow">Optimize route order</span><span class="toggle" role="switch" aria-checked="${P.optimize}"></span></button>
- <div class="row wrap" style="gap:8px"><span class="s13 sub grow">${P.stops.length?`${P.stops.length} homes · ${hm(P.start)} – ${hm(tt.end)} · ${tt.driveTotal} min of driving`:'Select at least one home'}</span>${btn('Cancel',{kind:'sec',act:'modal-close'})}${btn('Create draft tour',{icon:'calendar',act:'plan-create',disabled:!P.stops.length})}</div></div></div>`;
-}
-function aTourBuilder(){
- const T=S.tour,tt=tourTimes();const edit=T.status==='draft'||T.status==='changes';
- const stBadge={draft:badge('Draft'),proposed:badge('Waiting for approval','accent'),confirmed:badge('Approved by Alex','ink'),changes:badge('Changes requested','line'),completed:badge('Completed'),canceled:badge('Canceled','line')}[T.status];
- const reqs=S.showReq.filter(r=>!T.stops.includes(r.id));
- const pool=board().filter(l=>!T.stops.includes(l.id)&&l.reaction!=='pass');
- const actions=edit?`${btn('Send to Alex',{icon:'send',act:'tour-send',disabled:!T.stops.length})}`:T.status==='proposed'?`${btn('Edit tour',{kind:'sec',act:'tour-edit'})}<span class="s13 muted">Waiting for Alex to approve</span>${btn('Complete the tour',{icon:'check',act:'tour-complete',disabled:true})}`:T.status==='confirmed'?`${btn('Edit tour',{kind:'sec',act:'tour-edit'})}${btn('Complete the tour',{icon:'check',act:'tour-complete'})}`:'';
- return `<div class="row wrap"><div class="col grow"><div class="row" style="gap:10px"><h3>${T.date} tour</h3>${stBadge}</div><span class="s13 sub">${T.stops.length} homes · ${hm(T.start)} – ${hm(tt.end)} · ${tt.driveTotal} min of driving</span></div>${tourOpen()?btn('Cancel tour',{kind:'ghost',icon:'x',act:'tour-cancel'}):''}${actions}</div>
- ${T.status==='changes'&&T.changeNote?`<div class="sugg">${av('AK')}<div class="col grow"><span class="b">Alex asked for a change</span><span class="s13 sub">“${esc(T.changeNote)}”</span></div></div>`:''}
- <div class="tour-grid"><div class="stack" style="gap:12px">
- <div class="form-grid" style="grid-template-columns:1fr 1fr">${`<div class="field"><span class="lbl">Date</span><div class="inp">${icon('calendar','muted')}<span class="m">${T.date}</span></div></div><div class="field"><label for="tour-start">Start</label><div class="inp">${icon('clock','muted')}<select id="tour-start" data-input="tourStart" ${edit?'':'disabled'}>${[540,570,600,630,660].map(v=>`<option value="${v}" ${T.start===v?'selected':''}>${hm(v)}</option>`).join('')}</select></div></div>`}</div>
- <button class="row s13 m" data-act="tour-opt" ${edit?'':'disabled'} style="gap:8px">${icon('route')}<span class="grow">Optimize route order</span><span class="toggle" role="switch" aria-checked="${T.optimize}"></span></button>
- <div class="col" style="gap:0">${tt.stops.map((s,i)=>{const l=L(s.id);return `<div class="drive">${icon('car','sm')}${s.drive} min ${i?'drive':'from office'}</div><div class="stop"><span class="ndot">${i+1}</span>${media(l,'','thumb')}<div class="col grow" style="gap:2px"><div class="row" style="gap:6px"><button class="b s13" data-act="a-go" data-r="listing" data-id="${l.id}">${l.addr}</button>${T.requested.includes(l.id)?badge('Requested by Alex','accent'):''}</div><span class="small muted">${money(l.price)} · ${l.beds} bd · ${l.hood}</span></div><div class="col" style="align-items:flex-end;gap:0"><b class="s13 num">${hm(s.at)}</b><span class="small muted">30 min</span></div>${edit?`<div class="col" style="gap:0"><button class="iconbtn" data-act="tour-move" data-id="${l.id}" data-d="-1" aria-label="Move up" ${i===0||T.optimize?'disabled':''}>${icon('chevU')}</button><button class="iconbtn" data-act="tour-move" data-id="${l.id}" data-d="1" aria-label="Move down" ${i===tt.stops.length-1||T.optimize?'disabled':''}>${icon('chevD')}</button></div><button class="iconbtn" data-act="tour-remove" data-id="${l.id}" aria-label="Remove">${icon('trash')}</button>`:''}</div>`;}).join('')||'<div class="empty">No stops yet.</div>'}</div>
- ${reqs.length?`<div class="card tight"><span class="upper">Showing requests from Alex</span>${reqs.map(r=>`<div class="row">${media(L(r.id),'','thumb')}<div class="col grow"><span class="s13 b">${L(r.id).addr}</span><span class="small muted">${r.slots.join(', ')||'Any time'}</span></div>${btn('Add',{sm:1,act:'tour-add',data:`data-id="${r.id}"`,disabled:!edit})}</div>`).join('')}</div>`:''}
- ${edit&&pool.length?`<label class="inp">${icon('plus','muted')}<select id="tour-add" data-input="tourAdd"><option value="">Add a home from Alex’s board…</option>${pool.map(l=>`<option value="${l.id}">${l.addr} · ${money(l.price)}</option>`).join('')}</select></label>`:''}
- </div><div class="map">${mapSvg()}<div class="map-legend">${meta('car',tt.driveTotal+' min total drive')}${meta('clock','Done by '+hm(tt.end))}</div></div></div>`;
-}
 function reqList(){const R=openReqs();return R.length?`<div class="reqlist"><div class="row" style="padding:8px 0 4px"><span class="upper grow">Open requests from Alex · ${R.length}</span></div>${R.map(m=>{const r=reqInfo(m);return `<div class="li">${icon('bell','muted')}<div class="col grow"><span class="s13 m">${esc(r.title)}</span><span class="small muted">${esc(r.status)} · ${ago(m.t)}</span></div>${r.acts.map(([l,a,k])=>btn(l,{sm:1,kind:k||'sec',act:a,data:`data-ref="${m.ref}"`})).join('')}</div>`;}).join('')}</div>`:'';}
 function aMessages(){return `<div class="stack" style="max-width:760px">${reqList()}<div class="card">${chatThread('agent')}</div></div>`;}
 function chatThread(who){
@@ -1183,36 +1114,10 @@ function aInbox(){
  const lm=S.messages.slice(-1)[0],convs=[['AK','Alex Kim',lm.type==='req'?'Request: '+reqInfo(lm).title:lm.text,S.unread.agent,1],['PS','Priya Shah','Sunday works for us!',0],['SL','Sam Lee','Can you send the HOA docs?',0],['DO','Daniel Ortiz','Fingers crossed on the counter.',0]];
  return `<h1>Inbox</h1><div class="inbox"><div class="list">${convs.map(c=>`<button class="conv ${c[4]?'on':''}" ${c[4]?'':'data-act="toast" data-msg="Sample data covers Alex Kim only"'}>${av(c[0])}<div class="col grow"><span class="s13 b row" style="gap:6px">${c[1]}${c[4]&&openReqs().length?badge(openReqs().length+' requests','accent'):''}</span><span class="small muted" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(c[2])}</span></div>${c[3]?'<span class="dot"></span>':''}</button>`).join('')}</div><div class="thread"><div class="row" style="padding:14px 20px;border-bottom:1px solid var(--border)">${av('AK')}<span class="b grow">Alex Kim</span><button class="link" data-act="a-go" data-r="client" data-t="overview">Open client</button></div><div class="body" style="display:flex;flex-direction:column;gap:14px">${reqList()}${chatThread('agent')}</div></div></div>`;
 }
-function aOffer(){
- const O=S.offer,l=L(O.listing),edit=O.status==='draft'||O.status==='changes';
- const stLabel={draft:'Draft',awaiting:'Waiting for Alex',approved:'Approved by Alex',changes:'Changes requested',submitted:'Submitted',accepted:'Accepted'}[O.status];
- const inp=(id,label,val,o={})=>`<div class="field"><label for="${id}">${label}</label><div class="inp ${o.changed?'changed':''}">${o.icon?icon(o.icon,'muted'):''}<input id="${id}" data-input="offer" data-k="${o.k}" value="${esc(val)}" ${edit?'':'disabled'} ${o.type?`type="${o.type}"`:''}></div>${o.hint?`<span class="hintline ${o.changed?'on':''}">${o.hint}</span>`:''}</div>`;
- const cont=(k,t,d)=>`<button class="checkrow" data-act="offer-cont" data-k="${k}" ${edit?'':'disabled'}><span class="cbx" role="checkbox" aria-checked="${O.cont[k]}">${O.cont[k]?icon('check'):''}</span><span class="m">${t}</span><span class="s13 muted">${d}</span></button>`;
- let foot='';
- if(edit)foot=`<span class="meta s13 muted grow">${icon('lock','sm')}Alex approves before you submit.</span>${btn('Save draft',{kind:'sec',act:'toast',data:'data-msg="Draft saved"'})}${btn('Send to Alex for approval',{icon:'send',act:'offer-send'})}`;
- else if(O.status==='awaiting')foot=`<span class="s13 muted grow">Sent to Alex. You can submit once Alex approves.</span>${btn('Withdraw request',{kind:'sec',act:'offer-withdraw'})}`;
- else if(O.status==='approved')foot=`<span class="s13 grow"><b>Alex approved.</b> Submit to the listing agent.</span>${btn('Submit to listing agent',{icon:'send',act:'offer-submit'})}`;
- else if(O.status==='submitted')foot=`<span class="s13 muted grow">Waiting for the seller’s response.</span>${btn('Seller countered',{kind:'sec',act:'offer-countered'})}${btn('Seller accepted',{icon:'check',act:'offer-accepted'})}`;
- else foot=`<div class="confetti grow">${icon('check','lg')}Offer accepted — Alex is under contract.</div>`;
- const PW=100,pos=v=>Math.max(0,Math.min(100,(v-590000)/(650000-590000)*100));
- const steps=[...O.steps.map(s=>({...s,done:1}))];
- const cur={draft:`v${O.version} counter — draft`,changes:`v${O.version} — Alex asked for changes`,awaiting:`v${O.version} — waiting for Alex`,approved:`v${O.version} — approved by Alex`,submitted:`v${O.version} — submitted`,accepted:'Seller accepted'}[O.status];
- return `<div class="cols"><div class="card" style="gap:18px"><div class="row wrap"><div class="col grow"><h2>Offer on ${l.addr}</h2><span class="s13 muted">List price ${money(l.price)} · Seller countered at $624,000 · respond by ${O.expires}</span></div>${badge(stLabel,O.status==='accepted'?'ink':O.status==='draft'?'':'accent')}</div>
- <div class="vtabs"><span class="vtab">v1 · Submitted Sep 24</span><span class="vtab">v2 · Seller counter Sep 25</span><span class="vtab on">v${O.version} · Your counter</span></div>
- ${O.status==='changes'&&O.clientNote?`<div class="sugg">${av('AK')}<div class="col grow"><span class="b">Alex asked for changes</span><span class="s13 sub">“${esc(O.clientNote)}”</span></div></div>`:''}
- <div class="form-grid">${inp('of-price','Offer price',money(O.price),{k:'price',icon:'dollar',changed:O.price!==615000,hint:O.price!==615000?`Changed from $615,000 (v1) · seller asked $624,000`:'Same as v1'})}${inp('of-earnest','Earnest money',money(O.earnest),{k:'earnest',icon:'dollar',hint:`≈ ${(O.earnest/O.price*100).toFixed(1)}% of offer`})}
- ${inp('of-fin','Financing',O.financing,{k:'financing'})}${inp('of-close','Closing date',O.closing,{k:'closing',icon:'calendar',type:'date',changed:O.closing!=='2026-11-14',hint:O.closing==='2026-11-30'?'Accepting seller’s date (was Nov 14)':''})}</div>
- <div class="field"><span class="lbl">Contingencies</span>${cont('inspection','Inspection','10 days')}${cont('appraisal','Appraisal','Standard')}${cont('financing','Financing','21 days')}${cont('sale','Sale of current home','Not needed — renting')}</div>
- <div class="field"><label for="of-note">Note to Alex</label><div class="inp"><textarea id="of-note" data-input="offer" data-k="note" ${edit?'':'disabled'}>${esc(O.note)}</textarea></div></div>
- <div class="row wrap" style="border-top:1px solid var(--border);padding-top:16px">${foot}</div></div>
- <div class="stack"><button class="card tight" data-act="a-go" data-r="listing" data-id="${l.id}" style="flex-direction:row;align-items:center">${media(l,'','thumb')}<div class="col grow"><span class="b">${l.addr}</span><span class="small muted">${l.hood} · ${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft</span></div>${icon('chev','muted')}</button>
- <div class="card" style="gap:10px"><h3>Price context</h3><span class="small muted">6 comparable sales in ${l.hood}, last 90 days</span><div class="rangebar"><span class="base"></span><span class="band" style="left:${pos(598000)}%;width:${pos(641000)-pos(598000)}%"></span><span class="mk" style="left:${pos(O.price)}%;background:var(--ink)"></span><span class="mk" style="left:${pos(624000)}%;background:var(--accent)"></span></div><div class="row"><span class="small muted grow">$598k</span><span class="small muted">$641k</span></div><div class="row wrap small sub" style="gap:14px"><span class="meta"><i style="width:10px;height:10px;border-radius:2px;background:var(--ink);display:inline-block"></i>Your offer ${kf(O.price)}</span><span class="meta"><i style="width:10px;height:10px;border-radius:2px;background:var(--accent);display:inline-block"></i>Seller $624k</span></div></div>
- <div class="card" style="gap:12px"><h3>Status</h3><div class="steps">${steps.map(s=>`<div class="step"><div class="rail"><span class="sdot done">${icon('check')}</span></div><div class="col"><span class="s13 m">${s.text}</span><span class="small muted">${s.t}</span></div></div>`).join('')}<div class="step"><div class="rail"><span class="sdot ${O.status==='accepted'?'done':'cur'}">${O.status==='accepted'?icon('check'):''}</span></div><div class="col"><span class="s13 b">${cur}</span><span class="small muted">Now</span></div></div></div></div></div></div>`;
-}
 function aAddModal(){
  let body;
  {let pool=allNewMatches().slice(0,6);const fromSearch=pool.length>0;if(!fromSearch)pool=S.listings.filter(l=>!l.onBoard).sort((a,b)=>fit(b).score-fit(a).score).slice(0,6);
-  body=`<div class="row s13 sub" style="gap:8px">${icon('search')}<span class="grow">${fromSearch?`New matches from ${S.searches.map(s=>'“'+esc(s.name)+'”').join(' and ')}`:'Best-fit active listings'}</span><button class="link" data-act="a-go" data-r="client" data-t="searches">Open searches</button></div>
+  body=`<div class="row s13 sub" style="gap:8px">${icon('search')}<span class="grow">${fromSearch?`New matches from ${S.searches.map(s=>'“'+esc(s.name)+'”').join(' and ')}`:'Best-fit active listings'}</span><button class="link" data-act="a-go" data-r="client" data-t="prefs">Open preferences</button></div>
  ${pool.length?pool.map(l=>`<div class="li">${media(l,'','thumb')}<div class="col grow"><span class="b">${money(l.price)} · ${l.addr}</span><span class="small muted">${l.hood} · ${l.beds} bd · ${nf(l.sqft)} sqft · listed ${l.dom} day ago</span></div>${fitPill(l)}${btn('Add as pick',{sm:1,act:'add-board',data:`data-id="${l.id}" data-pick="1"`})}</div>`).join(''):'<div class="empty">No new matches right now.</div>'}
  <div class="row s13 muted" style="gap:8px">${icon('edit')}You can also paste a Zillow or Redfin link, or enter a home by hand.</div>`;}
  return `<div class="scrim" data-act="modal-close-bg"><div class="modal" role="dialog" aria-modal="true" aria-label="Add listing"><div class="row"><h2 class="grow">Add a listing to Alex’s board</h2><button class="iconbtn" data-act="modal-close" aria-label="Close">${icon('x')}</button></div>
@@ -1222,11 +1127,11 @@ function aAddModal(){
 /* ============ CLIENT ============ */
 function clientApp(m){
  const r=S.c.route;
- const map={invite:cInvite,onboard:cOnboard,board:cBoard,listing:cListing,search:cSearch,compare:cCompare,tours:cTours,feedback:cFeedback,offer:cOffer,prefs:cPrefs,chat:cChat};
+ const map={invite:cInvite,onboard:cOnboard,board:cBoard,listing:cListing,search:cSearch,compare:cCompare,chat:cChat};
  const v=(map[r]||cBoard)();
- const tabs=['board','search','compare','tours','chat'].includes(r);
+ const tabs=['board','search','compare','chat'].includes(r);
  const status=`<div class="c-status"><span>9:41</span><svg width="66" height="12" viewBox="0 0 66 12" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><path d="M29 11.5l-2.2-2.3a3.2 3.2 0 014.4 0zM24.6 7l1.2 1.3a4.6 4.6 0 016.4 0L33.4 7a6.4 6.4 0 00-8.8 0zM22.4 4.8l1.2 1.2a7.8 7.8 0 0110.8 0l1.2-1.2a9.6 9.6 0 00-13.2 0z"/><rect x="41" y="1" width="22" height="10.5" rx="3" fill="none" stroke="currentColor" stroke-opacity=".4"/><rect x="43" y="3" width="17" height="6.5" rx="1.5"/></svg></div>`;
- const tb=tabs?`<nav class="c-tabs" aria-label="Client tabs">${[['board','Board','home'],['search','Search','search'],['compare','Compare','compare'],['tours','Tours','calendar'],['chat','Chat','msg']].map(([k,l,i])=>`<button class="c-tab" data-act="c-go" data-r="${k}" ${r===k?'aria-current="page"':''}>${icon(i,'xl')}${l}${k==='chat'&&S.unread.client?'<span class="n"></span>':''}${k==='tours'&&(S.tour.status==='proposed'||S.fbQueue.length)?'<span class="n"></span>':''}${k==='compare'&&S.ai&&S.ai.sent&&!S.ai.sent.seen?'<span class="n"></span>':''}</button>`).join('')}</nav>`:'';
+ const tb=tabs?`<nav class="c-tabs" aria-label="Client tabs">${[['board','Board','home'],['search','Preferences','sliders'],['compare','Compare','compare'],['chat','Chat','msg']].map(([k,l,i])=>`<button class="c-tab" data-act="c-go" data-r="${k}" ${r===k?'aria-current="page"':''}>${icon(i,'xl')}${l}${k==='chat'&&S.unread.client?'<span class="n"></span>':''}${k==='compare'&&S.ai&&S.ai.sent&&!S.ai.sent.seen?'<span class="n"></span>':''}${k==='search'&&pendingSugg().length?'<span class="n"></span>':''}</button>`).join('')}</nav>`:'';
  return `<div class="phone-wrap"><div class="phone" aria-label="Client portal on Alex’s phone">${status}<div class="c-screen ${v.cls||''}" data-scroll="c-${r}-${S.c.id}">${v.html}</div>${v.actions?`<div class="c-actions">${v.actions}</div>`:tb}${S.c.sheet?cSheet():''}</div>${m==='both'?`<span class="phone-cap">${icon('mobile','sm')}Alex’s phone · client portal</span>`:''}</div>`;
 }
 const agentChip=()=>`<button class="agentchip" data-act="c-go" data-r="chat">${av('MC',1,'sm')}Maya${icon('msg','sm')}</button>`;
@@ -1236,7 +1141,7 @@ function cInvite(){
  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;height:200px">${media({tone:0},'','')}<div style="display:grid;grid-template-rows:1fr 1fr;gap:8px">${media({tone:2})}${media({tone:1})}</div></div>
  <div class="row" style="padding-top:16px">${av('MC',1,'md')}<div class="col" style="gap:0"><span class="b">Maya Chen</span><span class="s13 muted">Keller Realty · Your buyer’s agent</span></div></div>
  <h1 style="font-size:28px;line-height:1.2;font-weight:700">Let’s find your next home, together</h1>
- <p class="quote" style="font-size:14px;line-height:1.55;padding:14px">“Hi Alex — I set up a shared space for your search. Save homes you like, tell me what matters most, and we’ll plan tours together.”</p>
+ <p class="quote" style="font-size:14px;line-height:1.55;padding:14px">“Hi Alex — I set up a shared space for your search. Save homes you like, tell me what matters most, and I’ll compare the best ones for you.”</p>
  <div style="flex:1"></div>${btn('Get started',{lg:1,block:1,act:'c-go',data:'data-r="onboard"'})}<button class="s13 sub" data-act="c-go" data-r="board" style="text-align:center">Already joined? Go to your board</button>`};
 }
 const OB=[['office','Home office','p'],['yard','Yard','p'],['garage','2-car garage','p'],['basement','Basement','e'],['guest','Guest room','e'],['mudroom','Mudroom','e'],['primaryMain','Primary on main','p'],['ac','Central A/C','e'],['fireplace','Fireplace','e'],['ev','EV charging','e'],['pool','Pool','e']];
@@ -1252,11 +1157,7 @@ function cOnboard(){
 }
 function cBanners(){
  const b=[];
- if(S.offer.status==='awaiting')b.push(`<button class="banner" data-act="c-go" data-r="offer"><div class="col grow" style="gap:1px"><span class="b">Counter-offer ready for you</span><span class="t2">${L(S.offer.listing).addr} · ${money(S.offer.price)} · due Sat 5 pm</span></div><span class="btn">Review</span></button>`);
- if(S.offer.status==='accepted')b.push(`<div class="confetti">${icon('check','lg')}Your offer on ${L(S.offer.listing).addr} was accepted!</div>`);
  if(S.ai&&S.ai.sent&&!S.ai.sent.seen)b.push(`<button class="banner" data-act="c-go" data-r="compare"><div class="col grow" style="gap:1px"><span class="b">Maya sent you a comparison report</span><span class="t2">${S.ai.sent.res.homes.length} homes scored against your preferences</span></div><span class="btn">Open</span></button>`);
- if(S.fbQueue.length)b.push(`<button class="banner" data-act="c-go" data-r="feedback"><div class="col grow" style="gap:1px"><span class="b">Rate the homes from your tour</span><span class="t2">${S.fbQueue.length} home${S.fbQueue.length>1?'s':''} · takes a minute and helps Maya</span></div><span class="btn">Rate</span></button>`);
- if(S.tour.status==='proposed')b.push(`<button class="banner" data-act="c-go" data-r="tours"><div class="col grow" style="gap:1px"><span class="b">Maya planned a tour — approve it</span><span class="t2">${S.tour.date} · ${S.tour.stops.length} homes · ${hm(S.tour.start)}</span></div><span class="btn">Review</span></button>`);
  return b.join('');
 }
 function reactBar(l,small){const rb=(v,i,t)=>`<button class="rbtn h" data-act="react" data-id="${l.id}" data-v="${v}" aria-pressed="${l.reaction===v}">${icon(i,l.reaction===v&&v==='love'?'fill':'')}${t}</button>`;return `<div class="reacts">${rb('love','heart','Love')}${rb('like','thumb','Like')}${rb('maybe','help','Maybe')}${rb('pass','x','Pass')}</div>`;}
@@ -1265,7 +1166,7 @@ function cBoard(){
  const b=board();const list=sortList(b.filter(F[S.c.filter]));
  const card=l=>`<article class="mcard ${l.reaction==='pass'?'dim':''}">${`<div class="media" data-act="c-open" data-id="${l.id}" role="button" tabindex="0" aria-label="Open ${l.addr}"><div class="ph t${l.tone}">${icon('house')}</div><div class="ov l">${l.pick?badge('Maya’s pick','ink'):''}${l.addedBy==='client'?badge('Added by you','line'):''}</div></div>`}
  <div class="body"><button class="col" data-act="c-open" data-id="${l.id}" style="gap:2px"><span class="price num" style="font-size:20px">${money(l.price)}</span><span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.commute} min to work</span><span class="s13 muted">${l.addr}, ${l.hood}</span></button>${l.note?`<div class="quote">Maya: ${esc(l.note)}</div>`:''}${reactBar(l)}</div></article>`;
- return {html:`<div class="row"><div class="col grow"><h1 style="font-weight:700">Your homes</h1><span class="s13 muted">${b.length} on your board · ${b.filter(F.review).length} to review</span></div><button class="iconbtn" style="border:1px solid var(--border);border-radius:50%;background:var(--surface)" data-act="c-go" data-r="prefs" aria-label="Your preferences">${icon('sliders')}</button>${agentChip()}</div>
+ return {html:`<div class="row"><div class="col grow"><h1 style="font-weight:700">Your homes</h1><span class="s13 muted">${b.length} on your board · ${b.filter(F.review).length} to review</span></div><button class="iconbtn" style="border:1px solid var(--border);border-radius:50%;background:var(--surface)" data-act="c-go" data-r="search" aria-label="Your preferences">${icon('sliders')}</button>${agentChip()}</div>
  <div class="chips" style="flex-wrap:nowrap;overflow-x:auto">${[['review','To review'],['loved','Loved'],['all','All'],['passed','Passed']].map(([k,l])=>`<button class="chip" data-act="c-filter" data-v="${k}" aria-pressed="${S.c.filter===k}">${k==='loved'?icon('heart','sm'):''}${l} ${b.filter(F[k]).length}</button>`).join('')}</div>
  ${cBanners()}
  ${list.length?list.map(card).join(''):`<div class="empty">${S.c.filter==='review'?'You’re all caught up. Maya will add new homes as they come on the market.':'Nothing here yet.'}</div>`}`};
@@ -1280,22 +1181,48 @@ function cListing(){
  ${l.note?`<div class="row top" style="background:var(--surface-2);border-radius:14px;padding:14px;gap:10px">${av('MC',1,'sm')}<div class="col grow"><span class="s13 b">Why Maya picked it</span><span class="s13 sub" style="line-height:1.5">${esc(l.note)}</span></div></div>`:''}
  <div class="col" style="gap:12px"><h3>Comments</h3>${commentsBlock(l.id,'client')}</div>
  <div class="col" style="gap:8px"><h3>About this home</h3><p class="sub" style="line-height:1.6">${l.desc}</p></div></div>`,
- actions:`${btn(inCmp?'In compare':'Compare',{kind:'sec',icon:'compare',act:'c-compare-add',data:`data-id="${l.id}"`})}${btn(S.tour.stops.includes(l.id)&&S.tour.status!=='draft'?'On your tour':'Request showing',{icon:'calendar',act:'c-sheet',data:`data-v="showing"`,disabled:S.tour.stops.includes(l.id)&&S.tour.status!=='draft'})}`};
+ actions:`${btn(inCmp?'In compare':'Compare',{kind:'sec',icon:'compare',act:'c-compare-add',data:`data-id="${l.id}"`,block:1})}`};
+}
+function cPrefRow(k,l,v,step){
+ const p=S.prefs[k],ps=pendingSugg().find(x=>x.k===k);
+ const tag=()=>{const i=p.imp;return `<span class="imp ${i}">${i==='never'?icon('x','sm'):''}${IMPL[i]}</span>`;};
+ return `<div class="pf"><button class="col grow" style="gap:2px" data-act="c-pref" data-k="${k}"><span class="small muted row" style="gap:5px">${l}${p.lock?icon('lock','sm'):''}</span><span class="m">${esc(v)}</span><span class="small ${ps?'love m':'muted'}">${ps?`Suggestion sent: ${esc(sgDesc(ps))}`:p.lock?'Set with Maya · tap to suggest a change':'Tap to edit'}</span></button>${step&&!p.lock?stepper(step,'client'):''}${p.lock?tag():impBtn(k,'client')}</div>`;
 }
 function cSearch(){
- const ss=S.searches;const hasSynced=ss.some(s=>s.fromPrefs);
- const make=hasSynced?'':`<button class="banner" data-act="c-search-prefs"><div class="col grow" style="gap:1px"><span class="b">Search with your preferences</span><span class="t2">Your must-haves become filters and the best matches come first</span></div><span class="btn">Create</span></button>`;
- if(!ss.length)return {html:`<div class="row"><h1 class="grow" style="font-weight:700">Search</h1>${agentChip()}</div>${make}`};
- const s=ss.find(x=>x.id===S.c.searchId)||ss[0];const R=runSearch(criteriaOf(s));const nm=newMatches(s);
- const crit=R.steps.slice(1).map(st=>esc(st.label)).join(' · ')||'No filters';
- const card=l=>`<article class="mcard"><div class="media" style="aspect-ratio:2/1" data-act="c-open" data-id="${l.id}" data-from="search" role="button" tabindex="0" aria-label="Open ${esc(l.addr)}"><div class="ph t${l.tone}">${icon('house')}</div><div class="ov l">${isNew(l)&&!l.onBoard?badge('New','accent'):''}${l.priceDrop?badge('Price cut','line'):''}</div></div><div class="body"><button class="col" data-act="c-open" data-id="${l.id}" data-from="search" style="gap:2px"><span class="price num">${money(l.price)}</span><span class="s13 sub">${l.beds} bd · ${l.baths} ba · ${nf(l.sqft)} sqft · ${l.commute} min to work</span><span class="s13 muted">${esc(l.addr)}, ${l.hood}</span></button>${l.onBoard?`<span class="meta s13 sub">${icon('check','sm')}On your board</span>`:btn('Save to my board',{kind:'sec',block:1,icon:'plus',act:'add-board',data:`data-id="${l.id}" data-who="client"`})}</div></article>`;
- return {html:`<div class="row"><h1 class="grow" style="font-weight:700">Search</h1>${agentChip()}</div>
- <div class="chips" style="flex-wrap:nowrap;overflow-x:auto">${ss.map(x=>`<button class="chip" data-act="c-search" data-id="${x.id}" aria-pressed="${x===s}">${x.fromPrefs?icon('sliders','sm'):''}${esc(x.name)}</button>`).join('')}</div>
- ${make}
- <div class="card tight" style="gap:8px"><div class="row"><span class="grow"><b class="num" style="font-size:20px">${R.results.length}</b> <span class="sub">homes match</span></span>${nm.length?badge(nm.length+' new','accent'):''}</div><span class="small muted">${crit}</span><span class="row small sub" style="gap:6px">${icon('bell','sm')}${ALERTS[s.alerts]}${s.mode==='curated'?' · Maya reviews new matches first':''}</span></div>
- <div class="map">${searchMap(R,1)}</div>
- ${R.results.slice(0,8).map(card).join('')||'<div class="empty">No homes match right now.</div>'}
- ${R.near.length?`<span class="small muted" style="text-align:center">${R.near.length} more homes miss just one of your must-haves. Ask Maya about them.</span>`:''}`};
+ const pend=pendingSugg(),last=S.suggestions.filter(x=>x.resolvedAt).sort((a,b)=>b.resolvedAt-a.resolvedAt)[0];
+ const status=pend.length?`<div class="sugg" style="padding:12px">${icon('clock','lg')}<div class="col grow"><span class="s13 b">${pend.length} suggestion${pend.length>1?'s':''} waiting for Maya</span><span class="small sub">These fields are locked, so Maya decides.</span></div></div>`
+  :last?(last.status==='accepted'?`<div class="confetti" style="font-size:13px">${icon('check')}Maya approved your change to ${esc(PLBL(last.k).toLowerCase())}.</div>`:`<div class="sugg" style="padding:12px">${icon('x','lg')}<div class="col grow"><span class="s13 b">Maya kept ${esc(PLBL(last.k).toLowerCase())} as it was</span><span class="small sub">She explained in chat.</span></div></div>`):'';
+
+ const pt=S.c.ptText,has=!!pt.trim(),det=has?ptDiff(ptParse(pt)):[];
+ const expanded=has||S.c.listening||S.c.ptOpen;
+ const micBtn=`<button type="button" class="aiMicBtn ${S.c.listening?'on':''}" data-act="c-pt-mic" aria-pressed="${S.c.listening}"><span class="aiMicIconWrap">${icon('mic')}${icon('spark','sm')}</span><span>${S.c.listening?'Listening… tap to stop':'AI Voice'}</span></button>`;
+ const tcard=expanded?`<div class="card tight ai" style="gap:10px"><div class="row" style="gap:8px">${micBtn}<span class="grow"></span>${pt?btn('Clear',{kind:'ghost',sm:1,act:'c-pt-clear'}):''}${btn('Save',{sm:1,icon:'check',act:'c-pt-save',disabled:!has})}</div>
+  <div class="inp pt ${S.c.listening?'rec':''}"><textarea id="c-pt-input" data-input="cPtText" placeholder="e.g. Office is a must now, budget up to $675k" aria-label="Tell Maya what changed">${esc(pt)}</textarea></div>
+  ${has?`<div class="col" style="gap:6px"><span class="upper">${det.length?`${det.length} change${det.length>1?'s':''} detected`:'Nothing detected yet'}</span>${det.length?`<div class="chips ptchips">${det.map(c=>`<span class="chip out">${S.prefs[c.k].lock?icon('lock','sm'):''}${esc(c.label)}${c.kind==='i'?'':':'} ${c.kind==='i'?'→ ':''}${esc(c.to)}</span>`).join('')}</div>`:'<span class="small muted">Mention price, areas, home type, bedrooms, size, commute, HOA, the highway, or features.</span>'}</div>`:''}</div>`
+  :`<div class="row" style="gap:10px;padding:2px 0">${micBtn}<button class="link" data-act="c-pt-open">or type</button></div>`;
+
+ const groups=PREF_GROUPS().map(([g,fields])=>{
+  const open=S.c.openCategory===g;
+  const hasPend=fields.some(([k])=>pendingSugg().find(x=>x.k===k));
+  const summary=fields.map(f=>f[2]).join(' · ');
+  return `<div class="accCat ${open?'open':''}">
+   <button type="button" class="accCatHead" data-act="c-cat-toggle" data-c="${esc(g)}" aria-expanded="${open}">
+    <span class="accCatIcon">${icon(GROUP_ICON[g]||'house')}</span>
+    <span class="col grow" style="gap:1px;min-width:0">
+     <span class="accCatTitle">${g}${hasPend?`<span class="pendingDot" title="Suggestion pending"></span>`:''}</span>
+     ${!open?`<span class="accCatSummary">${esc(summary)}</span>`:''}
+    </span>
+    ${icon(open?'chevU':'chevD','sm')}
+   </button>
+   ${open?`<div class="accCatBody">${fields.map(([k,l,v,s])=>cPrefRow(k,l,v,s)).join('')}</div>`:''}
+  </div>`;
+ }).join('');
+
+ return {html:`<div class="row"><h1 class="grow" style="font-weight:700">Preferences</h1>${agentChip()}</div>
+ ${status}
+ ${tcard}
+ <div class="col" style="gap:10px">${groups}</div>
+ <span class="small muted" style="text-align:center">Tap a category to edit it — opening one closes the others. Changes save right away and Maya is notified; locked items go to her as suggestions.</span>`};
 }
 function cCompare(){
  const ls=S.compare.map(L);
@@ -1306,66 +1233,10 @@ function cCompare(){
   return pend?`<div class="row s13 sub" style="gap:8px">${icon('clock')}Report requested — Maya will send it soon</div>`:same?'':`<button class="banner" data-act="c-ask-report"><div class="col grow" style="gap:1px"><span class="b">${sn?'Ask Maya for an updated report':'Ask Maya for a comparison report'}</span><span class="t2">She scores these homes against your preferences and explains the trade-offs</span></div><span class="btn">Ask</span></button>`;})()}
  <div class="mcmp"><table><thead>${head}</thead><tbody>${cmpTableRows(ls,0)}</tbody></table></div>`};
 }
-function cTours(){
- const T=S.tour,tt=tourTimes();
- let tourCard='';
- if(T.stops.length&&T.status!=='draft'&&T.status!=='completed'){
-  tourCard=`<div class="card tight"><div class="row"><div class="col grow"><h3 style="font-size:17px">${T.date}</h3><span class="s13 sub">${hm(T.start)} – ${hm(tt.end)} · ${T.stops.length} homes</span></div>${badge({proposed:'Needs your approval',confirmed:'Approved',changes:'Change sent'}[T.status],T.status==='confirmed'?'ink':'accent')}</div>
-  <div class="map">${mapSvg(1)}</div>
-  <div class="steps">${tt.stops.map((s,i)=>`<div class="step"><div class="rail"><span class="ndot" style="width:24px;height:24px;font-size:11px">${i+1}</span></div><button class="row grow" data-act="c-open" data-id="${s.id}" data-from="tours" style="align-items:flex-start;padding-bottom:10px"><div class="col grow"><span class="b s13">${L(s.id).addr}</span><span class="small muted">${L(s.id).hood}${T.requested.includes(s.id)?' · You requested this':''}</span></div><b class="s13 num">${hm(s.at)}</b></button></div>`).join('')}</div>
-  ${T.status==='proposed'?`<div class="row">${btn('Suggest change',{kind:'sec',act:'c-sheet',data:'data-v="tourchange"'})}${btn('Approve tour',{icon:'check',act:'tour-confirm'})}</div>`:T.status==='confirmed'?`<div class="row small sub" style="gap:6px">${icon('star','sm')}After the tour you’ll rate each home for Maya.</div>`:''}<button class="row s13 m sub" style="justify-content:center;gap:6px" data-act="toast" data-msg="Added to your calendar">${icon('calendar','sm')}Add to calendar</button></div>`;
- } else tourCard=`<div class="empty">No upcoming tour yet. Request a tour with the days, time and homes you want, or request a showing from any home.</div>`;
- const fbc=S.fbQueue.length?`<button class="card tight" data-act="c-go" data-r="feedback" style="text-align:left"><div class="row"><div class="col grow"><span class="b">${S.fbQueue.length} ${S.fbQueue.length===1?'home':'homes'} to rate</span><span class="s13 sub">Tell Maya what you thought</span></div>${badge('Feedback due','ink')}</div><div class="row" style="gap:8px">${S.fbQueue.map(id=>media(L(id),'','thumb')).join('')}</div></button>`:'';
- const past=Object.keys(S.feedback).map(id=>{const f=S.feedback[id];return `<div class="li">${media(L(+id),'','thumb')}<div class="col grow"><span class="s13 b">${L(+id).addr}</span><span class="small muted">You rated ${f.stars}★ · Would offer: ${f.offer||'—'}</span></div></div>`;}).join('');
- const treq=S.messages.filter(m=>m.type==='req'&&m.kind==='tour_request'&&!m.done);
- return {html:`<div class="row"><h1 class="grow" style="font-weight:700">Tours</h1>${agentChip()}</div>${treq.length?`<div class="sugg" style="padding:12px">${icon('clock','lg')}<div class="col grow"><span class="s13 b">Tour requested for ${esc(treq[0].date)}</span><span class="small sub">${treq[0].ids.length} homes · waiting for Maya to plan it</span></div></div>`:''}${btn('Request a tour',{kind:'sec',block:1,icon:'calendar',act:'c-tourreq'})}${tourCard}${fbc?`<span class="upper">Past tours</span>${fbc}`:''}${past?`<div class="card tight" style="gap:0">${past}</div>`:''}`};
-}
-function cFeedback(){
- if(!S.fbQueue.length)return {cls:'white',html:`${cBack('tours','Feedback')}<div class="empty">All caught up. Thanks — Maya can see your ratings.</div>`};
- const id=S.fbQueue[0],l=L(id),fb=S.fb;const total=Object.keys(S.feedback).length+S.fbQueue.length,idx=Object.keys(S.feedback).length+1;
- const likeOpts=['Natural light','Kitchen','Layout','Yard','Street','Views','Storage'],disOpts=['Too small','No yard','HOA','Noise','Dated','Parking','Price'];
- const ch=(k,o)=>`<button class="chip lg ${fb[k].includes(o)?'':'out'}" data-act="fb-chip" data-k="${k}" data-v="${o}" aria-pressed="${fb[k].includes(o)}">${o}</button>`;
- return {cls:'white',html:`<div class="c-head"><button class="iconbtn" style="color:var(--text)" data-act="c-go" data-r="tours" aria-label="Close">${icon('x','xl')}</button><span class="t">Home ${idx} of ${total}</span><span style="width:32px"></span></div>
- <div class="media" style="aspect-ratio:2/1;border-radius:14px"><div class="ph t${l.tone}">${icon('house')}</div></div>
- <div class="col" style="gap:2px"><h2 style="font-size:20px;font-weight:700">${l.addr}</h2><span class="s13 muted">${money(l.price)} · ${l.beds} bd · ${l.baths} ba</span></div>
- <div class="col" style="gap:8px"><h3 style="font-size:15px">How did it feel?</h3><div class="stars">${[1,2,3,4,5].map(i=>`<button data-act="fb-star" data-v="${i}" aria-label="${i} stars">${icon('star',i<=fb.stars?'fill':'')}</button>`).join('')}</div></div>
- <div class="col" style="gap:8px"><h3 style="font-size:15px">What did you like?</h3><div class="chips">${likeOpts.map(o=>ch('liked',o)).join('')}</div></div>
- <div class="col" style="gap:8px"><h3 style="font-size:15px">What didn’t work?</h3><div class="chips">${disOpts.map(o=>ch('disliked',o)).join('')}</div></div>
- <div class="col" style="gap:8px"><h3 style="font-size:15px">Would you make an offer?</h3><div class="segm">${['Yes','Maybe','No'].map(v=>`<button data-act="fb-offer" data-v="${v}" aria-pressed="${fb.offer===v}">${v}</button>`).join('')}</div></div>
- ${btn(S.fbQueue.length>1?'Next home':'Send to Maya',{lg:1,block:1,act:'fb-submit',disabled:!fb.stars})}`};
-}
-function cOffer(){
- const O=S.offer,l=L(O.listing);
- const kv=(k,v,was)=>`<div class="kv"><span class="sub">${k}</span><span class="v">${v}${was?`<br><span class="small muted" style="font-weight:400">${was}</span>`:''}</span></div>`;
- const acts=O.status==='awaiting'?`<div class="col" style="gap:10px">${btn('Approve offer',{lg:1,block:1,icon:'check',act:'offer-approve'})}${btn('Request changes',{kind:'sec',block:1,act:'c-sheet',data:'data-v="offerchange"'})}</div>`:`<div class="confetti">${icon('check','lg')}${{approved:'You approved this offer. Maya will submit it.',submitted:'Submitted to the seller’s agent.',accepted:'Accepted — congratulations!',changes:'Change request sent to Maya.',draft:'Maya is preparing the next version.'}[O.status]}</div>`;
- return {html:`${cBack('board','Offer')}<div class="row">${media(l,'','thumb')}<div class="col grow"><h2>Review your counter-offer</h2><span class="s13 muted">${l.addr} · prepared by Maya</span></div></div>
- <div class="card" style="gap:0;padding:6px 16px">${kv('Offer price',money(O.price),O.price!==615000?'was $615,000 · seller asked $624,000':'')}${kv('Closing date',new Date(O.closing+'T12:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),O.closing==='2026-11-30'?'was Nov 14':'')}${kv('Earnest money',money(O.earnest))}${kv('Financing',esc(O.financing))}${kv('Contingencies',Object.entries(O.cont).filter(x=>x[1]).map(x=>({inspection:'Inspection',appraisal:'Appraisal',financing:'Financing',sale:'Home sale'})[x[0]]).join(', ')||'None')}${kv('Est. monthly payment',money(Math.round(O.price*0.8*0.00632+520)))}</div>
- <div class="row top" style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;gap:10px">${av('MC',1,'sm')}<div class="col grow"><span class="s13 b">Note from Maya</span><span class="s13 sub" style="line-height:1.5">${esc(O.note)}</span></div></div>
- <span class="meta s13 sub" style="justify-content:center">${icon('clock','sm')}Seller’s deadline: ${O.expires}</span>${acts}`};
-}
-function cPrefs(){
- const P=S.prefs,pend=pendingSugg(),last=S.suggestions.filter(x=>x.resolvedAt).sort((a,b)=>b.resolvedAt-a.resolvedAt)[0];
- const tag=k=>{const i=P[k].imp;return `<span class="imp ${i}">${i==='never'?icon('x','sm'):''}${IMPL[i]}</span>`;};
- const row=(k,l,v,step)=>{const p=P[k],ps=pend.find(x=>x.k===k);return `<div class="pf"><button class="col grow" style="gap:2px" data-act="c-pref" data-k="${k}"><span class="small muted row" style="gap:5px">${l}${p.lock?icon('lock','sm'):''}</span><span class="m">${esc(v)}</span><span class="small ${ps?'love m':'muted'}">${ps?`Suggestion sent: ${esc(sgDesc(ps))}`:p.lock?'Set with Maya · tap to suggest a change':'Tap to edit'}</span></button>${step&&!p.lock?stepper(step,'client'):''}${p.lock?tag(k):impBtn(k,'client')}</div>`;};
- const status=pend.length?`<div class="sugg" style="padding:12px">${icon('clock','lg')}<div class="col grow"><span class="s13 b">${pend.length} suggestion${pend.length>1?'s':''} waiting for Maya</span><span class="small sub">These fields are locked, so Maya decides.</span></div></div>`
-  :last?(last.status==='accepted'?`<div class="confetti" style="font-size:13px">${icon('check')}Maya approved your change to ${esc(PLBL(last.k).toLowerCase())}.</div>`:`<div class="sugg" style="padding:12px">${icon('x','lg')}<div class="col grow"><span class="s13 b">Maya kept ${esc(PLBL(last.k).toLowerCase())} as it was</span><span class="small sub">She explained in chat.</span></div></div>`):'';
- return {html:`${cBack('board','Your preferences')}
- ${status}
- ${PREF_GROUPS().map(([g,f])=>`<div class="card tight" style="gap:0;padding:14px 16px 4px"><h3 style="font-size:15px">${g}</h3>${f.map(([k,l,v,s])=>row(k,l,v,s)).join('')}</div>`).join('')}
- <span class="small muted" style="text-align:center">Changes save right away and Maya is notified. Locked items go to her as suggestions.</span>`};
-}
 function cChat(){if(S.unread.client)S.unread.client=0;return {html:`<div class="row"><h1 class="grow" style="font-weight:700">Chat</h1>${av('MC',1)}</div><div class="card tight">${chatThread('client')}</div>`};}
 function cSheet(){
  const sh=S.c.sheet;let inner='';
  if(sh.type==='pass'){const l=L(sh.id);const opts=['Price','Location','Layout','Size','Condition','Commute','HOA'];inner=`<h2>What didn’t work?</h2><span class="s13 sub">${l.addr} — this helps Maya find better matches.</span><div class="chips">${opts.map(o=>`<button class="chip lg ${l.reasons.includes(o)?'':'out'}" data-act="pass-reason" data-v="${o}" aria-pressed="${l.reasons.includes(o)}">${o}</button>`).join('')}</div>${btn('Done',{lg:1,block:1,act:'sheet-close'})}`;}
- if(sh.type==='tourreq'){const homes=board().filter(l=>l.reaction!=='pass'&&l.status!=='Rejected');
-  inner=`<h2>Request a tour</h2><span class="s13 sub">Pick a day, a start time and the homes you want to see. Maya plans the route and sends it back for your approval.</span>
-  <div class="form-grid" style="grid-template-columns:1fr 1fr"><div class="field"><label for="tr-date">Day</label><div class="inp"><select id="tr-date" data-input="sheet" data-k="date">${TOUR_DATES.map(d=>`<option ${sh.date===d?'selected':''}>${d}</option>`).join('')}</select></div></div>
-  <div class="field"><label for="tr-start">Start around</label><div class="inp"><select id="tr-start" data-input="sheet" data-k="start">${[540,570,600,630,660].map(v=>`<option value="${v}" ${+sh.start===v?'selected':''}>${hm(v)}</option>`).join('')}</select></div></div></div>
-  <div class="col" style="gap:0"><span class="upper">Homes (${sh.ids.length} selected)</span>${homes.map(l=>`<label class="ptrow ${sh.ids.includes(l.id)?'':'off'}"><input type="checkbox" data-act="tr-toggle" data-id="${l.id}" ${sh.ids.includes(l.id)?'checked':''}><div class="col grow" style="gap:1px"><span class="s13 m">${esc(l.addr)}</span><span class="small muted">${money(l.price)} · ${l.hood}${l.reaction==='love'?' · Loved':''}</span></div></label>`).join('')}</div>
-  <div class="field"><label for="tr-note">Note for Maya (optional)</label><div class="inp"><textarea id="tr-note" data-input="sheet" data-k="note">${esc(sh.note)}</textarea></div></div>
-  ${btn(sh.ids.length?`Send request · ${sh.ids.length} home${sh.ids.length>1?'s':''}`:'Pick at least one home',{lg:1,block:1,icon:'send',act:'tr-send',disabled:!sh.ids.length})}${btn('Cancel',{kind:'ghost',block:1,act:'sheet-close'})}`;}
- if(sh.type==='showing'){const l=L(S.c.id);const slots=['Sat morning','Sat afternoon','Sun afternoon','Weekday evening'];inner=`<h2>Request a showing</h2><span class="s13 sub">${l.addr} · pick the times that work</span><div class="chips">${slots.map(o=>`<button class="chip lg ${sh.slots.includes(o)?'':'out'}" data-act="slot" data-v="${o}" aria-pressed="${sh.slots.includes(o)}">${o}</button>`).join('')}</div>${btn('Send request to Maya',{lg:1,block:1,icon:'send',act:'showing-send',disabled:!sh.slots.length})}${btn('Cancel',{kind:'ghost',block:1,act:'sheet-close'})}`;}
  if(sh.type==='pref'){const k=sh.k,p=S.prefs[k],D=sh.d,lock=p.lock;
   const num=(f,label)=>`<div class="field"><label for="ps-${f}">${label}</label><div class="inp"><input id="ps-${f}" data-input="psheet" data-k="${f}" value="${esc(k==='price'||k==='hoa'?money(D[f]):nf(D[f]))}" inputmode="numeric"></div></div>`;
   const chips=opts=>`<div class="chips">${opts.map(o=>`<button class="chip lg ${D.v.includes(o)?'':'out'}" data-act="ps-toggle" data-v="${o}" aria-pressed="${D.v.includes(o)}">${o}</button>`).join('')}</div>`;
@@ -1373,13 +1244,11 @@ function cSheet(){
   const ctl={price:`<div class="form-grid" style="grid-template-columns:1fr 1fr">${num('min','Min')}${num('max','Max')}</div>`,hoa:num('v','Max HOA per month'),size:`<div class="form-grid" style="grid-template-columns:1fr 1fr">${num('min','Min sqft')}${num('max','Max sqft')}</div>`,areas:chips(Object.keys(HOODS)),type:chips(['Single-family','Townhouse','Condo']),beds:sel([1,2,3,4,5,6],o=>o+'+ bedrooms'),commute:sel([10,15,20,25,30,35,40,45,50,55,60],o=>`Up to ${o} min`)}[k]||'';
   const imps=k==='highway'?['never','off']:['must','nice','off'];
   inner=`<h2>${esc(PLBL(k))}</h2><span class="s13 sub">${lock?'Maya locked this one. Your change goes to her as a suggestion.':'Changes save right away and Maya is notified.'}</span>${ctl}<div class="field"><span class="lbl">How important is it?</span><div class="segm">${imps.map(i=>`<button data-act="ps-imp" data-v="${i}" aria-pressed="${D.imp===i}">${IMPL[i]}</button>`).join('')}</div></div>${lock?`<div class="field"><label for="ps-note">Why? (optional)</label><div class="inp"><textarea id="ps-note" data-input="sheet" data-k="note">${esc(sh.note)}</textarea></div></div>`:''}${btn(lock?(sh.pending?'Update suggestion':'Send suggestion to Maya'):'Save',{lg:1,block:1,icon:lock?'send':'check',act:'ps-save'})}${sh.pending?btn('Withdraw suggestion',{kind:'sec',block:1,act:'ps-withdraw'}):''}${btn('Cancel',{kind:'ghost',block:1,act:'sheet-close'})}`;}
- if(sh.type==='tourchange'||sh.type==='offerchange'){inner=`<h2>${sh.type==='tourchange'?'Suggest a change to the tour':'Request changes to the offer'}</h2><div class="field"><label for="sh-note">Message to Maya</label><div class="inp"><textarea id="sh-note" data-input="sheet" data-k="note" placeholder="${sh.type==='tourchange'?'Could we start at 11 instead?':'Can we keep the Nov 14 closing?'}">${esc(sh.note)}</textarea></div></div>${btn('Send to Maya',{lg:1,block:1,icon:'send',act:sh.type==='tourchange'?'tour-change-send':'offer-change-send'})}${btn('Cancel',{kind:'ghost',block:1,act:'sheet-close'})}`;}
  return `<div class="sheet-scrim" data-act="sheet-close-bg"><div class="sheet" role="dialog" aria-modal="true"><span class="grab"></span>${inner}</div></div>`;
 }
 
 /* ============ actions ============ */
 const ping=t=>{if(effMode()==='both')toast(t);};
-function editable(s){if(s.synced){s.criteria=JSON.parse(JSON.stringify(prefCriteria()));s.synced=false;s.name='Alex — custom';toast('Unlinked from preferences — edits apply to this search only');}return s.criteria;}
 function cycleImp(k,who){
  const p=S.prefs[k];if(who==='client'&&p.lock){toast('Maya locked this one. Tap it to suggest a change.');return;}
  const order=k==='highway'?['never','off']:['must','nice','off'];p.imp=order[(order.indexOf(p.imp)+1)%order.length];
@@ -1407,15 +1276,8 @@ function reqInfo(m){
    status:pend?(pend<sgs.length?`${pend} of ${sgs.length} waiting`:'Waiting for approval'):acc===sgs.length?'Approved':acc?`${acc} of ${sgs.length} approved`:'Declined',
    acts:pend?[[sgs.length>1?'Decline all':'Decline','req-decline','sec'],[sgs.length>1?`Approve all (${pend})`:'Approve','req-approve','']]:[]};}
  if(m.kind==='prefs_update')return{title:`Changed ${m.items.length} preference${m.items.length>1?'s':''}`,lines:m.items.map(x=>x.text),open:!m.reviewed,status:m.reviewed?'Reviewed':'To review',acts:m.reviewed?[]:[['Open preferences','req-prefs','sec'],['Mark as reviewed','pref-seen','']]};
- if(m.kind==='tour_request')return{title:`Tour on ${m.date} around ${hm(m.start)}`,lines:m.ids.map(id=>`${L(id).addr} · ${money(L(id).price)}`),note:m.note,open:!m.done,status:m.done?`Planned — draft for ${m.done}`:'Waiting to be planned',acts:m.done?[]:[['Plan this tour','req-plan','']]};
- if(m.kind==='showing'){const l=L(m.ref),on=S.tour.stops.includes(m.ref)&&tourOpen(),open=S.showReq.some(r=>r.id===m.ref);
-  return{title:`Showing at ${l.addr}`,lines:[`${money(l.price)} · ${l.hood}`,`Times: ${(m.slots||[]).join(', ')||'Any time'}`],open,status:on?`Added to the ${S.tour.date} tour`:open?'Waiting to be scheduled':'Closed',acts:open?[['Plan in Tours','req-tours','']]:[]};}
  if(m.kind==='compare'){const done=S.ai&&S.ai.sent&&S.ai.sent.at>m.t;
   return{title:'Comparison report',lines:[(m.ids||[]).map(id=>L(id).addr).join(' · ')],note:m.note,open:!done,status:done?'Report sent':'Waiting for a report',acts:done?[]:[['Open Compare','req-compare','']]};}
- if(m.kind==='tour_change'){const open=S.tour.status==='changes';
-  return{title:`Change to the ${S.tour.date} tour`,lines:[],note:m.note,open,status:open?'Waiting for you to edit the tour':'Resolved',acts:open?[['Edit tour','req-tours','']]:[]};}
- if(m.kind==='offer_change'){const open=S.offer.status==='changes';
-  return{title:`Change to the offer on ${L(S.offer.listing).addr}`,lines:[],note:m.note,open,status:open?'Waiting for a revised offer':'Resolved',acts:open?[['Open offer','req-offer','']]:[]};}
  return{title:'Request',lines:[],open:false,status:'',acts:[]};
 }
 const openReqs=()=>S.messages.filter(m=>m.type==='req'&&reqInfo(m).open);
@@ -1429,24 +1291,20 @@ function resolveSugg(sg,v){const lbl=PLBL(sg.k),desc=sgDesc(sg);
  if(v==='accept'){Object.assign(S.prefs[sg.k],JSON.parse(JSON.stringify(sg.to)));sg.status='accepted';S.prefHistory.unshift({who:'agent',text:`Approved ${lbl}: ${desc}`,t:Date.now()});log('agent',`approved Alex’s change to ${lbl}`);}
  else{sg.status='declined';S.prefHistory.unshift({who:'agent',text:`Declined ${lbl}: ${desc}`,t:Date.now()});}
  sg.resolvedAt=Date.now();}
-function declineMsg(sgs){const one=sgs.length===1?sgs[0]:null;S.messages.push({who:'agent',text:one&&one.k==='price'?`I’d like to keep the max at ${money(S.prefs.price.max)} — your pre-approval tops out at $650k and we still have strong options. Happy to talk!`:`I’d like to keep ${one?PLBL(one.k).toLowerCase():'these preferences'} as ${one?'it is':'they are'} for now — happy to talk it through!`,t:Date.now()});S.unread.client++;}
+function declineMsg(sgs){const one=sgs.length===1?sgs[0]:null;S.messages.push({who:'agent',text:one&&one.k==='price'?`I’d like to keep the max at ${money(S.prefs.price.max)} — we still have strong options in that range. Happy to talk!`:`I’d like to keep ${one?PLBL(one.k).toLowerCase():'these preferences'} as ${one?'it is':'they are'} for now — happy to talk it through!`,t:Date.now()});S.unread.client++;}
 const A={
  mode:d=>{MODE=d.v;try{localStorage.setItem('rh-mode',MODE);}catch(e){}},
  theme:d=>{THEME=d.v;document.documentElement.dataset.theme=THEME;try{localStorage.setItem('rh-theme',THEME);}catch(e){}},
  reset:()=>{if(REC)REC.abort();S=initState();toast('Demo reset');},
  toast:d=>toast(d.msg),
- 'a-nav':d=>{const n={dashboard:'Home',clients:'Clients',inbox:'Inbox',tours:'Tours'}[d.r];if(!n){toast(d.r==='listings'?'Listing search isn’t part of this prototype':'Documents aren’t part of this prototype');return;}S.a.nav=n;if(d.r==='tours'){S.a.route='client';S.a.tab='tours';}else S.a.route=d.r;if(d.r==='inbox')S.unread.agent=0;},
- 'a-go':d=>{S.a.modal=null;S.a.route=d.r;if(d.t)S.a.tab=d.t;if(d.id)S.a.id=+d.id;S.a.nav=d.r==='dashboard'?'Home':(d.t==='tours'&&S.a.nav==='Tours')?'Tours':'Clients';if(d.t==='messages')S.unread.agent=0;if(d.t==='compare')aiEnsure();},
- 'c-filter-a':d=>{S.a.clientFilter=d.v;},
+ 'a-nav':d=>{const n={dashboard:'Home',clients:'Clients',inbox:'Inbox'}[d.r];if(!n){toast('Listing search isn’t part of this prototype');return;}S.a.nav=n;S.a.route=d.r;if(d.r==='inbox')S.unread.agent=0;},
+ 'a-go':d=>{S.a.modal=null;S.a.route=d.r;if(d.t)S.a.tab=d.t;if(d.id)S.a.id=+d.id;S.a.nav=d.r==='dashboard'?'Home':'Clients';if(d.t==='messages')S.unread.agent=0;if(d.t==='compare')aiEnsure();},
  'a-filter':d=>{S.a.filter=d.v;},
  'a-select':d=>{const id=+d.id,s=S.a.selected;S.a.selected=s.includes(id)?s.filter(x=>x!==id):[...s,id];},
  'a-clear-sel':()=>{S.a.selected=[];},
  'a-compare-sel':()=>{S.compare=[...S.a.selected];if(!S.compare.includes(S.front))S.front=S.compare[0];S.a.tab='compare';aiEnsure();toast('Comparison updated for Alex too');},
- 'a-tour-sel':()=>{if(!['draft','changes'].includes(S.tour.status)){S.a.tab='tours';if(tourOpen()){toast(`The ${S.tour.date} tour was sent — use Edit tour to change it`);return;}openPlan([...S.a.selected]);return;}const add=S.a.selected.filter(id=>!S.tour.stops.includes(id));S.tour.stops.push(...add);optimize();S.a.tab='tours';toast(add.length?`Added ${add.length} to the tour`:'Already on the tour');},
  'a-pick':d=>{const l=L(+d.id);l.pick=!l.pick;if(l.pick){log('agent',`marked ${l.addr} as a pick`);ping('Alex now sees “Maya’s pick” on this home');}},
  'a-vis':()=>{S.a.privateNote=!S.a.privateNote;},
- 'a-addtour':d=>{if(!['draft','changes'].includes(S.tour.status)){if(tourOpen()){toast(`The ${S.tour.date} tour was sent — open Tours and use Edit tour`);return;}S.a.route='client';S.a.tab='tours';openPlan([+d.id]);return;}S.tour.stops.push(+d.id);optimize();toast(`Added to the ${S.tour.date} tour`);},
- 'a-draft-offer':d=>{const id=+d.id;if(S.offer.listing!==id&&S.offer.status!=='draft'){toast('Finish the active offer on '+L(S.offer.listing).addr+' first');return;}if(S.offer.listing!==id){S.offer.listing=id;S.offer.price=Math.round(L(id).price*0.98/1000)*1000;}S.a.route='client';S.a.tab='offers';},
  'modal-add':()=>{S.a.modal='add';},
  'modal-close':()=>{S.a.modal=null;},
  'modal-close-bg':(d,e)=>{if(e.target.classList.contains('scrim'))S.a.modal=null;},
@@ -1456,75 +1314,35 @@ const A={
  'ai-share':()=>{if(!S.ai||S.ai.status!=='ready'){toast('Wait for the AI comparison to finish');return;}const upd=!!S.ai.sent;S.ai.sent={res:S.ai.res,at:Date.now(),seen:false};const top=L(S.ai.res.rank[0]);
   S.messages.push({who:'agent',text:`${upd?'I updated the':'I sent you a'} comparison report for ${S.ai.res.homes.length} homes. ${top.addr} comes out on top — the details are in Compare.`,t:Date.now()});S.unread.client++;
   log('agent',`sent ${upd?'an updated':'the'} AI comparison report`);toast(upd?'Updated report sent to Alex':'Report sent to Alex');ping('Alex sees the report in Compare and in chat');},
- 'pt-mic':()=>ptMic(),
+ 'pt-mic':()=>ptMic('a'),
+ 'pt-open':()=>{S.a.ptOpen=true;},
  'pt-example':()=>{S.a.ptText=PT_EXAMPLE;},
- 'pt-clear':()=>{if(REC)REC.stop();S.a.ptText='';},
+ 'pt-clear':()=>{if(REC)REC.stop();S.a.ptText='';S.a.ptOpen=false;},
  'pt-save':()=>{if(REC)REC.stop();const text=S.a.ptText.trim();if(!text)return;const next=ptParse(text),changes=ptDiff(next);
-  if(!changes.length){S.prefNotes.unshift({text,t:Date.now(),applied:0});S.a.ptText='';toast('Note saved — no preference changes found');return;}
+  if(!changes.length){S.prefNotes.unshift({text,t:Date.now(),applied:0});S.a.ptText='';S.a.ptOpen=false;toast('Note saved — no preference changes found');return;}
   S.a.pt={text,next,changes,off:[]};S.a.modal='prefs';},
  'pt-toggle':d=>{const o=S.a.pt.off;S.a.pt.off=o.includes(d.id)?o.filter(x=>x!==d.id):[...o,d.id];},
  'pt-apply':()=>{const m=S.a.pt,on=m.changes.filter(c=>!m.off.includes(c.id)),n=on.length;if(!n)return;S.prefs=ptPatch(on);const t=Date.now();
   for(const c of on)S.prefHistory.unshift({who:'agent',text:c.kind==='i'?`${c.label} → ${c.to}`:`${c.label} ${c.from} → ${c.to}`,t});
   S.prefNotes.unshift({text:m.text,t,applied:n});log('agent',`updated ${n} preference${n>1?'s':''} from a note`);
-  S.a.ptText='';S.a.pt=null;S.a.modal=null;toast(`Saved ${n} change${n>1?'s':''} — fit scores recalculated`);ping('Alex sees the updated preferences');},
+  S.a.ptText='';S.a.pt=null;S.a.modal=null;S.a.ptOpen=false;toast(`Saved ${n} change${n>1?'s':''} — fit scores recalculated`);ping('Alex sees the updated preferences');},
  'pref-lock':d=>{const p=S.prefs[d.k];p.lock=!p.lock;S.prefHistory.unshift({who:'agent',text:`${p.lock?'Locked':'Unlocked'} ${d.k==='price'?'Price range':d.k}`,t:Date.now()});},
+ 'a-cat-toggle':d=>{S.a.openCategory=S.a.openCategory===d.c?null:d.c;},
  'pref-step':d=>{const p=S.prefs[d.k];if(d.who==='client'&&p.lock){toast('Maya locked this one. Tap it to suggest a change.');return;}const lim=d.k==='beds'?[1,6]:[10,60];const step=d.k==='beds'?1:5;const nv=Math.max(lim[0],Math.min(lim[1],p.v+(+d.d)*step));if(nv===p.v)return;const lbl=d.k==='beds'?'Bedrooms':'Max commute';const fmt=v=>d.k==='beds'?v+'+':v+' min';S.prefHistory.unshift({who:d.who,text:`${lbl} ${fmt(p.v)} → ${fmt(nv)}`,t:Date.now()});p.v=nv;if(d.who==='client'){log('client',`changed ${lbl} to ${fmt(nv)}`);clientPrefChanged(d.k,S.prefHistory[0].text);ping('Maya gets a to-do to review it');}},
  sugg:d=>{const sg=S.suggestions.find(x=>x.id===d.id);if(!sg)return;resolveSugg(sg,d.v);if(d.v!=='accept')declineMsg([sg]);toast(d.v==='accept'?`${PLBL(sg.k)} updated — fit scores recalculated`:'Declined — Alex got a message');ping('Alex sees the outcome in chat and on Preferences');},
  'req-approve':d=>{const sgs=S.suggestions.filter(x=>x.g===d.ref&&x.status==='pending');sgs.forEach(x=>resolveSugg(x,'accept'));toast(`Approved ${sgs.length} change${sgs.length>1?'s':''} — fit scores recalculated`);ping('Alex sees the approval');},
  'req-decline':d=>{const sgs=S.suggestions.filter(x=>x.g===d.ref&&x.status==='pending');sgs.forEach(x=>resolveSugg(x,'decline'));declineMsg(sgs);toast('Declined — Alex got a message');},
  'req-prefs':()=>{A['a-go']({r:'client',t:'prefs'});},
  'pref-seen':()=>{const n=S.prefUpdates.length;S.prefUpdates=[];S.messages.forEach(m=>{if(m.kind==='prefs_update')m.reviewed=true;});if(n)log('agent',`reviewed ${n} preference change${n>1?'s':''}`);toast('Marked as reviewed');ping('Alex sees “Reviewed by Maya” in chat');},
- 'req-plan':d=>{const m=S.messages.find(x=>x.type==='req'&&x.ref===d.ref);if(!m)return;if(['proposed','confirmed','changes'].includes(S.tour.status)){toast(`Finish, cancel or complete the ${S.tour.date} tour first`);S.a.route='client';S.a.tab='tours';return;}S.a.route='client';S.a.tab='tours';S.a.nav='Clients';openPlan(m.ids.filter(id=>L(id).onBoard));Object.assign(S.a.plan,{date:m.date,start:m.start,fromReq:m.ref});},
- 'req-tours':()=>{A['a-go']({r:'client',t:'tours'});},
  'req-compare':()=>{A['a-go']({r:'client',t:'compare'});},
- 'req-offer':()=>{A['a-go']({r:'client',t:'offers'});},
  'cmp-diff':()=>{S.diffOnly=!S.diffOnly;},
  'cmp-front':d=>{S.front=+d.id;log(d.who==='client'?'client':'agent',`marked ${L(S.front).addr} as the front-runner`);if(d.who==='client')ping('Maya sees Alex’s new top pick');},
  'cmp-remove':d=>{S.compare=S.compare.filter(x=>x!==+d.id);S.a.selected=S.a.selected.filter(x=>x!==+d.id);if(S.front===+d.id)S.front=S.compare[0];},
- 'tour-opt':()=>{S.tour.optimize=!S.tour.optimize;optimize();},
- 'tour-move':d=>{const s=S.tour.stops,i=s.indexOf(+d.id),j=i+(+d.d);if(j<0||j>=s.length)return;[s[i],s[j]]=[s[j],s[i]];},
- 'tour-remove':d=>{S.tour.stops=S.tour.stops.filter(x=>x!==+d.id);},
- 'tour-add':d=>{S.tour.stops.push(+d.id);if(!S.tour.requested.includes(+d.id))S.tour.requested.push(+d.id);S.showReq=S.showReq.filter(r=>r.id!==+d.id);optimize();},
- 'tour-send':()=>{S.tour.status='proposed';S.tour.changeNote='';S.tour.stops.forEach(id=>{const l=L(id);if(l.status==='New'||l.status==='Shortlisted')l.status='Touring';});log('agent',`sent the ${S.tour.date} tour to Alex`);toast('Tour sent to Alex');ping('Alex sees a “Maya planned a tour” banner');},
- 'tour-edit':()=>{S.tour.status='draft';},
- 'plan-open':()=>openPlan(),
- 'plan-toggle':d=>{const P=S.a.plan,id=+d.id;P.stops=P.stops.includes(id)?P.stops.filter(x=>x!==id):[...P.stops,id];},
- 'plan-opt':()=>{S.a.plan.optimize=!S.a.plan.optimize;},
- 'plan-create':()=>{const P=S.a.plan;if(!P||!P.stops.length)return;const T=S.tour;if(['completed','canceled'].includes(T.status)&&T.stops.length)S.pastTours.unshift({...T});
-  const reqIds=S.showReq.map(r=>r.id);S.tour={status:'draft',date:P.date,start:P.start,stops:[...P.stops],requested:P.stops.filter(id=>reqIds.includes(id)||(T.requested||[]).includes(id)),optimize:P.optimize,changeNote:''};optimize();
-  if(P.fromReq){const m=S.messages.find(x=>x.ref===P.fromReq);if(m){m.done=S.tour.date;S.tour.requested=[...new Set([...S.tour.requested,...m.ids])];}}
-  S.showReq=S.showReq.filter(r=>!P.stops.includes(r.id));S.a.modal=null;S.a.plan=null;log('agent',`planned a ${S.tour.date} tour`);toast(`Draft tour for ${S.tour.date} created — send it to Alex when ready`);},
- 'tour-cancel':()=>{const T=S.tour;if(T.status!=='draft'&&T.status!=='changes')S.messages.push({who:'agent',text:`I’ve canceled the ${T.date} tour. I’ll send a new plan soon.`,t:Date.now()}),S.unread.client++;T.status='canceled';S.pastTours.unshift({...T});S.tour={...T,stops:[],requested:[]};log('agent',`canceled the ${T.date} tour`);toast('Tour canceled');},
- 'tour-complete':()=>{if(S.tour.status!=='confirmed'){toast('Alex needs to approve the tour first');return;}S.tour.status='completed';for(const id of S.tour.stops)if(!S.fbQueue.includes(id)&&!S.feedback[id])S.fbQueue.push(id);S.messages.push({who:'agent',text:`Thanks for touring on ${S.tour.date}! Please rate each home — it helps me find the right one.`,t:Date.now()});S.unread.client++;log('agent','completed the tour');toast('Tour completed — add your feedback below; Alex was asked to rate each home');ping('Alex sees “Rate the homes from your tour”');},
- 'afb-verdict':d=>{const id=+d.id;S.agentFb[id]={...(S.agentFb[id]||{}),verdict:d.v};},
- 'fb-remind':()=>{S.messages.push({who:'agent',text:'Quick reminder: please rate the homes from our tour when you have a minute.',t:Date.now()});S.unread.client++;toast('Reminder sent to Alex');},
- 'tour-new':()=>{S.tour={...S.tour,status:'draft',date:'Sat, Oct 4',stops:[],requested:[]};},
- 'tour-confirm':()=>{S.tour.status='confirmed';log('client',`approved the ${S.tour.date} tour`);toast('Tour approved');ping('Maya sees the approval and a reminder to complete the tour');},
- 'offer-cont':d=>{S.offer.cont[d.k]=!S.offer.cont[d.k];},
- 'offer-send':()=>{S.offer.status='awaiting';log('agent',`sent counter-offer v${S.offer.version} (${money(S.offer.price)}) for approval`);toast('Sent to Alex for approval');ping('Alex sees “Counter-offer ready for you”');},
- 'offer-withdraw':()=>{S.offer.status='draft';},
- 'offer-submit':()=>{S.offer.steps.push({text:`v${S.offer.version} approved by Alex`,t:'Today'});S.offer.status='submitted';S.offer.steps.push({text:`v${S.offer.version} submitted — ${money(S.offer.price)}`,t:'Today'});log('agent','submitted the offer to the listing agent');toast('Submitted to the listing agent');},
- 'offer-countered':()=>{S.offer.steps.push({text:'Seller countered again — $621,000',t:'Today'});S.offer.version++;S.offer.price=621000;S.offer.status='draft';toast(`Started v${S.offer.version} from the seller’s counter`);},
- 'offer-accepted':()=>{S.offer.status='accepted';L(S.offer.listing).status='Offered';log('agent',`recorded an accepted offer on ${L(S.offer.listing).addr}`);toast('Offer accepted — Alex is under contract');ping('Alex sees the good news');},
- 'offer-approve':()=>{S.offer.status='approved';log('client',`approved counter-offer v${S.offer.version}`);toast('Offer approved');ping('Maya can now submit it');},
- 'search-from-prefs':()=>{const had=S.searches.some(s=>s.fromPrefs);const s=createPrefSearch('agent');S.a.searchId=s.id;S.a.route='client';S.a.tab='searches';if(!had){toast('Search created from Alex’s preferences');ping('Alex can browse it in the Search tab');}},
- 'sc-select':d=>{S.a.searchId=d.id;S.a.showAll=false;},
- 'sc-new-menu':()=>{S.a.newSearch=!S.a.newSearch;},
- 'sc-new':d=>{let s;if(d.v==='prefs'){s=newPrefSearch('agent');toast('Search created from Alex’s preferences');}else{s={id:'n'+Date.now(),name:'New search',synced:false,criteria:{features:[],noHighway:false},alerts:'daily',mode:'curated',by:'agent',hidden:[],t:Date.now()};S.searches.push(s);toast('Blank search created — add filters on the left');}S.a.searchId=s.id;S.a.newSearch=false;S.a.showAll=false;},
- 'sc-view':d=>{S.a.resView=d.v;},
- 'sc-delete':()=>{const s=curSearch();S.searches=S.searches.filter(x=>x!==s);S.a.searchId=S.searches[0]?.id;toast(`Deleted “${s.name}”`);},
- 'sc-unsync':()=>{editable(curSearch());},
- 'sc-sync':()=>{const s=curSearch();if(S.searches.some(x=>x.synced&&x!==s)){toast('Another search is already linked to preferences');return;}s.synced=true;s.name='Alex — preferences';toast('Linked — filters now follow Alex’s preferences');},
- 'sc-toggle':d=>{const c=editable(curSearch());const a=c[d.k]||[];c[d.k]=a.includes(d.v)?a.filter(x=>x!==d.v):[...a,d.v];},
- 'sc-step':d=>{const c=editable(curSearch());if(d.k==='beds'){const v=Math.max(0,Math.min(6,(c.beds||0)+(+d.d)));if(v)c.beds=v;else delete c.beds;}else{const v=Math.max(0,Math.min(60,(c.commute||0)+5*(+d.d)));if(v)c.commute=v;else delete c.commute;}},
- 'sc-hw':()=>{const c=editable(curSearch());c.noHighway=!c.noHighway;},
- 'sc-hide':d=>{curSearch().hidden.push(+d.id);toast('Hidden from this search');},
- 'sc-send-all':()=>{const s=curSearch(),nm=newMatches(s);for(const l of nm){l.onBoard=true;l.addedBy='agent';l.status='New';}log('agent',`sent ${nm.length} new matches from “${s.name}”`);toast(`Sent ${nm.length} homes to Alex’s board`);ping('Alex sees them under “To review”');},
- 'sc-near':()=>{S.a.showNear=!S.a.showNear;},
- 'sc-all':()=>{S.a.showAll=!S.a.showAll;},
- 'c-search':d=>{S.c.searchId=d.id;},
- 'c-search-prefs':()=>{const s=createPrefSearch('client');S.c.searchId=s.id;toast('Search created from your preferences');ping('Maya sees the new search on Alex’s Searches tab');},
- 'fb-seen':d=>{S.feedback[d.id].seen=true;S.a.route='listing';S.a.id=+d.id;S.a.nav='Clients';},
+ 'c-cat-toggle':d=>{S.c.openCategory=S.c.openCategory===d.c?null:d.c;},
+ 'c-pt-mic':()=>ptMic('c'),
+ 'c-pt-open':()=>{S.c.ptOpen=true;},
+ 'c-pt-clear':()=>{if(REC)REC.stop();S.c.ptText='';S.c.ptOpen=false;},
+ 'c-pt-save':()=>cPtApply(),
  /* client */
  'c-go':d=>{if(d.r==='onboard')S.c.ob=null;S.c.route=d.r;if(d.r==='chat')S.unread.client=0;if(d.r==='compare'&&S.ai&&S.ai.sent)S.ai.sent.seen=true;},
  'c-open':d=>{S.c.id=+d.id;S.c.from=d.from||S.c.route;S.c.route='listing';},
@@ -1538,12 +1356,6 @@ const A={
  'pass-reason':d=>{const l=L(S.c.sheet.id);l.reasons=l.reasons.includes(d.v)?l.reasons.filter(x=>x!==d.v):[...l.reasons,d.v];},
  'sheet-close':()=>{const sh=S.c.sheet;if(sh&&sh.type==='pass'){const l=L(sh.id);if(l.reasons.length&&S.activity[0])S.activity[0].text=`passed on ${l.addr} — ${l.reasons.join(', ')}`;ping('Maya sees why Alex passed');}S.c.sheet=null;},
  'sheet-close-bg':(d,e)=>{if(e.target.classList.contains('sheet-scrim'))A['sheet-close']();},
- 'c-tourreq':()=>{S.c.sheet={type:'tourreq',date:TOUR_DATES.find(d=>d!==S.tour.date)||TOUR_DATES[2],start:600,ids:board().filter(l=>l.reaction==='love'&&l.status!=='Rejected').map(l=>l.id),note:''};},
- 'tr-toggle':d=>{const sh=S.c.sheet,id=+d.id;sh.ids=sh.ids.includes(id)?sh.ids.filter(x=>x!==id):[...sh.ids,id];},
- 'tr-send':()=>{const sh=S.c.sheet;if(!sh.ids.length)return;pushReq('tour_request','tr'+Date.now(),{date:sh.date,start:+sh.start,ids:[...sh.ids],note:sh.note});log('client',`requested a tour on ${sh.date}`);S.c.sheet=null;toast('Tour request sent to Maya');ping('Maya sees the request in Messages and on Tours');},
- 'c-sheet':d=>{S.c.sheet={type:d.v,slots:[],note:'',max:''};},
- slot:d=>{const s=S.c.sheet.slots;S.c.sheet.slots=s.includes(d.v)?s.filter(x=>x!==d.v):[...s,d.v];},
- 'showing-send':()=>{const id=S.c.id;S.showReq=S.showReq.filter(r=>r.id!==id);S.showReq.push({id,slots:S.c.sheet.slots,t:Date.now()});pushReq('showing',id,{slots:[...S.c.sheet.slots]});log('client',`requested a showing at ${L(id).addr}`);S.c.sheet=null;toast('Request sent to Maya');ping('Maya sees the request in Messages');},
  'c-ask-report':()=>{if(S.compare.length<2){toast('Add at least two homes first');return;}pushReq('compare','cmp',{ids:[...S.compare]});log('client','asked for a comparison report');toast('Maya will send you a report');ping('Maya sees the request in Messages');},
  'c-compare-add':d=>{const id=+d.id;if(S.compare.includes(id)){S.c.route='compare';return;}if(S.compare.length>=4){toast('You can compare up to 4 homes');return;}S.compare.push(id);S.c.route='compare';},
  ob:d=>{const O=S.c.ob||(S.c.ob={imp:Object.fromEntries(Object.entries(S.prefs).map(([k,v])=>[k,v.imp])),extras:{...S.extras}});if(d.t==='p'){O.imp[d.k]={off:'nice',nice:'must',must:'off'}[O.imp[d.k]]||'nice';}else O.extras[d.k]=(O.extras[d.k]+1)%3;},
@@ -1567,12 +1379,6 @@ const A={
   const g='g'+Date.now(),sg={id:'sg'+Date.now(),g,k,from,to,note:sh.note||'',status:'pending',t:Date.now()};S.suggestions.push(sg);
   S.prefHistory.unshift({who:'client',text:`Suggested ${lbl}: ${sgDesc(sg)}`,t:Date.now()});log('client',`suggested a change to ${lbl}`);pushReq('prefs',g);
   S.c.sheet=null;toast('Suggestion sent to Maya');ping('Maya sees the suggestion in Messages and on Preferences');},
- 'tour-change-send':()=>{S.tour.status='changes';S.tour.changeNote=S.c.sheet.note||'Can we adjust the times?';pushReq('tour_change','tour',{note:S.tour.changeNote});log('client','asked to change the tour');S.c.sheet=null;toast('Sent to Maya');ping('Maya sees the change request');},
- 'offer-change-send':()=>{S.offer.status='changes';S.offer.clientNote=S.c.sheet.note||'Can we talk about the terms?';pushReq('offer_change','offer',{note:S.offer.clientNote});log('client','asked for changes to the offer');S.c.sheet=null;toast('Sent to Maya');ping('Maya sees Alex’s request on the offer');},
- 'fb-star':d=>{S.fb.stars=+d.v;},
- 'fb-chip':d=>{const a=S.fb[d.k];S.fb[d.k]=a.includes(d.v)?a.filter(x=>x!==d.v):[...a,d.v];},
- 'fb-offer':d=>{S.fb.offer=d.v;},
- 'fb-submit':()=>{const id=S.fbQueue.shift();S.feedback[id]={...S.fb};log('client',`rated ${L(id).addr} ${S.fb.stars}★`);S.fb={stars:0,liked:[],disliked:[],offer:null};if(!S.fbQueue.length){S.c.route='tours';toast('Thanks! Maya can see your feedback');ping('Maya sees the ratings in Needs attention');}},
 };
 document.addEventListener('click',e=>{
  const el=e.target.closest('[data-act]');if(!el||el.disabled)return;
@@ -1580,8 +1386,7 @@ document.addEventListener('click',e=>{
  if(el.dataset.act.endsWith('-bg')&&e.target!==el)return;
  fn(el.dataset,e);render();
 });
-document.addEventListener('click',e=>{if(S.a.newSearch&&!e.target.closest('.menuwrap')){S.a.newSearch=false;render();}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'&&S.a.newSearch){S.a.newSearch=false;render();return;}if((e.key==='Enter'||e.key===' ')&&e.target.matches('article[data-act],div[data-act][role="button"]')){e.preventDefault();e.target.click();}if(e.key==='Escape'){if(S.c.sheet){S.c.sheet=null;render();}else if(S.a.modal){S.a.modal=null;render();}}});
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('article[data-act],div[data-act][role="button"]')){e.preventDefault();e.target.click();}if(e.key==='Escape'){if(S.c.sheet){S.c.sheet=null;render();}else if(S.a.modal){S.a.modal=null;render();}}});
 document.addEventListener('submit',e=>{
  const f=e.target.closest('form[data-form]');if(!f)return;e.preventDefault();
  const text=(new FormData(f).get('text')||'').toString().trim();if(!text)return;
@@ -1595,23 +1400,15 @@ document.addEventListener('submit',e=>{
 function onInput(e){
  const el=e.target;const b=el.dataset.input;if(!b)return;
  if(b==='clientSearch'){S.a.clientSearch=el.value;render();}
- else if(b==='afb'){const id=+el.dataset.id;S.agentFb[id]={...(S.agentFb[id]||{}),note:el.value};if(e.type==='change')render();}
- else if(b==='plan'){const k=el.dataset.k;S.a.plan[k]=k==='start'?+el.value:el.value;render();}
  else if(b==='sort'){S.a.sort=el.value;render();}
  else if(b==='status'){L(+el.dataset.id).status=el.value;render();}
- else if(b==='tourStart'){S.tour.start=+el.value;render();}
- else if(b==='tourAdd'){if(el.value){A['tour-add']({id:el.value});render();}}
  else if(b==='sheet'){S.c.sheet[el.dataset.k]=el.value;}
  else if(b==='psheet'){const v=parseInt(String(el.value).replace(/\D/g,''),10);if(!isNaN(v))S.c.sheet.d[el.dataset.k]=v;if(e.type==='change')render();}
  else if(b==='ptText'){S.a.ptText=el.value;render();}
- else if(b==='scName'){curSearch().name=el.value||'Untitled search';if(e.type==='change')render();}
- else if(b==='scAlerts'){curSearch().alerts=el.value;render();}
- else if(b==='scMode'){const s=curSearch();s.mode=el.value;if(s.mode==='auto'){const nm=newMatches(s);for(const l of nm){l.onBoard=true;l.addedBy='agent';l.status='New';}if(nm.length){log('agent',`auto-sent ${nm.length} new matches`);toast(`${nm.length} new matches sent to Alex`);}}render();}
- else if(b==='scPrice'){const c=editable(curSearch());const v=parseInt(el.value.replace(/\D/g,''),10);const cur=c.price?[...c.price]:[0,9999999];cur[+el.dataset.k]=v||(+el.dataset.k?9999999:0);if(cur[0]===0&&cur[1]===9999999)delete c.price;else c.price=cur;render();}
- else if(b==='offer'){const k=el.dataset.k;if(k==='price'||k==='earnest'){const v=parseInt(el.value.replace(/\D/g,''),10);if(v)S.offer[k]=v;if(e.type==='change')render();}else{S.offer[k]=el.value;if(e.type==='change'&&k==='closing')render();}}
+ else if(b==='cPtText'){S.c.ptText=el.value;render();}
 }
-document.addEventListener('input',e=>{const b=e.target.dataset.input;if(['clientSearch','sheet','psheet','offer','scName','ptText','afb'].includes(b))onInput(e);});
-document.addEventListener('change',e=>{const b=e.target.dataset.input;if(!['clientSearch','weight','sheet','ptText'].includes(b))onInput(e);});
+document.addEventListener('input',e=>{const b=e.target.dataset.input;if(['clientSearch','sheet','psheet','ptText','cPtText'].includes(b))onInput(e);});
+document.addEventListener('change',e=>{const b=e.target.dataset.input;if(!['clientSearch','weight','sheet','ptText','cPtText'].includes(b))onInput(e);});
 let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(render,120);});
 render();
 </script>

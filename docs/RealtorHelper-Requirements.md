@@ -2,21 +2,23 @@
 
 | | |
 |---|---|
-| Version | 2.0 |
-| Date | 2026-09-27 |
+| Version | 3.0 |
+| Date | 2026-10-03 |
 | Owner | Oleksandr Martyniuk |
 | Status | Ready for review |
-| Sources | HTML prototype (`prototype/realtorhelper-v2.html`), Product & UX spec (Claude Docs), Figma file "RealtorHelper" |
+| Sources | HTML prototype (`prototype/realtorhelper.html`), Product & UX spec (Claude Docs) |
 
-This document says **what** to build so a team can implement RealtorHelper without the prototype open. It is technology-neutral: it defines behavior, data, rules, contracts and acceptance criteria, not frameworks or libraries. The tech stack is an open question (§17).
+This document says **what** to build so a team can implement RealtorHelper without the prototype open. It is technology-neutral: it defines behavior, data, rules, contracts and acceptance criteria, not frameworks or libraries. The tech stack is an open question (§16).
 
 **How to read it**
 
-- Requirement IDs (`PR-3`, `TR-10`) are the reference for tickets and tests.
+- Requirement IDs (`PR-3`, `BD-10`) are the reference for tickets and tests.
 - Priority: **P0** = MVP, **P1** = fast-follow, **Later** = after MVP.
 - "Must", "should" and "may" are used in the RFC 2119 sense.
 - ✅ marks behavior demonstrated in the HTML prototype. Match it unless this document says otherwise.
-- Examples use the demo data: agent **Maya Chen** (solo, Keller Realty), client **Alex Kim** (first-time buyer).
+- Examples use the demo data: agent **Maya Chen** (solo, Keller Realty), client **Alex Kim**.
+
+**v3.0 — scope narrowed.** After pilot feedback, we cut everything that duplicates a general-purpose real-estate CRM (client pipeline/stage, tours, offers, documents, household/financing details) and kept what's distinctive: AI-assisted search, shared home comparison, and agent–client communication. See §1.1.
 
 ---
 
@@ -45,7 +47,7 @@ This document says **what** to build so a team can implement RealtorHelper witho
 
 ## 1. Product summary and scope
 
-RealtorHelper is a web app for **buyer's agents**. It pairs a light client CRM with a **shared home-search workspace per client**. The agent and client work on preferences, saved searches and listings together until the client makes an offer. It is modeled on Compass Collections, with structured preferences and, for the agent, a fit score on every listing.
+RealtorHelper is a web app for **buyer's agents**. It pairs an **AI-assisted home search** with a **shared comparison workspace** and **client communication**, per client. The agent and client search, react to and discuss homes together, and the agent uses AI to compare shortlisted homes and send the client a report. It deliberately does not manage the client relationship end to end — no pipeline stage, tours, offers or documents — so it stays simple and doesn't compete with the client's existing CRM and transaction tools.
 
 Two apps share one backend and one design system:
 
@@ -62,38 +64,36 @@ Two apps share one backend and one design system:
 | Client access | Invite-based portal with magic-link / one-time-code login. No passwords for clients. |
 | Organization | Solo agents. Every record carries `workspace_id` so teams can be added later. |
 | Buyer model | One buyer per client. |
+| Client model | Minimal: name, email, phone, plus the structured preference profile that drives search and fit (§4.3), and the client's own free-text "dream home" note. No pipeline stage, household, financing, tags, source or move-date fields — an agent's existing CRM owns that. |
 | Paid, agent-only insight | Fit scores, fit breakdowns and AI features are **agent-only** features of the paid agent plan. Clients never see fit scores and never trigger AI. A client sees comparison results only in a **report the agent sends** (§8.3). |
 | AI | Two AI features: "Update preferences from a note" (§8.2) and "AI comparison" (§8.3), behind a vendor-neutral model interface with a rule-based fallback. |
 | Client preferences | The client can change any unlocked preference; the change **applies immediately** and the agent gets a **review to-do** closed by **Mark as reviewed** (PR-12). Locked fields become **suggestions** the agent approves or declines. |
-| Client requests | Every client ask (showing, tour, comparison report, tour change, offer change, locked-field suggestion) and every preference update arrives in the conversation as a **card** the agent acts on (MS-5). |
-| Tours | The agent plans tours on the client's Tours tab. A tour must be **approved by the client** before the agent can complete it. After completion both sides give per-home feedback. Clients can request a tour (day, time, homes). |
+| Client requests | Every client ask (preference suggestion, comparison report) and every preference update arrives in the conversation as a **card** the agent acts on (MS-5). |
 | Searches | A new search starts **from the client's preferences** (a copy) or **from scratch**. |
-| Client-scoped actions | Adding listings (Board tab) and planning tours (Tours tab) always happen inside a client. |
+| Client-scoped actions | Adding listings (Board tab) always happens inside a client. |
+| Out of scope | Pipeline/stage tracking, tour scheduling, offers and transaction management, and document storage are not part of this product. |
 
 ### 1.2 Scope
 
 | In MVP | Out of MVP |
 |---|---|
-| Clients and pipeline, personal info, private notes, invites | Seller workflows |
-| Collaborative preferences with locks, suggestions, review to-dos and history | Team and brokerage roles |
-| Preferences from typed or dictated notes (AI) | Lead-gen and marketing |
-| Saved searches (from preferences or from scratch), almost matches, review-first / auto delivery | E-signature (DocuSign) |
-| Mock listing provider, add by search / URL / manual | Transaction management after offer acceptance |
-| Board, reactions, comments (shared and private), agent picks | Native mobile apps |
-| Compare table, front-runner, AI comparison and reports | Real MLS/IDX feed |
-| Showing and tour requests, tour planner, route order, client approval, completion, two-sided feedback | |
-| Messaging with request cards, unified inbox | |
-| Offers with client approval and counter versions, documents | |
-| In-app and email notifications, SMS for invites and tour reminders | |
+| Clients (minimal profile), personal info, private notes, invites | Client pipeline / stage, seller workflows |
+| Collaborative preferences with locks, suggestions, review to-dos and history | Tour scheduling, showings, route planning (not part of this product) |
+| Preferences from typed or dictated notes (AI) | Offers, transaction management, e-signature (not part of this product) |
+| Live, fit-ranked results from the client's preferences, almost matches (agent's Board, Worth a look filter — §7.3, BD-1); client-side saved searches (from preferences or from scratch) with alerts and review-first / auto delivery | Document storage (not part of this product) |
+| Mock listing provider, add by search / URL / manual | Team and brokerage roles |
+| Board, reactions, comments (shared and private), agent picks | Lead-gen and marketing |
+| Compare table, front-runner, AI comparison and reports | Native mobile apps |
+| Messaging with request cards, unified inbox | Real MLS/IDX feed |
 
 ### 1.3 Delivery phases
 
 | Phase | Scope | Exit gate |
 |---|---|---|
-| 1. MVP core | §7.1–7.6, §8, notifications (in-app + email) | 3 pilot agents with 2+ active clients each for 2 weeks |
-| 2. MVP complete | §7.7–7.9, SMS reminders | Pilot agents run a full search-to-offer on the app |
+| 1. MVP core | §7.1–7.4, §8, notifications (in-app + email) | 3 pilot agents with 2+ active clients each for 2 weeks |
+| 2. MVP complete | §7.5–7.6 (Messaging, Authentication and settings) | Pilot agents run a full search-to-comparison loop on the app |
 | 3. Fast-follow | All P1 items | — |
-| 4. Later | Real MLS/IDX, teams, seller clients, e-signature, native apps | — |
+| 4. Later | Real MLS/IDX, teams, seller clients, native apps | — |
 
 ---
 
@@ -122,9 +122,6 @@ Two apps share one backend and one design system:
 | Comparison | A side-by-side of 2–4 board items. |
 | AI analysis | Model-generated category scores and explanations for a comparison (§8.3). Agent-only. |
 | Report | A snapshot of an AI analysis that the agent sends to the client. |
-| Tour | A planned showing day with ordered stops. One open tour per client in MVP. |
-| Showing | One stop on a tour. |
-| Offer | Terms drafted by the agent, approved by the client. Counters are new versions. |
 | Activity event | An immutable record of a collaborative action. Drives feeds and notifications. |
 
 ---
@@ -137,7 +134,7 @@ Two apps share one backend and one design system:
 |---|---|
 | Agent | Owns the workspace. Full access to all of its clients. |
 | Client | One buyer. Access only to their own client record through the portal. |
-| System | Background jobs (search runs, simulator, digests, reminders). Events are attributed to "system". |
+| System | Background jobs (search runs, simulator, digests). Events are attributed to "system". |
 
 ### 3.2 Permissions matrix
 
@@ -160,21 +157,14 @@ Two apps share one backend and one design system:
 | Compare homes, set front-runner | Yes | Yes (fact table only) |
 | Generate AI analysis, send report | Yes (paid) | No |
 | Ask for a comparison report; view sent reports | — | Yes |
-| Request a showing or a tour | — | Yes |
-| Plan, send, edit, cancel, complete a tour | Yes | No |
-| Approve a tour / suggest a change | No | Yes |
-| Give per-home tour feedback | Yes (private verdict and notes) | Yes (rating) |
-| Draft, send, submit an offer; record seller response | Yes | No |
-| Approve an offer / request changes | No | Yes |
-| Upload documents | Yes | Yes (e.g., pre-approval) |
 | Messaging | Yes | Yes |
 
 ### 3.3 Authorization rules
 
 - **AUTH-1 (P0).** Every request is authorized server-side. An agent may access only records with their `workspace_id`. A client may access only records with their `client_id`.
-- **AUTH-2 (P0).** Agent-only data — agent notes, private comments, internal tags, fit scores and breakdowns, AI analyses (reports excepted), agent tour feedback, matches waiting for review — must never be serialized in any response or real-time event to a client session. Test this with a contract test per resource.
+- **AUTH-2 (P0).** Agent-only data — agent notes, private comments, internal tags, fit scores and breakdowns, AI analyses (reports excepted), matches waiting for review — must never be serialized in any response or real-time event to a client session. Test this with a contract test per resource.
 - **AUTH-3 (P0).** Private data is shown to the agent with a lock icon and an "Only you" label.
-- **AUTH-4 (P0).** Private notes, private comments and agent tour feedback are never sent to an AI model (§8.1).
+- **AUTH-4 (P0).** Private notes and private comments are never sent to an AI model (§8.1).
 
 ---
 
@@ -200,12 +190,6 @@ erDiagram
   COMPARISON ||--o| COMPARE_ANALYSIS : has
   COMPARISON ||--o{ COMPARE_REPORT : sends
   CLIENT ||--o{ CLIENT_REQUEST : makes
-  CLIENT ||--o{ TOUR : has
-  TOUR ||--|{ SHOWING : contains
-  SHOWING ||--o| SHOWING_FEEDBACK : "client rates"
-  SHOWING ||--o| AGENT_SHOWING_FEEDBACK : "agent notes"
-  CLIENT ||--o{ OFFER : has
-  CLIENT ||--o{ DOCUMENT : has
   CLIENT ||--|| CONVERSATION : has
   CONVERSATION ||--o{ MESSAGE : has
   CLIENT ||--o{ ACTIVITY_EVENT : timeline
@@ -226,15 +210,7 @@ erDiagram
 | first_name, last_name | string | first_name required |
 | email, phone | string? | At least one is required to send an invite |
 | preferred_contact | enum(email, sms, phone) | |
-| portal_status | enum(not_invited, invited, active, revoked) | §5.2 |
-| stage | enum(lead, onboarding, actively_searching, touring, offer_out, under_contract, closed, paused, lost) | §5.1 |
-| source | string? | e.g. "Referral · Mia Wong" |
-| tags | string[] | |
-| household | {adults:int, children:int, pets:string?} | e.g. 2, 1, "1 dog" |
-| current_home | string? | e.g. "Renting downtown, lease ends Dec 31" |
-| commute_targets | [{label, address, lat, lng, mode: enum(drive, transit, bike, walk)}] | MVP uses the first one ("Medical Center") |
-| target_move_date | date? | |
-| financing | {pre_approved:bool, amount:money?, lender:string?, expires_on:date?, down_payment_pct:number?} | |
+| portal_status | enum(not_invited, invited, active, revoked) | §5.1 |
 | dream_home_text | string? | Client's free text, shown highlighted to the agent |
 | last_activity_at | ts | Updated by any client event |
 | archived | bool | |
@@ -247,7 +223,7 @@ erDiagram
 
 **PreferenceNote** — `id`, `client_id`, `author_id`, `text`, `input_mode: enum(typed, dictated)`, `detected_changes: ChangeProposal[]` (§8.2), `applied_change_ids: id[]`, `status: enum(saved_no_changes, applied, cancelled)`.
 
-**ClientRequest** — `id`, `client_id`, `kind: enum(preference_update, preference_suggestion, showing, tour_request, compare_report, tour_change, offer_change)`, `ref` (change group, board item, comparison, tour or offer id), `payload` (showing windows; tour request day, start time and homes; compared ids; note), `created_at`, `status` (derived, MS-5), `message_id` (its card in the conversation).
+**ClientRequest** — `id`, `client_id`, `kind: enum(preference_update, preference_suggestion, compare_report)`, `ref` (change group or comparison id), `payload` (note), `created_at`, `status` (derived, MS-5), `message_id` (its card in the conversation).
 
 **SavedSearch**
 
@@ -278,15 +254,14 @@ erDiagram
 | property_type | enum(single_family, townhouse, condo, multi_family, land) | |
 | hoa_monthly, tax_annual | money | |
 | days_on_market | int | "New" = ≤ 7 days |
+| commute_min | int | Minutes to the client's commute target; a mock/precomputed listing attribute (§6.6) |
 | features | {garage: 0/0.5/1, yard: 0/0.5/1, office: 0/0.5/1, primary_main: bool, near_highway: bool, ...} | 1 = full (2-car garage, fenced yard, dedicated office), 0.5 = partial (1-car, small yard, den), 0 = none |
 | school_rating | int 1–10 | Data only; never a filter (fair housing) |
 | photos | url[] | 6–12 |
 | description | text | |
 | listing_agent | {name, phone, email}? | |
 
-Commute time is derived per client commute target (§6.7), not stored on the listing.
-
-**BoardItem** — `id`, `client_id`, `listing_id`, `added_by`, `added_via: enum(agent_pick, search_match, client_search, client_link, manual)`, `state` (§5.3), `agent_pick: bool`, `agent_note?` (shared "Why Maya picked it"), `pinned`, unique (`client_id`, `listing_id`).
+**BoardItem** — `id`, `client_id`, `listing_id`, `added_by`, `added_via: enum(agent_pick, search_match, client_search, client_link, manual)`, `state` (§5.2), `agent_pick: bool`, `agent_note?` (shared "Why Maya picked it"), `pinned`, unique (`client_id`, `listing_id`).
 
 **Reaction** — `id`, `board_item_id`, `value: enum(love, like, maybe, pass)`, `reasons: enum(price, location, layout, size, condition, commute, hoa)[]` (Pass only). One active reaction per item; choosing the current value clears it.
 
@@ -298,21 +273,7 @@ Commute time is derived per client commute target (§6.7), not stored on the lis
 
 **CompareReport** — immutable snapshot of a ready analysis sent to the client: `id`, `comparison_id`, `analysis` (copy), `sent_by`, `sent_at`, `seen_by_client_at?`. The client sees the latest report.
 
-**ShowingRequest** — `id`, `client_id`, `board_item_id`, `windows: enum(sat_morning, sat_afternoon, sun_afternoon, weekday_evening)[]` (≥ 1), `note?`, `status: enum(open, scheduled, dismissed)`.
-
-**Tour** — `id`, `client_id`, `date`, `start_time` (09:00, 09:30, 10:00, 10:30, 11:00), `start_address` (agent office by default), `status` (§5.5), `optimize_route: bool`, `stop_order: showing_id[]`, `change_note?`, `from_request_id?`.
-
-**Showing** — `id`, `tour_id`, `board_item_id`, `arrive_at`, `duration_min` (default 30), `drive_min_from_prev`, `requested_by_client: bool`, `listing_agent_confirmation: enum(pending, confirmed, declined)`, `access_notes?`.
-
-**ShowingFeedback** (client) — `id`, `showing_id`, `stars: 1–5` (required), `liked: enum(natural_light, kitchen, layout, yard, street, views, storage)[]`, `disliked: enum(too_small, no_yard, hoa, noise, dated, parking, price)[]`, `would_offer: enum(yes, maybe, no)?`, `seen_by_agent: bool`.
-
-**AgentShowingFeedback** — `id`, `showing_id`, `verdict: enum(strong_fit, maybe, not_a_fit)`, `note?`, `updated_at`. Agent-only.
-
-**Offer** — `id`, `client_id`, `board_item_id`, `version:int`, `parent_offer_id?`, `price`, `earnest_money`, `financing` (text, e.g. "Conventional · 20% down"), `contingencies {inspection:bool, inspection_days?, appraisal:bool, financing:bool, financing_days?, sale_of_home:bool}`, `closing_date`, `expires_at`, `note_to_client`, `client_change_request?`, `status` (§5.6), `timeline: [{text, at}]`.
-
-**Document** — `id`, `client_id`, `board_item_id?`, `offer_id?`, `type: enum(pre_approval, disclosure, offer, inspection, other)`, `file_ref`, `uploaded_by`, `visibility: enum(shared, agent_only)`.
-
-**Conversation / Message** — one conversation per client. Message: `id`, `conversation_id`, `author_id`, `body?`, `attachments[]`, `card? {type: request | listing | comparison | tour | offer, ref_id}`, `read_by[]`.
+**Conversation / Message** — one conversation per client. Message: `id`, `conversation_id`, `author_id`, `body?`, `attachments[]`, `card? {type: request | listing | comparison, ref_id}`, `read_by[]`.
 
 **ActivityEvent** — `id`, `client_id`, `actor_id` (or "system"), `type` (§10.1), `payload`, `visibility`. Immutable.
 
@@ -342,7 +303,6 @@ Each field has a value, an `importance` (must, nice, off, never) and a `locked` 
 | Features | `basement`, `guest_room`, `mudroom`, `central_ac`, `fireplace`, `ev_charging`, `pool` | | Importance only | off | P0 capture (onboarding), P1 scoring |
 | Condition | `condition` | move_in_ready / light_cosmetic / fixer_ok | Select | off | P1 |
 | Lifestyle | `walkability`, `quiet_street`, `near_parks`, `near_transit` | | Importance only | off | P1 |
-| Timing | `must_move_by`, `flexibility` | | | off | P1 |
 | Free text | `dream_home_text` | text | Textarea | — | P0 |
 
 Rules:
@@ -357,82 +317,20 @@ Rules:
 
 Every transition writes an ActivityEvent (§10). Transitions not listed are rejected with `409 invalid_transition`.
 
-### 5.1 Client stage
-
-`lead → onboarding → actively_searching → touring → offer_out → under_contract → closed`, plus `paused` and `lost` from any open stage.
-
-- **ST-1 (P0).** The agent can set any stage manually.
-- **ST-2 (P1).** Suggested stage (shown as a chip the agent accepts; derived automatically in the prototype ✅):
-  - an offer accepted → `under_contract`
-  - an offer awaiting approval, approved or submitted → `offer_out`
-  - a tour proposed, approved or completed → `touring`
-  - otherwise, once the portal is active → `actively_searching`
-
-### 5.2 Portal invite
+### 5.1 Portal invite
 
 `not_invited → invited → active`; `invited → invited` (resend); `invited | active → revoked`. An invite link expires after 7 days; resend issues a new one.
 
-### 5.3 Board item state
+### 5.2 Board item state
 
-`new → shortlisted → touring → offered`, plus `rejected` and `archived` from any state. The agent changes state from a select.
-- Sending a tour moves its homes from `new` or `shortlisted` to `touring` ✅.
-- An accepted offer moves the item to `offered` ✅.
+`new → shortlisted`, plus `rejected` and `archived` from any state. The agent changes state from a select.
 - A client Love suggests Shortlist to the agent (P1 chip). A client Pass does not change state.
 
-### 5.4 Preference suggestion (locked fields)
+### 5.3 Preference suggestion (locked fields)
 
-`suggested → accepted | declined`, or `withdrawn` by the client. One pending suggestion per field; the client can update or withdraw it while pending. Approve applies the value. Decline keeps the value and posts an agent chat message (editable template) ✅ — price: "I'd like to keep the max at $650,000 — your pre-approval tops out at $650k and we still have strong options. Happy to talk!"; other fields: "I'd like to keep {field} as it is for now — happy to talk it through!"
+`suggested → accepted | declined`, or `withdrawn` by the client. One pending suggestion per field; the client can update or withdraw it while pending. Approve applies the value. Decline keeps the value and posts an agent chat message (editable template) ✅ — price: "I'd like to keep the max at $650,000 — we still have strong options in that range. Happy to talk!"; other fields: "I'd like to keep {field} as it is for now — happy to talk it through!"
 
-### 5.5 Tour
-
-```mermaid
-stateDiagram-v2
-  [*] --> draft
-  draft --> proposed: Agent sends
-  proposed --> approved: Client approves
-  proposed --> changes_requested: Client suggests a change
-  changes_requested --> proposed: Agent resends
-  proposed --> draft: Agent edits
-  approved --> draft: Agent edits
-  approved --> completed: Agent completes the tour
-  draft --> canceled
-  proposed --> canceled
-  approved --> canceled
-  changes_requested --> canceled
-  completed --> [*]
-```
-
-- Stops can be edited only in `draft` or `changes_requested` ✅.
-- **Complete the tour** is available only in `approved` ✅.
-- One open tour (`draft`, `proposed`, `approved`, `changes_requested`) per client ✅ (TR-6).
-- `completed` queues a client rating for every stop and opens agent feedback (TR-10).
-- Labels — agent: Draft, "Waiting for approval", "Approved by Alex", "Changes requested", Completed, Canceled; client: "Needs your approval", "Approved", "Change sent".
-
-### 5.6 Offer
-
-```mermaid
-stateDiagram-v2
-  [*] --> draft
-  draft --> awaiting_approval: Agent sends to client
-  awaiting_approval --> draft: Agent withdraws request
-  awaiting_approval --> approved: Client approves
-  awaiting_approval --> changes_requested: Client requests changes
-  changes_requested --> awaiting_approval: Agent resends
-  approved --> submitted: Agent submits to listing agent
-  submitted --> countered: Seller counters
-  countered --> draft: New version (v+1) prefilled with the counter
-  submitted --> accepted
-  submitted --> rejected
-  draft --> withdrawn
-  submitted --> withdrawn
-  accepted --> [*]
-```
-
-- A counter creates a new Offer version (`version+1`, `parent_offer_id`), prefilled with the seller's terms, with a diff against the previous version ✅.
-- One offer per client may be active at a time. Drafting on another home while one is active is blocked: "Finish the active offer on {address} first" ✅.
-- `accepted` moves the client to `under_contract` and the item to `offered` ✅; other open offers are prompted to withdraw.
-
-### 5.7 AI analysis and report
+### 5.4 AI analysis and report
 
 `none → generating → ready | failed`; `ready → generating` (regenerate). A `ready` analysis is **out of date** when the current `inputs_hash` differs (§8.3.4). Sending creates a CompareReport snapshot; regenerating never changes a sent report.
 
@@ -466,7 +364,7 @@ Fit = round(100 × Σ wᵢ·mᵢ / Σ wᵢ)
 - **FS-2.** If `near_highway` is a deal-breaker and the listing is near the highway, Fit = 0 and the UI shows "Deal-breaker". The listing can still be added.
 - **FS-3.** Σ wᵢ = 0 → Fit = 0 with a "No preferences weighted" note.
 - **FS-4.** Bands: ≥ 80 great (accent color), 60–79 good, < 60 weak.
-- **FS-5.** The fit breakdown lists each weighted preference with ✓ (1), ≈ (0.5) or ✗ (0), its importance, and a detail line (e.g. "22 min drive to Medical Center", "3 + den bd — wants 4+").
+- **FS-5.** The fit breakdown lists each weighted preference with ✓ (1), ≈ (0.5) or ✗ (0), its importance, and a detail line (e.g. "22 min drive", "3 + den bd — wants 4+").
 - **FS-6.** Fit recalculates whenever preferences or listing data change.
 - **FS-7.** Fit is agent-only. The client portal never shows a fit number, pill, band or breakdown; it may use fit to order results without showing it.
 - Adjacency (demo metro): Linden Hills ↔ Oak Park, Hillcrest ↔ Cedar Grove, Downtown ↔ Riverside.
@@ -475,11 +373,12 @@ Fit = round(100 × Σ wᵢ·mᵢ / Σ wᵢ)
 
 | Option | Initial criteria |
 |---|---|
-| **From preferences** | Copied from the current preferences: must-haves become filters (price range, areas, types, beds min, commute max, size range, HOA max, required features); deal-breakers become exclusions (e.g., near I-94); nice-to-haves rank results through the fit score; don't-care is ignored |
-| **From scratch** | No filters; all active listings ranked by fit |
+| **Agent's live results (§7.3, Board → Worth a look)** | Not a separate object — the Board's Worth a look filter always reflects the client's *current* preferences directly: must-haves become filters (price range, areas, types, beds min, commute max, size range, HOA max, required features), deal-breakers become exclusions (e.g., near I-94), nice-to-haves rank results through the fit score, don't-care is ignored. Every preference edit re-ranks the results at once; there is nothing to create or snapshot. |
+| **Client's saved search — from preferences** | A snapshot of the preferences at creation time: same mapping as above, but frozen (SC-1). |
+| **Client's saved search — from scratch** | No filters; all active listings ranked by fit. |
 
-- **SC-1.** The copy is a snapshot. Later preference changes re-rank results but do not change the search's filters; the agent edits filters directly.
-- **SC-2.** A client may have several searches of either origin. The Preferences tab's "Create search from preferences" and the portal's "Search with your preferences" open the existing from-preferences search if there is one, else create it.
+- **SC-1.** A client-created "from preferences" search is a snapshot. Later preference changes re-rank its results but do not change its filters.
+- **SC-2.** A client may have several searches of either origin. The portal's "Search with your preferences" opens the client's existing from-preferences search if there is one, else creates it.
 
 ### 6.3 Search execution ✅
 
@@ -495,22 +394,15 @@ Fit = round(100 × Σ wᵢ·mᵢ / Σ wᵢ)
 - **Send straight to the client:** new matches go to the client's board as `new`, `added_via = search_match`. Switching a search to this mode immediately sends its current new matches.
 - **Client notifications:** instant = on each run with new results; daily / weekly = digest at 8 am client local time; off = none.
 
-### 6.5 Tour timing and route ✅
+### 6.5 Payment estimate ✅
 
-- Drive time between two stops: `max(6, round(distance_units / 18))` minutes on the demo map; production uses §6.7.
-- Each stop lasts 30 minutes. `arrive(stop₁) = start + drive(start, stop₁)`; `arrive(stopₙ) = arrive(stopₙ₋₁) + 30 + drive(stopₙ₋₁, stopₙ)`.
-- **Optimize route** (default on): nearest-neighbor from the start address; while on, manual reordering is disabled.
-- Summaries show stop count, start–end time and total driving minutes (e.g. "3 homes · 10:00 am – 12:08 pm · 38 min of driving").
+Demo formula: `monthly = price × 0.8 × 0.00632 + price × 0.011 / 12 + hoa` (20% down, ~6.5% 30-year P&I, 1.1% annual tax, plus HOA). Production: principal + interest + tax + HOA + insurance from a configurable down payment and rate (default 6.5%, 30-year fixed). Always labeled "Estimate".
 
-### 6.6 Payment estimate ✅
+### 6.6 Commute time
 
-Demo formula: `monthly = price × 0.8 × 0.00632 + price × 0.011 / 12 + hoa` (20% down, ~6.5% 30-year P&I, 1.1% annual tax, plus HOA). Production: principal + interest + tax + HOA + insurance from the client's down payment and a configurable rate (default 6.5%, 30-year fixed). Always labeled "Estimate".
+The client has no stored address. `commute_min` is a per-listing mock attribute seeded with the rest of the listing data (§13.1), standing in for drive time to the client's (out-of-app) commute target. Production may replace it with a routing API behind the same `ListingProvider` contract (§11.1), without changing the preference model or fit score.
 
-### 6.7 Commute time
-
-Straight-line distance × mode factor: drive 1.4 min/km, transit 2.5, bike 3.5, walk 12. Computed per client commute target, cached per (listing, target). A routing API may replace it.
-
-### 6.8 Batching and inactivity
+### 6.7 Batching and inactivity
 
 - Several reactions by the same client within 10 minutes batch into one notification ("Alex loved 3 homes").
 - A client with no activity for 7 days raises "{Name} has been inactive for N days" in Needs attention.
@@ -525,94 +417,87 @@ Acceptance criteria (AC) use Given / When / Then. Every screen has empty, loadin
 
 | ID | Requirement | Pri |
 |---|---|---|
-| CL-1 | Agent creates a client. Only first name is required. Optional: last name, email, phone, stage, budget, financing, "Send portal invite now" (default on) with a message preview. | P0 |
-| CL-2 | Client list: table with name + email, stage badge, budget, areas, pre-approved, last activity, loved count; stage filter chips with counts; text filter by name or area ✅. | P0 |
-| CL-3 | Pipeline view (kanban by stage) with drag to change stage. | P1 |
-| CL-4 | Client page header: avatar, name, stage badge, pre-approval, move-by date, portal status, **Message**. Tabs: Overview, Preferences, Searches, Board, Compare, Tours, Messages, Offers (Documents, Activity: P1). Tab indicators: Preferences = pending suggestions + unreviewed changes; Searches = "N new"; Board = item count; Messages = "N open" requests, else unread count ✅. | P0 |
-| CL-5 | Overview: search progress (homes on board, loved, shortlisted, toured, offers), activity timeline (latest 7), personal info, private notes, next tour card ✅. | P0 |
-| CL-6 | Private notes: add, list newest first, pin (P1). Labeled "Only you" ✅. | P0 |
-| CL-7 | Invite by email and/or SMS, resend, revoke; portal status shown. | P0 |
-| CL-8 | Manual stage change (P0); suggested stage chip (P1, ST-2). | P0 |
-| CL-9 | Archive / restore; export client data as CSV. | P1 |
-| CL-10 | Import clients from CSV. | P1 |
-| DB-1 | **Needs attention** feed, live ✅. Items, each with a deep-link action: review to-do for client preference changes ("To do: review Alex's preference changes (N)", latest two changes and time — Review); pending suggestions ("Alex suggested a change to Price range" — Review); offer approved by the client (Submit); client requested offer changes (Open offer); "To do: complete the {date} tour after the showings" (Open tour); tour change requested (Edit tour); tour requests ("Alex requested a tour on {day}" — Plan); showing requests (Schedule); "To do: add your feedback for N toured homes" (Add feedback); new search matches with the top fit (Review); new loves (Open board); unseen client comments (Reply); homes added by the client (View); unread messages (Reply); new tour ratings ("Alex rated {address} 4★" — View); offers expiring < 24 h; pre-approval expiring; inactive clients. Items clear when acted on or seen. | P0 |
+| CL-1 | Agent creates a client. Only first name is required. Optional: last name, email, phone, "Send portal invite now" (default on) with a message preview. | P0 |
+| CL-2 | Client list: table with name + email, budget, areas, last activity, loved count; text filter by name or area ✅. | P0 |
+| CL-3 | Client page header: avatar, name, portal status, **Message**. Tabs: Overview, Preferences, Board, Compare, Messages. Tab indicators: Preferences = pending suggestions + unreviewed changes, else "N new" matches; Board = item count; Messages = "N open" requests, else unread count ✅. | P0 |
+| CL-4 | Overview: search progress (homes on board, loved, shortlisted), activity timeline (latest 7), personal info, private notes ✅. | P0 |
+| CL-5 | Private notes: add, list newest first, pin (P1). Labeled "Only you" ✅. | P0 |
+| CL-6 | Invite by email and/or SMS, resend, revoke; portal status shown. | P0 |
+| CL-7 | Archive / restore; export client data as CSV. | P1 |
+| CL-8 | Import clients from CSV. | P1 |
+| DB-1 | **Needs attention** feed, live ✅. Items, each with a deep-link action: review to-do for client preference changes ("To do: review Alex's preference changes (N)", latest two changes and time — Review); pending suggestions ("Alex suggested a change to Price range" — Review); new search matches with the top fit (Review); new loves (Open board); unseen client comments (Reply); homes added by the client (View); unread messages (Reply); inactive clients. Items clear when acted on or seen. | P0 |
 | DB-2 | Home header: greeting, date and "N things need your attention" ✅. | P0 |
-| DB-3 | Upcoming tours (date chip, client, stop count, time range, status) ✅. | P0 |
-| DB-4 | Stat tiles (active clients, tours this week, offers out, new matches) and pipeline bars per stage ✅. | P0 |
-| DB-5 | The notification bell shows the Needs-attention count ✅. | P0 |
-| DB-6 | Listings are added from the client's Board tab (BD-4) and tours are planned on the client's Tours tab (TR-3); Home and the top bar have no such shortcuts ✅. | P0 |
+| DB-3 | Stat tiles (active clients, new matches this week, homes on board, comparisons sent) ✅. | P0 |
+| DB-4 | The notification bell shows the Needs-attention count ✅. | P0 |
+| DB-5 | Listings are added from the client's Board tab (BD-4); Home and the top bar have no such shortcut ✅. | P0 |
 
 **AC — DB-1**
 - Given Alex loved 1248 Linden Ave, when Maya opens Home, then Needs attention shows "Alex loved 1248 Linden Ave" with Open board; opening the board clears it.
 - Given Alex commented on a home, when Maya opens that listing, then the "Alex commented on…" item disappears.
 
-### 7.2 Preferences
+### 7.2 Preferences & search
+
+This tab is **preferences only**, on both sides, and reads as the same screen for the agent and the client: a review-to-do banner when there's something of the other party's to look at (PR-12), the minimal **AI Voice** button at the top (PR-9/PR-13), then the four groups as a **one-at-a-time accordion** (PR-1) — no results, ever. It was a merged preferences+results screen in two earlier builds (first with a card grid, then with a results list under the accordion); results were dropped entirely from this tab both times results were tried, so the screen now reads as what it is: the place to set preferences and collaborate, nothing else.
+
+Live, fit-ranked results (§6.2/§6.3) still exist — every preference edit still re-ranks them at once — but they surface only on the agent's **Board**, under the **Worth a look** filter (BD-1), alongside the board's existing Loved / To review / Shortlisted / Passed views. The client never sees them directly; Alex finds out what matched only downstream, once Maya (or a sent match) puts a home on the board.
 
 | ID | Requirement | Pri |
 |---|---|---|
-| PR-1 | Fields grouped Budget, Location, Property, Features, each with value, importance chip and (agent) lock toggle ✅. Tapping the importance chip cycles must → nice → off (avoid fields: never ↔ off); a full picker is also available. Hint: "Importance drives the fit score on every listing." | P0 |
-| PR-2 | Editing ✅. Agent: inline controls and steppers (bedrooms ±1 within 1–6, commute ±5 within 10–60); changes apply at once. Client: tap a field to open an edit sheet with its control (price min/max, HOA max, area chips, commute select, home-type chips, bedrooms select, size min/max) and an importance selector (Must-have / Nice-to-have / Don't care; avoid fields: Deal-breaker / Don't care); quick steppers and the importance chip also work on unlocked rows. Client changes to unlocked fields apply immediately ("Saved — Maya was notified") and go to the agent's review to-do (PR-12). Validation: min ≤ max ("Min must be below max"); areas and types need at least one. | P0 |
-| PR-3 | Locks and suggestions ✅. The agent can lock any field; the agent row reads "Locked by you — Alex's edits become suggestions". The client row reads "Set with Maya · tap to suggest a change"; its sheet says "Maya locked this one. Your change goes to her as a suggestion." with an optional "Why?" and **Send suggestion to Maya**. While pending, the row reads "Suggestion sent: {old → new}"; reopening offers **Update suggestion** and **Withdraw suggestion**. | P0 |
-| PR-4 | The agent approves or declines a suggestion from a banner on the Preferences tab ("Alex suggested a change to Price range (locked) · $550,000 – $650,000 → $550,000 – $700,000 · '{note}'", Decline / Approve), from its card in Messages, or from Needs attention ✅. The field shows "Suggestion pending". Decline sends the decline message (§5.4). The client sees "N suggestions waiting for Maya", then "Maya approved your change to …" or "Maya kept … as it was". | P0 |
-| PR-5 | Change history (latest 7 on the tab, full list in a drawer): who, what (`Bedrooms 3+ → 4+`, `Garage → Nice-to-have`, `Locked Price range`), when ✅. Revert a change (P1). | P0 |
-| PR-6 | Client onboarding wizard (7 steps, progress bar, Skip, resume later): Budget → Areas → Home type & size → Must-haves → Deal-breakers → Timing → Dream home. Must-haves step: chips — tap once = nice, twice = must, third = off ✅. Answers stay a draft until **Continue**, which applies them (unlocked fields) and adds each change to the review to-do ✅. | P0 |
-| PR-7 | "Create search from preferences" / "Open preferences search" on the Preferences tab (SC-2) ✅. | P0 |
-| PR-8 | Dream-home text shown to the agent as "Dream home, in Alex's words" ✅. | P0 |
-| PR-9 | **Update from a note** (AI): the agent types or dictates what the client said; detected changes show live; nothing is saved until the agent approves them in a review dialog (§8.2) ✅. | P0 |
+| PR-1 | Fields grouped Budget, Location, Property, Features, shown as a **one-at-a-time accordion** on both the agent's and the client's screens ✅: a closed category is one row — icon, title, a one-line summary of its current values ("$550,000 – $650,000 · $250 / mo max", or "Open to anything" if nothing is set) — and a dot if one of its fields has a pending suggestion or change. Tapping a closed category opens it in place and closes whichever category was open; there's no secondary per-field toggle. What's inside an open category differs by role (PR-2): the agent sees every field's full control at once (value editor, importance chip, lock toggle); the client taps a field to open its edit sheet. Agent-only hint: "Importance drives the fit score on every listing." | P0 |
+| PR-2 | Editing ✅. Agent: inline controls and steppers (bedrooms ±1 within 1–6, commute ±5 within 10–60) inside the expanded row; changes apply at once. Client: tap a field to open an edit sheet with its control (price min/max, HOA max, area chips, commute select, home-type chips, bedrooms select, size min/max) and an importance selector (Must-have / Nice-to-have / Don't care; avoid fields: Deal-breaker / Don't care); quick steppers and the importance chip also work on unlocked rows. Client changes to unlocked fields apply immediately ("Saved — Maya was notified") and go to the agent's review to-do (PR-12). Validation: min ≤ max ("Min must be below max"); areas and types need at least one. | P0 |
+| PR-3 | Locks and suggestions ✅. The agent can lock any field; the expanded row reads "Locked by you — Alex's edits become suggestions". The client row reads "Set with Maya · tap to suggest a change"; its sheet says "Maya locked this one. Your change goes to her as a suggestion." with an optional "Why?" and **Send suggestion to Maya**. While pending, the collapsed row carries a dot and the expanded row shows the suggestion with **Approve** / **Decline** inline; reopening on the client's side offers **Update suggestion** and **Withdraw suggestion**. | P0 |
+| PR-4 | The agent approves or declines a suggestion from the field row itself (PR-3), from a card in Messages, or from Needs attention ✅. Decline sends the decline message (§5.3). The client sees "N suggestions waiting for Maya", then "Maya approved your change to …" or "Maya kept … as it was". | P0 |
+| PR-5 | Change history: who, what (`Bedrooms 3+ → 4+`, `Garage → Nice-to-have`, `Locked Price range`), when. Recorded for every edit, suggestion and onboarding change; not surfaced on the Preferences tab in this build (kept deliberately lean) — a future build may expose it in a drawer. Revert a change (P1). | P1 |
+| PR-6 | Client onboarding wizard (6 steps, progress bar, Skip, resume later): Budget → Areas → Home type & size → Must-haves → Deal-breakers → Dream home. Must-haves step: chips — tap once = nice, twice = must, third = off ✅. Answers stay a draft until **Continue**, which applies them (unlocked fields) and adds each change to the review to-do ✅. | P0 |
+| PR-7 | A changed or suggested field carries a dot ✅: on the agent's side, on the field itself once its category is open, and on the closed category's row so it's visible without opening it; on the client's side, on the affected category's row and on the Preferences tab itself (PR-14). | P0 |
+| PR-8 | Dream-home text captured in onboarding (§4.2) and available to the agent; not displayed on the Preferences tab in this build. | P1 |
+| PR-9 | **Update from a note** (AI): a single, clearly AI- and voice-branded **AI Voice** button by default — minimal, no card chrome. Tapping it starts speech-to-text directly (§8.2); a small "or type" link reveals the text field without starting voice. Once there's a draft, the full card (field, live preview, Clear / Save) expands in place and collapses again after Save or Clear. Detected changes show live; nothing is saved until the agent approves them in a review dialog (§8.2). | P0 |
 | PR-10 | Saved notes on the card: quote, time, "N changes applied" or "No preference changes" ✅. | P0 |
-| PR-11 | Any preference change recalculates fit scores and result ranking at once and notifies the other party. Saved search filters do not change (SC-1). | P0 |
-| PR-12 | **Review to-do for client changes** ✅. Every applied client change (edit sheet, stepper, importance chip, onboarding) joins one open review to-do, shown as: (a) a to-do banner on the Preferences tab — "To do: review N changes Alex made — they're already applied to Alex's preferences and fit scores" — listing each change old → new with its time, and **Mark as reviewed**; (b) a "Changed by Alex · {time}" tag on each changed field; (c) a Needs-attention item; (d) a "To review" card in Messages collecting all changes, with Open preferences and Mark as reviewed; (e) the Preferences tab count and a notification. Mark as reviewed (from any place) closes it everywhere; the card turns "Reviewed" and the client's copy reads "Reviewed by Maya". The next change starts a new to-do and card. | P0 |
+| PR-11 | Any preference change recalculates fit scores and the live results on the Board's Worth a look filter (BD-1) at once, and notifies the other party. | P0 |
+| PR-12 | **Review to-do for client changes** ✅. Every applied client change (edit sheet, stepper, importance chip, onboarding) joins one open review to-do, shown as: (a) a to-do banner on the tab — "To do: review N changes Alex made — they're already applied to Alex's preferences and fit scores" — listing each change old → new with its time, and **Mark as reviewed**; (b) a dot on the changed field's row; (c) a Needs-attention item; (d) a "To review" card in Messages collecting all changes, with Open preferences and Mark as reviewed; (e) the tab's badge and a notification. Mark as reviewed (from any place) closes it everywhere; the card turns "Reviewed" and the client's copy reads "Reviewed by Maya". The next change starts a new to-do and card. | P0 |
+| PR-13 | **Client-side "Update from a note" (AI)** ✅. The same minimal **AI Voice** button (PR-9) on the client's Preferences screen; tapping starts speech-to-text, "or type" reveals the field without starting voice, and a live preview of detected changes expands in place. Unlike the agent's flow, there is no separate review dialog: on **Save**, each detected change is routed through the client's existing per-field rules — unlocked fields **apply immediately** and join the agent's review to-do (PR-12), locked fields become **suggestions** (PR-3), grouped under one suggestion group quoting the note so the agent approves or declines them together. A toast summarizes what happened ("Updated Commute · sent Price range to Maya as a suggestion"). No new agent-side approval step is introduced; client actions still only ever reach data through the existing lock/suggestion model (AI-3). | P0 |
+| PR-14 | **Client-only addition to PR-1's shared accordion** ✅: the Preferences tab itself carries the same dot as an affected category, so a pending suggestion is visible without opening the screen at all. | P0 |
+| SS-7 | **Agent only, on the Board's Worth a look filter (BD-1), not the Preferences tab** ✅ — the client's Preferences screen never shows results, a map, or a fit score; matches reach Alex only through the Board. "Homes matching {client}'s preferences, not yet on the board — ranked by fit", then a horizontal row per home, one per line (thumbnail, price, price-cut badge, New badge, beds/baths/sqft/type, address, commute, fit pill, **Add**) — not a card grid, and not paginated. | P0 |
+| SS-8 | Map view for Worth a look: matches as filled pins (a dot inside = on board), almost matches as hollow pins, other listings as grey dots, neighborhood labels, legend with counts; clicking a pin opens the listing. The engine (§6.3) supports this; not surfaced as a Board view in this build (List only), kept deliberately lean — a later build may add a List/Map toggle to Worth a look the way the old Preferences-tab results once had one. | P1 |
+| SS-9 | Almost matches (up to 6 rows with the failing reason and "Add anyway"; header "N homes miss exactly one filter · relaxing '{filter}' would add N"). The engine (§6.3) still computes these; not surfaced on Worth a look in this build, kept deliberately lean. | P1 |
+| SS-10 | **Removed from the client portal.** The client's screen (Preferences, C4, §9.3) carries no results, no map, no fit score and no "Save to my board" from a live list — only the AI Voice note (PR-13) and the accordion of preferences (PR-1). Alex still adds homes to the board directly (BD-11, by URL or by hand) or receives ones Maya picks; a live, self-browsed match list is no longer part of the client experience, by design (§7.2). | — |
+| SS-11 | Draw an area on the map (polygon), agent only. | P1 |
+| SS-12 | Multiple named saved searches with per-search alerts and review-first / auto delivery (§6.4) remain a data-model capability (SavedSearch, §4.2) but are not surfaced as UI chrome anywhere in MVP — the agent's Board works off the client's current preferences directly (PR-1…PR-14, SS-7…SS-9), and the client has no results view to attach a saved search to. | Later |
 
 **AC — PR-3 / PR-4**
-- Given Price range is locked at $550k–$650k, when Alex sets Max $700,000 with a note and sends it, then Maya sees the suggestion banner and card, the Preferences count includes it, and history shows "Suggested Price range: $550,000 – $650,000 → $550,000 – $700,000".
+- Given Price range is locked at $550k–$650k, when Alex sets Max $700,000 with a note and sends it, then Maya sees a dot on the Price range row, and expanding it shows the suggestion with Decline / Approve; history shows "Suggested Price range: $550,000 – $650,000 → $550,000 – $700,000".
 - When Maya approves, then max becomes $700,000, fit scores recalculate, and Alex sees "Maya approved your change to price range."
 - When Maya declines, then the value stays and Alex gets the decline message in chat.
 
 **AC — PR-12**
-- Given Areas is unlocked, when Alex adds Linden Hills and saves, then Areas changes at once, fit scores recalculate, and Maya sees the banner line "Areas: Oak Park, Cedar Grove, Westgate → Oak Park, Cedar Grove, Westgate, Linden Hills", a "Changed by Alex" tag, the Needs-attention item and the "To review" card.
+- Given Areas is unlocked, when Alex adds Linden Hills and saves, then Areas changes at once, fit scores recalculate, and Maya sees the banner line "Areas: Oak Park, Cedar Grove, Westgate → Oak Park, Cedar Grove, Westgate, Linden Hills", a dot on the Areas row, the Needs-attention item and the "To review" card.
 - When Alex then changes the commute with the stepper, the same to-do and card gain a second line.
-- When Maya clicks Mark as reviewed, the banner, tags and Needs-attention item disappear, the card reads "Reviewed", and Alex's card reads "Reviewed by Maya".
+- When Maya clicks Mark as reviewed, the banner, dots and Needs-attention item disappear, the card reads "Reviewed", and Alex's card reads "Reviewed by Maya".
 
-### 7.3 Saved searches
-
-| ID | Requirement | Pri |
-|---|---|---|
-| SS-1 | Searches tab layout, top to bottom ✅: header "Saved searches · N searches for {client}" with **New search**; search tiles; settings for the selected search; the review queue (when there are new matches); then **filters on the left** and **results on the right**, with almost matches under the results. | P0 |
-| SS-2 | **New search** is a button with a popup menu ✅: **From preferences** ("{client}'s must-haves become filters, deal-breakers are excluded, nice-to-haves rank results") and **From scratch** ("No filters to start; results are ranked by fit") (§6.2). The menu closes on selection, outside click or Escape. The new search is selected with defaults: daily digest, review first. | P0 |
-| SS-3 | Tiles: name, "From preferences" badge, match count, new count, notification setting, delivery setting; the selected tile is highlighted ✅. | P0 |
-| SS-4 | Settings card ✅: name (inline edit), created by / when and origin, **{client}'s notifications** (instant / daily digest / weekly digest / off), **New matches** ("Review first, then send to {client}" / "Send straight to {client}"), delete. | P0 |
-| SS-5 | Review queue (review-first searches): "N new matches listed in the last 7 days — {client} sees them once you send them" with **Send N to {client}**; in auto mode the line reads "New matches go to {client}'s board automatically" ✅. | P0 |
-| SS-6 | Filters (left, "N active"): price min/max, area chips, home-type chips, bedrooms stepper, max commute stepper, must-include feature chips, "Exclude homes near I-94" toggle. Edits apply to the selected search ✅. | P0 |
-| SS-7 | Results (right): "Results · N", "Ranked by fit", **List / Map** toggle. List shows the first 8 with "Show all N"; row: photo, price, price-cut badge, New badge, beds/baths/sqft/type, address, commute, fit pill, Add / On board, Hide ✅. | P0 |
-| SS-8 | Map view: matches as filled pins (a dot inside = on board), almost matches as hollow pins, other listings as grey dots, neighborhood labels, legend with counts; clicking a pin opens the listing ✅. | P0 |
-| SS-9 | Almost matches (show/hide): up to 6 rows with the failing reason and "Add anyway"; header "N homes miss exactly one filter · relaxing '{filter}' would add N" ✅. | P0 |
-| SS-10 | Client portal Search ✅: chips per search, "Search with your preferences" banner when there is no from-preferences search (SC-2), match count and new badge, criteria summary, notification setting and "Maya reviews new matches first" when curated, map, result cards (best first, no fit score) with **Save to my board** (adds it as "Added by you" with a Like reaction and notifies the agent) or "On your board", and "N more homes miss just one of your must-haves. Ask Maya about them." | P0 |
-| SS-11 | Draw an area on the map (polygon). | P1 |
-
-### 7.4 Listings and board
+### 7.3 Listings and board
 
 | ID | Requirement | Pri |
 |---|---|---|
-| BD-1 | Agent board: filter chips with counts (All, Loved, To review, Shortlisted, On tour, Passed), sort (Best fit, Lowest price, Newest), **Add listing**, card grid ✅. List and map views P1. | P0 |
+| BD-1 | Agent board: filter chips with counts (All, Loved, To review, **Worth a look**, Shortlisted, Passed), sort (Best fit, Lowest price, Newest), **Add listing**, card grid ✅. **Worth a look** ✅ folds the live, fit-ranked search results (not on the board yet, §6.2/§6.3) into the board itself, as a row list (not the card grid) with an **Add** button per row — this is where the agent now finds and reacts to new matches, replacing the results list that used to sit on the Preferences tab (§7.2). List and map views for the rest of the board remain P1. | P0 |
 | BD-2 | Agent card: photo, select checkbox, "Agent pick", "Added by Alex", fit pill, price, state badge, beds/baths/sqft, address, reaction line ("Alex · Loved"), comment count; passed cards dimmed ✅. | P0 |
-| BD-3 | Multi-select bar: "N homes selected", Compare (2–4), Add to tour, Clear ✅. | P0 |
-| BD-4 | **Add listing** (Board tab only) opens "Add a listing to {client}'s board": new matches from the client's searches first (with "Open searches"), else best-fit active listings, each with fit pill and **Add as pick**; paste a URL (resolved by the provider; "not recognized" → manual entry) or enter a home by hand ✅. | P0 |
+| BD-3 | Multi-select bar: "N homes selected", Compare (2–4), Clear ✅. | P0 |
+| BD-4 | **Add listing** (Board tab only) opens "Add a listing to {client}'s board": new matches from the client's searches first (with "Open search"), else best-fit active listings, each with fit pill and **Add as pick**; paste a URL (resolved by the provider; "not recognized" → manual entry) or enter a home by hand ✅. | P0 |
 | BD-5 | Client reactions Love / Like / Maybe / Pass on cards and detail; choosing the current one clears it. Pass opens "What didn't work?" chips: Price, Location, Layout, Size, Condition, Commute, HOA. Reacting to a home not on the board adds it as "Added by you" ✅. | P0 |
 | BD-6 | Agent pick toggle and shared note ("Why Maya picked it") ✅. | P0 |
-| BD-7 | Agent listing detail ✅: gallery, price, status, est. monthly, address, days listed, facts (beds, baths, sqft, lot, year, HOA, $/sqft), **Why it fits Alex** (fit number, "Meets X of Y must-haves", breakdown per FS-5, Edit preferences), description, the client's reaction and pass reasons (read-only), board state select, Agent pick toggle, Add to tour / Add to board, Draft offer, comments. | P0 |
-| BD-8 | Client listing detail ✅: hero with share and photo count, price, "Maya's pick", address, est. monthly, facts, reaction bar with pass reasons, "Why Maya picked it", comments, description; sticky actions **Compare** (max 4) and **Request showing** ("On your tour" when already on a sent tour). | P0 |
+| BD-7 | Agent listing detail ✅: gallery, price, status, est. monthly, address, days listed, facts (beds, baths, sqft, lot, year, HOA, $/sqft), **Why it fits Alex** (fit number, "Meets X of Y must-haves", breakdown per FS-5, Edit preferences), description, the client's reaction and pass reasons (read-only), board state select, Agent pick toggle, Add to board, comments. | P0 |
+| BD-8 | Client listing detail ✅: hero with share and photo count, price, "Maya's pick", address, est. monthly, facts, reaction bar with pass reasons, "Why Maya picked it", comments, description; sticky action **Compare** (max 4). | P0 |
 | BD-9 | Comments: shared by default; the agent can switch a comment to "Only you" (dashed, lock) ✅. @mentions and photo attachments P1. | P0 |
 | BD-10 | Provider status and price changes show on cards and notify (pending, sold, price cut). | P0 |
-| BD-11 | Client board ✅: title with counts, preferences shortcut, agent chip, filters (To review, Loved, All, Passed), cards with reaction bar and Maya's note (no fit score), and banners: "Maya sent you a comparison report", "Counter-offer ready for you", "Maya planned a tour — approve it", "Rate the homes from your tour", "Your offer on … was accepted!". | P0 |
+| BD-11 | Client board ✅: title with counts, preferences shortcut, agent chip, filters (To review, Loved, All, Passed), cards with reaction bar and Maya's note (no fit score), and a banner: "Maya sent you a comparison report". | P0 |
 | BD-12 | Swipe mode for "To review". | P1 |
 
-### 7.5 Compare
+### 7.4 Compare
 
 | ID | Requirement | Pri |
 |---|---|---|
 | CP-1 | Pick 2–4 homes: agent multi-select on the board; client "Compare" on a listing (max 4) ✅. | P0 |
 | CP-2 | Page layout ✅. Agent: header "Top N — {name}", "Alex sees this table. The AI report reaches Alex only when you send it.", Differences only, **Send report to Alex**; the AI card (§8.3); then the full-width comparison table. Client: title, "Shared with Maya", Differences toggle, the latest report (if any), "Ask Maya for a comparison report" (MS-8), then the table. | P0 |
-| CP-3 | Table rows grouped: **Cost** (price, $/sqft, est. monthly, HOA) · **Home** (beds, baths, size, lot, year) · **Fit & location** (commute, school rating, and for the agent only must-haves met and fit score; the client group is "Location") · **Alex's take** (reaction, tour rating) ✅. | P0 |
+| CP-3 | Table rows grouped: **Cost** (price, $/sqft, est. monthly, HOA) · **Home** (beds, baths, size, lot, year) · **Fit & location** (commute, school rating, and for the agent only must-haves met and fit score; the client group is "Location") · **Alex's take** (reaction) ✅. | P0 |
 | CP-4 | Best value per row in bold with a check; "Differences only" (default on) hides equal rows ✅. | P0 |
 | CP-5 | Front-runner (client: "Top pick") set by either party; the agent can remove a home; comments on the comparison ✅. | P0 |
 | CP-6 | AI comparison: per-category scores with explanations for each home (§8.3) ✅. | P0 |
@@ -624,15 +509,15 @@ Acceptance criteria (AC) use Given / When / Then. Every screen has empty, loadin
 | CP-12 | The agent can edit an explanation or add their own take; labeled "Edited by Maya". | P1 |
 | CP-13 | Export or share the comparison as PDF. | P1 |
 
-### 7.6 Messaging and client requests
+### 7.5 Messaging and client requests
 
 | ID | Requirement | Pri |
 |---|---|---|
 | MS-1 | One conversation per client: bubbles with author and relative time, composer ✅. | P0 |
-| MS-2 | Share a listing, comparison, tour or offer as a rich card. | P0 |
+| MS-2 | Share a listing or comparison as a rich card. | P0 |
 | MS-3 | Agent inbox ✅: conversation list with last message (a request shows as "Request: {title}"), unread dot and "N requests" badge; the thread opens with the open-requests list (MS-6), then the conversation; "Open client". | P0 |
 | MS-4 | Unread counts on tabs and navigation; the client's Messages tab shows "N open" while requests are open ✅. | P0 |
-| MS-5 | **Request cards** ✅. Every client ask or update is posted to the conversation as a card, counted as unread, and handled from the card. The client sees the same card with live status ("Waiting for Maya", "Maya was notified", "Reviewed by Maya", "Approved", "Added to the Sat, Sep 27 tour", "Report sent"). Kinds below. | P0 |
+| MS-5 | **Request cards** ✅. Every client ask or update is posted to the conversation as a card, counted as unread, and handled from the card. The client sees the same card with live status ("Waiting for Maya", "Maya was notified", "Reviewed by Maya", "Approved", "Report sent"). Kinds below. | P0 |
 | MS-6 | The agent's Messages tab and inbox thread start with **Open requests from {client} · N** (title, status, time, action buttons). Resolved cards stay in the thread, greyed ✅. | P0 |
 | MS-7 | Open requests also appear in Needs attention (DB-1) and notify per §10 ✅. | P0 |
 | MS-8 | The client's Compare shows "Ask Maya for a comparison report" (or "…an updated report") when no sent report covers the current homes, and "Report requested — Maya will send it soon" while one is open ✅. | P0 |
@@ -643,52 +528,9 @@ Acceptance criteria (AC) use Given / When / Then. Every screen has empty, loadin
 |---|---|---|---|---|
 | Preferences changed (to review) | Any applied change (PR-12) | All changes since the last review, old → new | Open preferences, Mark as reviewed | Marked as reviewed |
 | Suggestion | Edit on a locked field (PR-3) | The change old → new, note | Approve, Decline | Approved or declined |
-| Showing | "Request showing" (TR-1) | Home, price, neighborhood, time windows | Plan in Tours | Added to a tour or dismissed |
-| Tour | "Request a tour" (TR-2) | Day, start time, homes, note | Plan this tour | A draft tour is created from it |
 | Comparison report | "Ask Maya for a comparison report" (MS-8) | The compared homes | Open Compare | A report is sent after the request |
-| Tour change | "Suggest change" (TR-9) | The note | Edit tour | The tour is resent or changed |
-| Offer change | "Request changes" (OF-2) | The note | Open offer | A revised offer is sent |
 
-### 7.7 Showings and tours
-
-| ID | Requirement | Pri |
-|---|---|---|
-| TR-1 | Client **Request showing** (one home): pick ≥ 1 window (Sat morning, Sat afternoon, Sun afternoon, Weekday evening), optional note; posts a Showing card (MS-5) ✅. | P0 |
-| TR-2 | Client **Request a tour** on the Tours tab ✅: day, start-around time, homes from the board (loved pre-selected; passed and rejected hidden), optional note, "Send request · N homes". It posts a Tour card, shows on the agent's Tours tab ("Alex requested a tour on {day} around {time}" with **Plan this tour**) and in Needs attention. The client sees "Tour requested for {day} — waiting for Maya". | P0 |
-| TR-3 | Agent Tours tab ✅: header "Tours with {client}" with the open tour's status, past-tour count and waiting showing requests, and **Plan a tour**; then tour requests, the complete-tour reminder (TR-11), the open tour's builder or an empty state with Plan a tour, Tour feedback cards (TR-13) and Past tours. | P0 |
-| TR-4 | **Planner** dialog ✅: date, start time, the client's board homes (passed and rejected excluded) as checkboxes with showing requests and loved homes pre-selected and badged ("Requested · Sat morning", "Loved", "Agent pick"), optimize-route toggle, live summary, Cancel / **Create draft tour**. Opened from Plan a tour, from Plan this tour (pre-filled with the request's day, time and homes; the request becomes "Planned" and its homes "Requested by Alex"), or from Add to tour on the board or a listing when there is no open tour. Replacing a draft warns "This replaces your draft for {date}". Included showing requests move onto the tour. | P0 |
-| TR-5 | Tour builder ✅: date, start time, optimize toggle, stops with drive time, arrival time, 30-min duration, "Requested by Alex" badge, move up/down (optimize off), remove; "Showing requests from Alex" with Add; "Add a home from Alex's board"; numbered route map; totals (§6.5). | P0 |
-| TR-6 | One open tour per client ✅. While a tour is sent, approved or has a change request, Plan a tour and Plan this tour are blocked with "Complete or cancel the {date} tour to plan another". | P0 |
-| TR-7 | **Cancel tour** (any open status); canceling a sent tour notifies the client in chat. Completed and canceled tours are listed in **Past tours** (date, homes, status) ✅. | P0 |
-| TR-8 | **Send to Alex** → client banner "Maya planned a tour — approve it" → itinerary (map, stops, times) with **Approve tour**, Suggest change and Add to calendar (ICS). After approval the client card reads "After the tour you'll rate each home for Maya." ✅ | P0 |
-| TR-9 | Client **Suggest change** posts a Tour change card with the note; the agent sees "Alex asked for a change" on the tour and can edit and resend ✅. | P0 |
-| TR-10 | **Complete the tour** (agent), enabled only when approved ✅. It moves the tour to Past tours, queues a client rating for every stop, posts "Thanks for touring on {date}! Please rate each home…" to the client, and opens the agent feedback card (TR-13). | P0 |
-| TR-11 | Reminder to complete ✅: while a tour is approved, the Tours tab shows "Reminder: complete the tour after the showings" with Complete the tour, and Needs attention shows "To do: complete the {date} tour after the showings". Production also sends a push/email the evening of the tour day. | P0 |
-| TR-12 | Client rating flow ✅: "Home X of N", stars (required), liked chips, disliked chips, "Would you make an offer?" Yes / Maybe / No; Next home / Send to Maya. The Tours tab lists rated homes under Past tours. | P0 |
-| TR-13 | Agent feedback ✅: a "Tour feedback · {date}" card per completed tour lists each stop with Alex's rating (stars, would offer, likes/dislikes) or "waiting for rating", and the agent's private verdict (Strong fit / Maybe / Not a fit) and notes. Header: "Your feedback: X of N · Alex's ratings: Y of N". | P0 |
-| TR-14 | Feedback reminders ✅: agent — a note in the feedback card and "To do: add your feedback for N toured homes" in Needs attention until every stop has a verdict; client — the board banner "Rate the homes from your tour", the Tours "N homes to rate" card and a tab dot until all are rated; the agent can **Remind Alex to rate** (a chat message). | P0 |
-| TR-15 | Client ratings appear in Needs attention, on the listing and in Compare (tour rating) ✅. | P0 |
-| TR-16 | Per-stop listing-agent confirmation status, tracked manually. | P0 |
-| TR-17 | SMS reminder 2 h before the tour. | P0 (phase 2) |
-| TR-18 | Several open tours per client (e.g., Saturday and Sunday). | P1 |
-| TR-19 | Tours list and calendar (week/month) across clients. | P1 |
-| TR-20 | Tour-day mode (current stop, navigate, notes, photos). | P1 |
-
-### 7.8 Offers and documents
-
-| ID | Requirement | Pri |
-|---|---|---|
-| OF-1 | Offer editor ✅: offer price (hint vs v1 and the seller's ask), earnest money (hint % of offer), financing, closing date (hint vs original), contingencies (inspection 10 days, appraisal, financing 21 days, sale of current home), note to the client, version tabs (v1, seller counter, current), Save draft. | P0 |
-| OF-2 | **Send to Alex for approval** (with **Withdraw request**) → client "Counter-offer ready for you" banner → summary (price with "was", closing date, earnest money, financing, contingencies, est. monthly payment, Maya's note, seller's deadline) with **Approve offer** / **Request changes** (posts an Offer change card) ✅. | P0 |
-| OF-3 | After approval the agent submits to the listing agent and records the seller's response: **Seller countered** (new version prefilled, §5.6) or **Seller accepted** ✅. | P0 |
-| OF-4 | Status timeline with timestamps and version diffs ✅. | P0 |
-| OF-5 | Price context: comparable sales range in the neighborhood (last 90 days) with markers for the offer and the seller's ask ✅. | P0 |
-| OF-6 | Accepted → client stage Under contract and a celebration state in the portal ✅. | P0 |
-| OF-7 | Documents per client: upload, type tag, link to item/offer, preview (PDF/image), download; pre-approval visible to agent and client only. | P0 |
-| OF-8 | Pre-approval expiry tracking and reminder. | P1 |
-| OF-9 | E-signature. | Later |
-
-### 7.9 Authentication and settings
+### 7.6 Authentication and settings
 
 | ID | Requirement | Pri |
 |---|---|---|
@@ -722,22 +564,22 @@ interface LlmProvider {
 ```
 
 - **AI-2. Human in the loop.** AI output never changes data or reaches the client without an explicit agent action (Approve & save, Send report).
-- **AI-3. Agent-only.** Only agents trigger AI calls; client actions never start a generation.
+- **AI-3. Agent-only generation; client note-parsing is the exception.** Only agents trigger a `generateStructured` call (compare analysis, or a note reviewed in the agent's dialog, §8.2). The client's own "Update from a note" (PR-13) runs the same `preferences_from_note` task, but its output never needs a human-in-the-loop dialog of its own — it is applied through the existing, already-gated preference rules (apply if unlocked, suggest if locked, PR-2/PR-3), so AI-2 is satisfied by that mechanism instead.
 - **AI-4. Grounded.** Numbers, homes and preferences in output must match the input; a server-side validator checks this before anything is shown.
 - **AI-5. Fallback.** If the model fails, times out, or fails validation twice, use the deterministic rules engine (the prototype logic) and label the result "Generated by rules".
-- **AI-6. Privacy.** Send only what the task needs. Never send private notes, private comments, agent tour feedback, documents, contact details or financing amounts beyond the price range. Log prompts and outputs without PII for 30 days for quality review.
+- **AI-6. Privacy.** Send only what the task needs. Never send private notes, private comments, contact details or financing amounts beyond the price range. Log prompts and outputs without PII for 30 days for quality review.
 - **AI-7. Fair housing.** Prompts forbid statements about demographics, safety, crime, "family-friendly" or similar steering; validators reject outputs containing deny-listed terms.
 - **AI-8. Versioning.** Store `prompt_version`, `model` and `schema_version` with every result.
 - **AI-9. Evaluation.** Keep a golden set per task (§8.4) and run it in CI on any prompt or model change.
 
-### 8.2 Update preferences from a note (PR-9) ✅
+### 8.2 Update preferences from a note (PR-9, PR-13) ✅
 
 **Goal.** The agent types or dictates what the client said ("They can stretch the budget to $675k now; an office is a must, a garage would be nice") and approves the detected changes in one step.
 
 #### 8.2.1 UX
 
-1. Card "Update from a note" on the Preferences tab: "Type or dictate what Alex told you. It's mapped to preferences, and you approve every change before it's saved."; textarea; **Dictate**; Clear; **Save** (disabled when empty); "Try an example" when empty.
-2. **Dictate** starts speech-to-text (§11.5). While listening the button reads "Listening… stop", the field is highlighted, and the transcript streams into the textarea (appended, editable). Unsupported or blocked: "Voice input isn't supported in this browser — type instead" / "Microphone access is blocked — type instead".
+1. Card "Update from a note" on the Preferences tab, tagged **AI**: "Tap AI Voice and tell me what Alex said, or type below. Either way, you approve every change before it's saved."; a prominent **AI Voice** button; textarea; Clear; **Save** (disabled when empty); "Try an example" when empty.
+2. **AI Voice** starts speech-to-text (§11.4) directly — no separate record step. While listening the button reads "Listening… tap to stop", the field is highlighted, and the transcript streams into the textarea (appended, editable). Unsupported or blocked: "Voice input isn't supported in this browser — type instead" / "Microphone access is blocked — type instead".
 3. **Live preview** (debounced 500 ms): "N changes detected" with chips (`Price range: $550,000 – $675,000`, `Garage → Nice-to-have`), or "Nothing detected yet" with the hint "Mention price, areas, home type, bedrooms, size, commute, HOA, the highway, or features like garage, yard and office."
 4. **Save**: with no changes, store the note (`saved_no_changes`) — "Note saved — no preference changes found"; otherwise open the review dialog.
 5. **Review dialog** "Review changes to Alex's preferences": the note as a quote; "N changes found in your note. Untick anything you don't want to save."; one checked row per change with label (+ "· importance"), old struck through → **new**, and for locked fields "Locked by you — saving overrides the lock"; "What happens when you save": "Fit scores change on X of Y homes on Alex's board" and "Alex sees the new preferences in the portal. Each change is logged in Change history."; Cancel (keeps the draft) / **Approve & save N changes** (disabled when none ticked).
@@ -802,6 +644,16 @@ Word numbers (one–sixty) are normalized; commas inside numbers ("2,000") are n
 - A note with nothing mappable is saved with "No preference changes" and no dialog.
 - Cancel leaves preferences and the draft unchanged.
 
+#### 8.2.4 Client variant (PR-13) ✅
+
+The client's Preferences screen (C4) carries its own **AI Voice** button, the same progressive-disclosure UX as 8.2.1 steps 1–3 (voice or type, live preview of detected changes) and the same parsing (8.2.2, 8.2.3) — there is no separate client-facing contract or mapping table. It diverges from 8.2.1 only from the point of saving:
+
+- There is no review dialog. **Save** applies each detected change directly through the existing per-field rule (PR-2/PR-3): unlocked fields apply at once and add to the agent's review to-do (PR-12); locked fields become suggestions, grouped under one suggestion group that quotes the note, so the agent sees and resolves them together as usual (PR-4).
+- The note itself is not stored as a separate object the way the agent's is (PR-10) — its only trace is the review-to-do / suggestion entries it produced, each tagged "From a note" with the quoted text.
+- A toast confirms the outcome ("Updated Commute · sent Price range to Maya as a suggestion"); a note with nothing mappable toasts "Got it — nothing to change there" and saves nothing.
+
+This keeps AI-2 satisfied without adding a client-facing approval step: the gate is the lock, not a dialog.
+
 ### 8.3 AI comparison (CP-6 … CP-10) ✅
 
 #### 8.3.1 Output
@@ -810,7 +662,7 @@ For 2–4 homes:
 - per home and category (Budget, Location, Property, Features): a 0–10 score (one decimal) and a 1–3 sentence explanation citing listing facts and the client's preferences;
 - per home: overall score, must-haves met, pros, cons;
 - a summary (≤ 90 words): the recommended home and why, how the others compare, and the trade-off between the top two ("If space matters more to Alex than features, 4410 Cedar Grove Ln is the better pick.");
-- **Worth checking**: 3–5 things to verify on the tour or with the listing agent.
+- **Worth checking**: 3–5 things to verify before making an offer or asking the listing agent.
 
 #### 8.3.2 Categories
 
@@ -826,7 +678,7 @@ A category with no weighted preferences shows "Not scored": "Alex marked everyth
 #### 8.3.3 Scoring
 
 1. **Rubric score** per category = 10 × (Σ w·m / Σ w) over its weighted preferences (§6.1).
-2. **Adjustment δ** from client signals (shared comments, reactions, pass reasons, tour ratings): each signal fragment maps to one category and moves it ±0.5; |δ| ≤ 1 per category. Examples: "Love the backyard and the office nook." → Features +0.5; "Commute might be a stretch" → Location −0.5. Questions ("Is the street busy at rush hour?") never adjust a score; they go to Worth checking.
+2. **Adjustment δ** from client signals (shared comments, reactions, pass reasons): each signal fragment maps to one category and moves it ±0.5; |δ| ≤ 1 per category. Examples: "Love the backyard and the office nook." → Features +0.5; "Commute might be a stretch" → Location −0.5. Questions ("Is the street busy at rush hour?") never adjust a score; they go to Worth checking.
 3. Category score = clamp(rubric + δ, 0, 10).
 4. Deal-breaker: Location = 0 and Overall = 0, labeled "Deal-breaker".
 5. Overall = Σ(w_c × s_c) / Σ w_c, where w_c = sum of importance weights in category c.
@@ -834,7 +686,7 @@ A category with no weighted preferences shows "Not scored": "Alex marked everyth
 
 #### 8.3.4 Lifecycle
 
-- `inputs_hash` = hash of the ordered compared listing ids, the full preference profile, and per home the client comment count, reaction and tour stars.
+- `inputs_hash` = hash of the ordered compared listing ids, the full preference profile, and per home the client comment count and reaction.
 - Generated automatically the first time a comparison with ≥ 2 homes is opened; afterwards only on **Regenerate**.
 - When the hash differs: "Out of date — Preferences, the compared homes or Alex's feedback changed since this analysis. Regenerate to update the scores."; Regenerate becomes the primary button.
 - A sent report is a snapshot; after regenerating, the agent sees "Send updated report".
@@ -844,7 +696,7 @@ A category with no weighted preferences shows "Not scored": "Alex marked everyth
 
 **Agent (above the table)**
 - Card with an "AI comparison" tag, title "How these homes fit Alex's preferences", meta "Generated 2 min ago · 3 homes · 12 weighted preferences · only you until you send it / sent to Alex 5 min ago / Alex has an earlier version", Regenerate.
-- Loading: skeleton lines, "Analyzing 3 homes against Alex's preferences, comments and ratings…" (aria-busy).
+- Loading: skeleton lines, "Analyzing 3 homes against Alex's preferences and comments…" (aria-busy).
 - Summary panel.
 - Score grid: columns = homes in rank order (address, price, neighborhood, "Best fit" or "Deal-breaker"); rows = Overall ("Weighted by importance", "7 of 8 must-haves met") then each category (row header "2 must-haves, 1 nice-to-have"). Cell: score (accent ≥ 8, muted < 5), bar, explanation, adjustment tag "+0.5 from Alex's comment: '…'".
 - Worth checking list.
@@ -873,7 +725,7 @@ interface CompareAnalysis {
       key: 'budget' | 'location' | 'property' | 'features';
       score: number | null;          // null = not scored
       rubric_score: number | null;
-      adjustment?: { delta: number; signal: 'comment' | 'reaction' | 'pass_reason' | 'tour_rating'; quote?: string };
+      adjustment?: { delta: number; signal: 'comment' | 'reaction' | 'pass_reason'; quote?: string };
       explanation: string;           // 1–3 sentences
       facts: string[];               // e.g. ["listing.commute", "prefs.commute"]
     }[];
@@ -887,14 +739,14 @@ interface CompareAnalysis {
 
 #### 8.3.7 Model input (redacted)
 
-Per home: address, neighborhood, price, est. monthly, HOA, beds label and count, baths, sqft, type, feature values, near-highway flag, commute minutes, school rating, days on market, and the client's shared comments, reaction, pass reasons and tour rating. Plus the preference profile with importances, the rubric scores, and "best in set" facts (lowest price, shortest commute, most space, best-rated schools). Never private comments, agent notes, agent tour feedback, contact info or documents.
+Per home: address, neighborhood, price, est. monthly, HOA, beds label and count, baths, sqft, type, feature values, near-highway flag, commute minutes, school rating, days on market, and the client's shared comments, reaction and pass reasons. Plus the preference profile with importances, the rubric scores, and "best in set" facts (lowest price, shortest commute, most space, best-rated schools). Never private comments, agent notes, contact info.
 
 #### 8.3.8 Worth-checking rules (fallback and guidance)
 
 | Trigger | Check text |
 |---|---|
-| Client comment ending in "?" | "Alex asked about {address}: '{question}' Check it on the tour." |
-| commute m = 0.5 | "Drive from {address} to Medical Center at rush hour (listed {n} min, limit {limit})." |
+| Client comment ending in "?" | "Alex asked about {address}: '{question}' Check it with the listing agent." |
+| commute m = 0.5 | "Confirm the commute from {address} at rush hour (listed {n} min, limit {limit})." |
 | office m = 0.5 | "Confirm the den at {address} closes off as an office." |
 | garage m = 0.5 | "Check whether the 1-car garage at {address} is enough for Alex." |
 | beds m = 0.5 | "See if {address} has space for a {n}th bedroom." |
@@ -935,59 +787,45 @@ Latency: note parse p95 < 3 s; comparison p95 < 8 s. One call per save / per gen
 
 ### 9.2 Agent app
 
-Layout: left sidebar (Home, Clients, Inbox, Tours, Listings, Documents; Settings; the agent's card) and top bar (global search, notifications bell with count, avatar).
+Layout: left sidebar (Home, Clients, Inbox, Listings; Settings; the agent's card) and top bar (global search, notifications bell with count, avatar).
 
 | # | Screen | Key content | Requirements |
 |---|---|---|---|
 | A1 | Sign in / up | Email + password, Google | AU-1 |
-| A2 | Home | Greeting, date and attention count; stat tiles; Needs attention; upcoming tours; pipeline | DB-1…DB-6 |
-| A3 | Clients table | Stage chips, filter, table | CL-2 |
-| A4 | Pipeline | Kanban | CL-3 (P1) |
-| A5 | New client modal | | CL-1 |
-| A6 | Client Overview | Header and tabs; progress stats, activity, personal info, private notes, next tour | CL-4…CL-6 |
-| A7 | Client Preferences | Review to-do banner; suggestion banners; hint and Create / Open preferences search; Budget + Property, Location + Features, and a column with Update from a note, Change history and Dream home; field tags "Changed by Alex" / "Suggestion pending" | PR-* |
-| A7a | Review changes dialog | | §8.2.1 |
-| A8 | Client Searches | Header + New search menu; tiles; settings; review queue; filters (left); results List/Map and almost matches (right) | SS-1…SS-9 |
-| A9 | Client Board | Filters, sort, Add listing, cards, selection bar | BD-1…BD-4 |
-| A10 | Add listing modal | | BD-4 |
-| A11 | Listing detail | | BD-7, BD-9 |
-| A12 | Compare | Header, AI card, comparison table | CP-* |
-| A13 | Client Tours | Requests, reminder, builder or empty state, feedback cards, past tours | TR-3…TR-16 |
-| A13a | Plan a tour dialog | | TR-4 |
-| A14 | Client Messages / Inbox | Open requests list, cards with actions, conversation | MS-* |
-| A15 | Offer editor | | OF-1…OF-5 |
-| A16 | Documents | | OF-7 |
-| A17 | Settings | | SE-1 |
-| A18 | Tours calendar across clients | | TR-19 (P1) |
+| A2 | Home | Greeting, date and attention count; stat tiles; Needs attention | DB-1…DB-5 |
+| A3 | Clients table | Filter, table | CL-2 |
+| A4 | New client modal | | CL-1 |
+| A5 | Client Overview | Header and tabs; progress stats, activity, personal info, private notes | CL-3…CL-5 |
+| A6 | Client Preferences | Review to-do banner; a single minimal **AI Voice** button at the top (expands only once there's a note to review); then the four groups (Budget, Location, Property, Features) as a **one-at-a-time accordion** — a closed category shows an icon and a one-line summary, opening one closes whichever was open and reveals its fields and controls directly (no further per-field toggle). No results on this screen — matches surface on the Board's **Worth a look** filter (A7, BD-1) instead. | PR-* |
+| A6a | Review changes dialog | | §8.2.1 |
+| A7 | Client Board | Filters (All, Loved, To review, **Worth a look**, Shortlisted, Passed), sort, Add listing, cards, selection bar | BD-1…BD-4 |
+| A8 | Add listing modal | | BD-4 |
+| A9 | Listing detail | | BD-7, BD-9 |
+| A10 | Compare | Header, AI card, comparison table | CP-* |
+| A11 | Client Messages / Inbox | Open requests list, cards with actions, conversation | MS-* |
+| A12 | Settings | | SE-1 |
 
 ### 9.3 Client portal
 
-Bottom tabs: Board, Search, Compare, Tours, Chat. Dots: Chat (unread), Tours (tour waiting for approval or homes to rate), Compare (unseen report). The header shows the agent chip (tap → Chat).
+Bottom tabs: Board, Preferences, Compare, Chat. Dots: Chat (unread), Compare (unseen report), Preferences (a suggestion pending with Maya). The header shows the agent chip (tap → Chat).
 
 | # | Screen | Key content | Requirements |
 |---|---|---|---|
-| C1 | Invite landing | Agent photo, brokerage, message, Get started, "Already joined? Go to your board"; expired state | CL-7 |
+| C1 | Invite landing | Agent photo, brokerage, message, Get started, "Already joined? Go to your board"; expired state | CL-6 |
 | C2 | Sign-in | Email/phone → 6-digit code | AU-2 |
-| C3 | Onboarding wizard | 7 steps | PR-6 |
-| C4 | Your preferences | Suggestion status; fields with "Tap to edit" / "Set with Maya · tap to suggest a change" / "Suggestion sent: …"; quick steppers and importance chips on unlocked fields; "Changes save right away and Maya is notified. Locked items go to her as suggestions." | PR-2, PR-3 |
+| C3 | Onboarding wizard | 6 steps | PR-6 |
+| C4 | Preferences | No results, map or fit score — preferences only (SS-10). Four categories (Budget, Location, Property, Features) as a **one-at-a-time accordion** (PR-1): a closed category shows an icon, title and a one-line summary of its values, with a dot if a suggestion on it is pending; opening one closes whichever was open, revealing its fields ("Tap to edit" / "Set with Maya · tap to suggest a change" / "Suggestion sent: …", quick steppers and importance chips on unlocked fields). A minimal **AI Voice** button expands to live preview, Clear / Save. "Changes save right away and Maya is notified. Locked items go to her as suggestions." | PR-1…PR-3, PR-13, PR-14 |
 | C4a | Edit preference sheet | Control, importance; unlocked: Save; locked: Why?, Send / Update suggestion, Withdraw; Cancel | PR-2, PR-3 |
 | C5 | Board | | BD-11 |
 | C6 | Listing detail | | BD-8 |
 | C6a | Pass reasons sheet | | BD-5 |
-| C7 | Search | | SS-10 |
-| C8 | Compare | Report, Ask Maya for a report, fact table, Top pick | CP-2…CP-5, MS-8 |
-| C9 | Showing request sheet | | TR-1 |
-| C10 | Tours | Tour-request status, Request a tour, itinerary (map, stops, Approve tour / Suggest change, Add to calendar), homes to rate, past ratings | TR-2, TR-8, TR-9, TR-12, TR-14 |
-| C10a | Tour request sheet | | TR-2 |
-| C11 | Rate the homes | | TR-12 |
-| C12 | Chat | Messages and the client's request cards with status | MS-1, MS-5 |
-| C13 | Offer review | | OF-2 |
-| C14 | Documents | | OF-7 |
-| C15 | Notifications + settings | | §10 |
+| C7 | Compare | Report, Ask Maya for a report, fact table, Top pick | CP-2…CP-5, MS-8 |
+| C8 | Chat | Messages and the client's request cards with status | MS-1, MS-5 |
+| C9 | Notifications + settings | | §10 |
 
 ### 9.4 Design system components
 
-ListingCard (S/M/L), FitPill and FitScoreBadge (agent only), ReactionBar, PreferenceField, ImportanceChip (Must-have filled, Nice-to-have soft, Don't care dashed, Deal-breaker outlined with ×), Stepper, LockToggle, StageBadge, StatusPill, VisibilityTag, PopupMenu, SearchTile, SearchMap, CompareTable, AiComparisonCard, ScoreBar, RequestCard, TodoBanner, TourStop, RouteMap, FeedbackRow, OfferTimeline, PriceContextBar, ActivityItem, ChatBubble + RichCard, Sheet (mobile), Modal, Toast, Skeleton, EmptyState. Tokens: color (incl. accent and accent-soft), type scale, 4-pt spacing, radius, elevation; light and dark.
+ListingCard (S/M/L), FitPill and FitScoreBadge (agent only), ReactionBar, PreferenceField (collapsed one-line row that expands in place), ImportanceChip (Must-have filled, Nice-to-have soft, Don't care dashed, Deal-breaker outlined with ×), Stepper, LockToggle, AiVoiceButton, StatusPill, VisibilityTag, PopupMenu, SearchMap, CompareTable, AiComparisonCard, ScoreBar, RequestCard, TodoBanner, ActivityItem, ChatBubble + RichCard, Sheet (mobile), Modal, Toast, Skeleton, EmptyState. Tokens: color (incl. accent and accent-soft), type scale, 4-pt spacing, radius, elevation; light and dark.
 
 ---
 
@@ -1001,7 +839,7 @@ ListingCard (S/M/L), FitPill and FitScoreBadge (agent only), ReactionBar, Prefer
 | `prefs.changed` | Either | Other party | In-app, email digest; client changes join the review to-do and card | Client change: yes, until reviewed |
 | `prefs.reviewed` | Agent | Client | Card shows "Reviewed by Maya" | — |
 | `prefs.note_applied` | Agent | Client | In-app | — |
-| `request.created` (suggestion, showing, tour, comparison report, tour change, offer change) | Client | Agent | In-app, email; request card | Yes, until resolved |
+| `request.created` (suggestion, comparison report) | Client | Agent | In-app, email; request card | Yes, until resolved |
 | `request.resolved` | Agent | Client | In-app, email; the card updates | — |
 | `search.created` | Either | Other party | In-app | — |
 | `search.matches_new` (auto) | System | Client | Per notification setting | — |
@@ -1012,16 +850,6 @@ ListingCard (S/M/L), FitPill and FitScoreBadge (agent only), ReactionBar, Prefer
 | `listing.status_changed` / `price_cut` | System | Agent + client | In-app, email | Yes if shortlisted |
 | `compare.report_sent` | Agent | Client | In-app, email, chat message | — |
 | `compare.front_runner` | Either | Other party | In-app | — |
-| `tour.proposed` / `changed` / `canceled` | Agent | Client | In-app, email; chat message on cancel | — |
-| `tour.approved` | Client | Agent | In-app, email | "Complete the tour" to-do |
-| `tour.reminder` | System | Client + agent | SMS 2 h before | — |
-| `tour.completed` | Agent | Client | In-app, email, chat message | Agent: "add your feedback" to-do |
-| `feedback.reminder` | Agent | Client | Chat message | — |
-| `feedback.submitted` | Client | Agent | In-app | Yes until seen |
-| `offer.sent_for_approval` | Agent | Client | In-app, email, push (P1) | — |
-| `offer.approved` / `changes_requested` | Client | Agent | In-app, email, push (P1) | Yes |
-| `offer.expiring` | System | Both | In-app, email | Yes |
-| `offer.accepted` | Agent | Client | In-app, email | — |
 | `message.new` | Either | Other party | In-app; email if unread 15 min | Unread: yes |
 | `client.inactive` | System | Agent | In-app | Yes |
 
@@ -1029,7 +857,7 @@ ListingCard (S/M/L), FitPill and FitScoreBadge (agent only), ReactionBar, Prefer
 
 - **NT-1.** Every event writes an ActivityEvent and feeds the client timeline (agent sees all; client sees shared events only).
 - **NT-2.** Channel preferences per user, event type and channel (SE-1).
-- **NT-3.** Batching per §6.8.
+- **NT-3.** Batching per §6.7.
 - **NT-4.** Quiet hours (default 21:00–08:00 local) delay push and SMS, not in-app or email.
 - **NT-5.** Every email has a per-category unsubscribe link.
 - **NT-6.** Notification center: list, unread state, mark read, deep link.
@@ -1053,29 +881,25 @@ MVP ships `MockListingProvider` (§13). `resolveUrl` accepts URLs containing `/l
 
 ### 11.2 Email
 
-Transactional sender with templates: invite, magic code, digest, notification, offer for approval, report sent, tour reminders. Per-category unsubscribe.
+Transactional sender with templates: invite, magic code, digest, notification, report sent. Per-category unsubscribe.
 
 ### 11.3 SMS
 
-Invites, magic codes and tour reminders only. Opt-out keywords honored.
+Invites and magic codes only. Opt-out keywords honored.
 
-### 11.4 Calendar
-
-ICS per tour: title "Home tour with {agent}", one event spanning the tour, stops in the description with addresses and times.
-
-### 11.5 Speech-to-text
+### 11.4 Speech-to-text
 
 Browser speech recognition where available (en-US, continuous, interim results); optional server STT behind an interface. Audio is never stored; only the edited transcript is saved.
 
-### 11.6 Maps
+### 11.5 Maps
 
-Map tiles and geocoding behind an interface; a stylized map is acceptable for MVP. Commute per §6.7.
+Map tiles and geocoding behind an interface; a stylized map is acceptable for MVP.
 
-### 11.7 File storage
+### 11.6 File storage
 
-Signed upload and download URLs (15-minute expiry), virus scan on upload, max 20 MB, PDF/JPG/PNG/HEIC.
+Signed upload and download URLs (15-minute expiry), virus scan on upload, max 20 MB, for message/comment attachments (P1). PDF/JPG/PNG/HEIC.
 
-### 11.8 LLM
+### 11.7 LLM
 
 `LlmProvider` per §8.1.
 
@@ -1098,7 +922,7 @@ Resource-oriented, JSON, versioned (`/v1`). Style (REST, RPC or GraphQL) is a st
 | Resource | Operations |
 |---|---|
 | Auth | agent sign-up / sign-in / SSO / reset; client request code; client verify code; sign-out |
-| Clients | list (stage, text, archived), create, get, update, archive/restore, invite (send/resend/revoke), activity timeline |
+| Clients | list (text, archived), create, get, update, archive/restore, invite (send/resend/revoke), activity timeline |
 | Notes | list, create, pin (agent) |
 | Preferences | get profile; patch fields (value / importance / lock) with `version` (client patches to locked fields are rejected); history; revert (P1); suggestions: create / update / withdraw (client), approve / decline (agent); review to-do: list unreviewed client changes, mark reviewed (agent) |
 | Preference notes | parse (preview) → ChangeProposal[]; save (note + selected proposals) → applied changes; list |
@@ -1108,18 +932,12 @@ Resource-oriented, JSON, versioned (`/v1`). Style (REST, RPC or GraphQL) is a st
 | Board | list (filters, sort), add, update (state, agent pick, note), remove; set/clear reaction (+ reasons); comments list/create |
 | Comparisons | list, create, update (items, front-runner, differences_only), comments |
 | Compare analysis | agent: get (with `stale`), generate/regenerate (async job, entitlement check), edit (P1), send report; client: get latest report, mark seen |
-| Showing requests | create (client), list, dismiss |
-| Tour requests | create (client: day, start, homes, note), list, plan (agent → planner defaults) |
-| Tours | list, create (optionally from a tour request), update (date, start, optimize, stops, order), send, approve (client), request change (client), complete (agent, approved only), cancel, ICS |
-| Tour feedback | client: create rating per showing; agent: set verdict and note per showing; list per tour; remind client |
-| Offers | list, create draft, update draft, send for approval, withdraw request, approve (client), request changes (client), submit, record counter (→ new version), record accepted / rejected, withdraw |
-| Documents | request upload URL, register, list, get download URL, delete |
 | Messages | list conversations, list messages, send, mark read |
 | Notifications | list, mark read, get/put settings |
 
 ### 12.3 Real-time events
 
-Pushed to sessions of the same `client_id`, filtered by visibility: `board.updated`, `reaction.changed`, `comment.created`, `prefs.updated`, `review.updated`, `suggestion.changed`, `request.changed`, `search.updated`, `compare.updated`, `analysis.updated`, `report.sent`, `tour.updated`, `feedback.updated`, `offer.updated`, `message.created`, `notification.created`.
+Pushed to sessions of the same `client_id`, filtered by visibility: `board.updated`, `reaction.changed`, `comment.created`, `prefs.updated`, `review.updated`, `suggestion.changed`, `request.changed`, `search.updated`, `compare.updated`, `analysis.updated`, `report.sent`, `message.created`, `notification.created`.
 
 ---
 
@@ -1132,12 +950,13 @@ Pushed to sessions of the same `client_id`, filtered by visibility: `board.updat
 - Deterministic generation from a fixed seed so tests are stable (prototype: 54 generated + 8 hand-written, seed 20260925).
 - Condos: garage 0 or 0.5, yard 0, lot 0, HOA $260–$500. Townhouses: HOA $0 or $120.
 - About 16% have a recent price cut (~3%). About 4% (50% in Hillcrest) are near the highway.
+- Each listing's `commute_min` is seeded alongside its other attributes (§6.6).
 - Photos: licensed stock set, 6–12 per listing. Descriptions generated from features.
 - Daily market simulator: adds 5–10 listings, cuts prices on 3%, moves 2% to pending and 1% of pending to sold.
 
 ### 13.2 Demo seed
 
-**Agent:** Maya Chen, Keller Realty. **Client:** Alex Kim, alex.kim@email.com, (555) 214-8890; renting downtown, lease ends Dec 31; 2 adults, 1 child, 1 dog; commute to Medical Center, max 30 min drive; pre-approved $650k (First Street Lending), expires Nov 30; source Referral · Mia Wong; move by Jan 2027; stage Actively searching; portal active.
+**Agent:** Maya Chen, Keller Realty. **Client:** Alex Kim, alex.kim@email.com, (555) 214-8890; portal active.
 
 **Preferences:** price $550k–$650k must, locked; HOA ≤ $250 nice; areas Oak Park, Cedar Grove, Westgate must; commute ≤ 30 min must; near I-94 deal-breaker; types Single-family, Townhouse must; beds 4+ must; size 1,700–2,600 sqft nice; garage, yard, office must; primary on main nice. Onboarding extras: basement nice, central A/C must, EV charging nice, others off. Dream home: "A quiet street where our daughter can bike, a real office, and a yard big enough for the dog. We don't need fancy — just not a project."
 
@@ -1148,7 +967,7 @@ Pushed to sessions of the same `client_id`, filtered by visibility: `board.updat
 | # | Address | Hood | Price | Beds | Baths | Sqft | HOA | Commute | School | Type | Garage/Yard/Office | Primary main | Near I-94 | Board state | Reaction |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | 1248 Linden Ave | Oak Park | $629,000 | 3 + den | 2.5 | 1,920 | 0 | 22 | 8 | SF | 1/1/1 | No | No | Shortlisted, agent pick | Love |
-| 2 | 4410 Cedar Grove Ln | Cedar Grove | $612,500 | 4 | 3 | 2,340 | 45 | 31 | 7 | SF | 1/1/0.5 | No | No | Touring | Like |
+| 2 | 4410 Cedar Grove Ln | Cedar Grove | $612,500 | 4 | 3 | 2,340 | 45 | 31 | 7 | SF | 1/1/0.5 | No | No | Shortlisted | Like |
 | 3 | 17 Westgate Ct | Westgate | $598,000 | 3 | 2 | 1,780 | 0 | 18 | 9 | SF | 0.5/1/0.5 | Yes | No | New | Love |
 | 4 | 3021 Maple St | Linden Hills | $579,000 | 3 | 2 | 1,650 | 0 | 24 | 7 | SF | 1/1/0.5 | No | No | New, agent pick | — |
 | 5 | 88 Riverside Dr #4B | Riverside | $545,000 | 2 | 2 | 1,310 | 380 | 15 | 6 | Condo | 0.5/0/0 | Yes | No | New | Maybe |
@@ -1156,16 +975,13 @@ Pushed to sessions of the same `client_id`, filtered by visibility: `board.updat
 | 7 | 56 Orchard Ln | Oak Park | $641,000 | 4 | 2.5 | 2,210 | 0 | 20 | 8 | SF | 1/1/1 | No | No | Not on board (listed 1 day ago) | — |
 | 8 | 2210 Birch Way | Westgate | $589,000 | 3 | 2.5 | 1,840 | 0 | 19 | 9 | Townhouse | 1/0.5/1 | No | No | Not on board (listed 1 day ago) | — |
 
-**Comments:** #1 Alex "Love the backyard and the office nook. Is the street busy at rush hour?"; Maya "It's a cul-de-sac side street — very little through traffic. I can check during the tour on Saturday."; Maya (only you) "Seller motivated — relocating in Nov. Room to go $610–615k." · #2 Alex "Commute might be a stretch, but that yard!" · #3 Alex "A primary bedroom on the main floor would be great when my parents visit." · #5 Alex "Nice views but tight for the three of us." · #6 Maya "Backs onto the highway sound wall — flagging since you want to avoid I-94."
+**Comments:** #1 Alex "Love the backyard and the office nook. Is the street busy at rush hour?"; Maya "It's a cul-de-sac side street — very little through traffic."; Maya (only you) "Seller motivated — relocating in Nov. Room to go $610–615k." · #2 Alex "Commute might be a stretch, but that yard!" · #3 Alex "A primary bedroom on the main floor would be great when my parents visit." · #5 Alex "Nice views but tight for the three of us." · #6 Maya "Backs onto the highway sound wall — flagging since you want to avoid I-94."
 
 **Other seed:**
-- Agent note "Very price sensitive above $630k. Wants to close before the school year break."
+- Agent note "Very price sensitive above $630k."
 - Search "Oak Park houses" (from scratch: $550–650k, Oak Park, Single-family, 3+ beds; daily; send straight to Alex).
 - Comparison #1, #2, #3, front-runner #1.
-- Open tour Sat, Sep 27, 10:00, stops #1, #3, #2 (#3 requested by Alex), draft.
-- Past tour Sat, Sep 20, stops #5, #6, completed; both homes waiting for Alex's rating and the agent's feedback.
-- Offer on #1: v3 draft $618,000, earnest $12,000, Conventional · 20% down, closing 2026-11-30, expires Sep 27 5:00 pm, inspection + appraisal + financing; timeline v1 $615,000 drafted, approved by Alex and submitted Sep 24; seller countered $624,000, close Nov 30, Sep 25.
-- Messages: Maya "Morning! I added 3021 Maple St — under budget with a big yard. Take a look when you can."; Alex "Will do. Can we fit Westgate into Saturday too?" (unread).
+- Messages: Maya "Morning! I added 3021 Maple St — under budget with a big yard. Take a look when you can."; Alex "Will do. What do you think about Westgate?" (unread).
 
 ### 13.3 Reference results (demo seed, 62-listing inventory)
 
@@ -1200,8 +1016,8 @@ With the 500-listing seed, pin these again with snapshot tests; the hand-written
 | Performance | p95 API < 300 ms (non-AI). Board of 200 items renders < 1.5 s on 4G. Search run < 1 s on 500 listings. Note parse p95 < 3 s; comparison p95 < 8 s. |
 | Real-time | Cross-party updates < 2 s |
 | Availability | 99.5% |
-| Security | TLS; encryption at rest; row-level workspace isolation; signed URLs (15 min); audit log for preference, offer, report and tour-completion actions; rate limits on auth (5 code attempts) and AI (plan quota, max 20 generations / agent / hour); OWASP ASVS L1 |
-| Privacy | PII limited to contact and financing. Per-client export and delete (CCPA/GDPR-ready). Pre-approval documents visible to agent and client only. AI data handling per AI-6. |
+| Security | TLS; encryption at rest; row-level workspace isolation; signed URLs (15 min); audit log for preference and report actions; rate limits on auth (5 code attempts) and AI (plan quota, max 20 generations / agent / hour); OWASP ASVS L1 |
+| Privacy | PII limited to contact details. Per-client export and delete (CCPA/GDPR-ready). AI data handling per AI-6. |
 | Accessibility | WCAG 2.2 AA (UX-6) |
 | Browsers | Latest 2 versions of Chrome, Safari, Edge, Firefox; iOS Safari 16+; Android Chrome |
 | Observability | Structured logs, traces, error tracking; AI metrics (latency, failures, fallbacks, validation rejects) |
@@ -1230,11 +1046,8 @@ Every event carries `workspace_id`, `client_id`, `role`.
 | `compare_opened` | homes |
 | `ai_analysis_generated` | generator, latency_ms, stale_before, validation_retries |
 | `ai_report_sent` | updated, homes |
-| `tour_planned`, `tour_sent`, `tour_approved`, `tour_completed`, `tour_canceled` | stops, from_request |
-| `client_feedback_submitted`, `agent_feedback_saved`, `feedback_reminder_sent` | stars, verdict |
-| `offer_sent`, `offer_approved`, `offer_submitted`, `offer_accepted` | version |
 
-Pilot success metrics: invite → active ≥ 70%; wizard completion ≥ 60%; ≥ 5 reactions per active client per week; ≥ 60% of board items reacted to within 48 h; showings per offer −20% vs baseline; agent weekly active ≥ 80%; notes saved with ≥ 1 change applied ≥ 70%; AI reports sent for ≥ 50% of comparisons; client requests resolved and changes reviewed within 24 h ≥ 80%; both-side feedback completed for ≥ 80% of toured homes within 48 h.
+Pilot success metrics: invite → active ≥ 70%; wizard completion ≥ 60%; ≥ 5 reactions per active client per week; ≥ 60% of board items reacted to within 48 h; agent weekly active ≥ 80%; notes saved with ≥ 1 change applied ≥ 70%; AI reports sent for ≥ 50% of comparisons; client requests resolved and changes reviewed within 24 h ≥ 80%.
 
 ---
 
@@ -1250,21 +1063,17 @@ End-to-end on the demo seed, agent and client sessions side by side.
 | E4 | Client edits Areas (unlocked) and the commute stepper | Both apply at once; one review to-do with 2 lines (banner, field tags, Needs attention, card); Mark as reviewed clears it and Alex sees "Reviewed by Maya" |
 | E5 | Client portal, every screen | No fit score, pill or breakdown anywhere |
 | E6 | Agent saves the example note, unticks Bedrooms, approves | 4 changes applied; saved note "4 changes applied" |
-| E7 | New search → From preferences | "Alex — preferences" selected; must-have filters and I-94 exclusion; 8 results |
-| E8 | Agent edits a filter on that search, then changes a preference | The filter edit applies to the search only; the preference change re-ranks results without changing filters |
-| E9 | Review-first search → Send N to Alex | Homes appear on Alex's board as New; the queue clears |
+| E7 | Agent opens the Board's Worth a look filter | Results are already ranked by fit from Alex's current preferences (must-have filters and the I-94 exclusion applied) — 8 results, no search to create first, and no results of any kind on the Preferences tab |
+| E8 | Agent opens the Budget category and raises the budget, then opens Location | Budget's fields (with full controls) stay visible the whole time it's open, no secondary per-field toggle; opening Location closes Budget, which now shows the new value in its one-line summary; Worth a look's count updates immediately the next time it's opened |
+| E9 | Agent clicks Add on a row in Worth a look | The home appears on Alex's board as New, and Worth a look's count drops by one |
 | E10 | Client passes on a home with Price, Location | Card dimmed; activity "passed on … — Price, Location" |
 | E11 | Agent selects 3 homes → Compare | AI card loads and ranks per §13.3; Alex sees no AI card |
 | E12 | Client asks for a report; agent sends it | Card in Messages resolves "Report sent"; Alex gets the chat message, banner and report; the Compare dot clears on open |
 | E13 | Agent changes a preference and returns to Compare | "Out of date"; Regenerate updates; Alex keeps the earlier report; "Send updated report" |
-| E14 | Client requests a tour (Sun, Sep 28, 10:30 am, 3 homes) | Card in Messages and on Tours; Plan this tour opens the planner pre-filled; the draft marks the request "Planned" |
-| E15 | Client requests a showing; agent plans it and sends the tour | Stop tagged "Requested by Alex"; Alex sees "Maya planned a tour — approve it" |
-| E16 | Agent tries Complete before approval; client approves; agent completes | Complete disabled until approved; reminder and to-do while approved; after completion Alex gets the rating banner and chat message and Maya gets the feedback card and to-do |
-| E17 | Client rates the homes; agent sets verdicts | Both reminders clear; Compare shows tour ratings |
-| E18 | Agent sends offer v3; client approves; agent submits; records a counter | v4 draft at $621,000 prefilled; timeline shows each step |
-| E19 | Agent records the offer accepted | Client stage Under contract; Alex sees the celebration |
-| E20 | Client token requests agent notes, private comments, fit scores, agent tour feedback, the live AI analysis | All 403 / absent |
-| E21 | AI provider down | Both AI features work with "Generated by rules" |
+| E14 | Client token requests agent notes, private comments, fit scores, the live AI analysis | All 403 / absent |
+| E15 | AI provider down | Both AI features work with "Generated by rules" |
+| E16 | Client opens Preferences (bottom tab or Board's gear icon), taps AI Voice and dictates/types a note naming one unlocked and one locked field | No review dialog; the unlocked field applies at once and joins the agent's review to-do; the locked field becomes a suggestion quoting the note, grouped for the agent to approve or decline; no results appear anywhere on this screen |
+| E17 | On the client's Preferences screen, Alex opens Budget then opens Location | Budget closes the moment Location opens — only one category is ever expanded; the Budget row now shows its one-line summary again |
 
 ---
 
@@ -1279,31 +1088,25 @@ End-to-end on the demo seed, agent and client sessions side by side.
 | Q5 | Mock metro: 8th neighborhood, photo set | Design | Phase 1 |
 | Q6 | Swipe mode on the client board: P0 or P1 (P1 in this document) | Product | Phase 1 |
 | Q7 | Legal review of fair-housing rules for preference fields and AI prompts | Legal | Phase 1 |
-| Q8 | Should the agent's per-home tour verdict be shareable with the client? (Private in this document) | Product | Phase 2 |
 
 ---
 
 ## 18. Appendix: prototype reference
 
-Reference prototype: `prototype/realtorhelper-v2.html` (single HTML file, vanilla JS, one shared state for both apps), published at https://claude.ai/artifact/JxJm9thcHfdizx3JACJfos. Its prototype-only controls — the view switch (side by side / agent / client), Reset demo, and hint toasts about what the other party sees — are not product features.
+Reference prototype: `prototype/realtorhelper.html` (single HTML file, vanilla JS, one shared state for both apps). Its prototype-only controls — the view switch (side by side / agent / client), Reset demo, and hint toasts about what the other party sees — are not product features.
 
 | Section | Prototype code |
 |---|---|
 | §6.1 Fit score | `fitParts`, `fit`, `fitPill` |
-| §6.2 Creating a search | `prefCriteria`, `newPrefSearch`, `createPrefSearch`, `sc-new`, `sc-new-menu` |
+| §6.2 Creating a search | `prefCriteria`, `newPrefSearch`, `createPrefSearch` |
 | §6.3 Search execution | `FILTERS`, `runSearch`, `newMatches`, `allNewMatches` |
-| §6.4 Delivery | `sc-send-all`, `scMode` handler |
-| §6.5 Tour timing | `drive`, `tourTimes`, `nnOrder`, `optimize` |
-| §5.1 Stage | `stage` |
+| §6.4 Delivery | (data-model only in this build; not surfaced as UI, SS-12) |
 | §7.1 Needs attention | `attention` |
-| §7.2 Preferences, suggestions, review to-do | `aPrefs`, `cPrefs`, `cycleImp`, `pref-step`, `c-pref`, `ps-save`, `ps-withdraw`, `sugg`, `resolveSugg`, `sgDesc`, `clientPrefChanged`, `pref-seen`, `ob`, `ob-done` |
-| §7.3 Searches | `aSearches`, `searchMap`, `cSearch` |
-| §7.4 Board and listings | `aBoard`, `aListing`, `aAddModal`, `cBoard`, `cListing`, `react`, `add-board` |
-| §7.5 Compare | `aCompare`, `cCompare`, `cmpRows`, `cmpTableRows` |
-| §7.6 Messaging and request cards | `chatThread`, `aMessages`, `aInbox`, `pushReq`, `reqInfo`, `reqCard`, `reqList`, `openReqs`, `c-ask-report` |
-| §7.7 Tours | `aTours`, `aPlanModal`, `aTourBuilder`, `aTourFeedback`, `fbTours`, `openPlan`, `plan-create`, `tour-send`, `tour-confirm`, `tour-complete`, `tour-cancel`, `afb-verdict`, `fb-remind`, `c-tourreq`, `tr-send`, `req-plan`, `cTours`, `cFeedback` |
-| §7.8 Offers | `aOffer`, `cOffer`, `offer-*` handlers |
-| §8.2 Preferences from a note | `ptParse`, `ptDiff`, `ptPatch`, `ptImpact`, `aPrefsModal`, `ptMic` |
+| §7.2 Preferences, suggestions, review to-do | `aSearchPrefs`, `aAccField`, `a-cat-toggle`, `cPrefRow`, `c-cat-toggle`, `cycleImp`, `pref-step`, `c-pref`, `ps-save`, `ps-withdraw`, `sugg`, `resolveSugg`, `sgDesc`, `clientPrefChanged`, `pref-seen`, `ob`, `ob-done`, `cSearch` |
+| §7.3 Board, listings and live matches | `aBoard`, `resultRow`, `a-filter` (incl. `matches`), `aListing`, `aAddModal`, `cBoard`, `cListing`, `react`, `add-board` |
+| §7.4 Compare | `aCompare`, `cCompare`, `cmpRows`, `cmpTableRows` |
+| §7.5 Messaging and request cards | `chatThread`, `aMessages`, `aInbox`, `pushReq`, `reqInfo`, `reqCard`, `reqList`, `openReqs`, `c-ask-report` |
+| §8.2 Preferences from a note | `ptParse`, `ptDiff`, `ptPatch`, `ptImpact`, `aPrefsModal`, `ptMic`, `cPtApply`, `c-pt-mic`, `c-pt-open`, `c-pt-save`, `c-pt-clear` |
 | §8.3 AI comparison and reports | `aiSignals`, `aiText`, `aiCons`, `aiCompute`, `aiKey`, `aiRun`, `aiCard`, `ai-share`, `cAiCard` |
 | §13.2 Demo seed | `BASE`, `INV`, `initState` |
 
